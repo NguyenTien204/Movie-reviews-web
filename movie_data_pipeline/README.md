@@ -47,8 +47,7 @@ Stores the structured and relational version of:
 | **Flask API**        | Receives user events from frontend    |
 
 ---
-
-<pre lang="nohighlight"><code>### 📁 Project Structure (Simplified)
+### 📁 Project Structure (Simplified)
 
 ```text
 movie_data_pipeline/
@@ -69,7 +68,7 @@ movie_data_pipeline/
 ├── .env                     # Environment variables (API keys, DB URI)
 ├── requirements.txt         # Python dependencies
 └── README.md                # This file
-
+```
 
 ---
 
