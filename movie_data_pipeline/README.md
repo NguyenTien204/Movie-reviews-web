@@ -85,12 +85,12 @@ The system uses a star schema-like structure with dimension and fact tables. Exa
 
 ## 🚀 Getting Started
 
-1. Install dependencies:
+1. Install dependencies:  
    pip install -r requirements.txt
 
-2. Set environment variables:
-    TMDB_API_KEY=...
-    POSTGRES_URI=...
+2. Set environment variables:  
+    TMDB_API_KEY=...  
+    POSTGRES_URI=...  
 
 3. Run ingestion scripts or Kafka producers/consumers as needed.
 
