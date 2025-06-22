@@ -96,12 +96,10 @@ The system uses a star schema-like structure with dimension and fact tables. Exa
 
 ## 📌 Notes
 
-MongoDB stores data not suited for SQL (e.g., raw JSONs, long text, posters).
-
-Designed to scale both for batch and streaming pipelines.
+MongoDB stores data not suited for SQL (e.g., raw JSONs, long text, posters).  
+Designed to scale both for batch and streaming pipelines.  
 
 ## 📫 Maintainer
 
-Data Engineering Lead: Nguyễn Văn Tiến
-
-Contact: vantiennguyen1424@gmail.com
+Data Engineering Lead: Nguyễn Văn Tiến  
+Contact: vantiennguyen1424@gmail.com  
