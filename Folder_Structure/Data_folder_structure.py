@@ -11,7 +11,8 @@ structure = {
                 "kafka_config.py",
                 "spark_config.py",
                 "postgres_config.py",
-                "tmdb_config.py"
+                "tmdb_config.py",
+                "mongo_config.py"
             ]
         },
         {
