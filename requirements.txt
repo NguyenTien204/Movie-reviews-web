@@ -1,0 +1,65 @@
+# Core scientific stack
+numpy==1.24.4
+pandas==1.5.3
+scipy==1.10.1
+matplotlib==3.7.1
+seaborn==0.12.2
+scikit-learn==1.2.2
+
+# Machine Learning & Deep Learning
+xgboost==1.7.6
+lightgbm==3.3.5
+tensorflow==2.13.0
+torch==2.0.1
+torchvision==0.15.2
+transformers==4.32.1
+catboost==1.2
+
+# Data manipulation & wrangling
+openpyxl==3.1.2
+xlrd==2.0.1
+sqlalchemy==1.4.49
+pyarrow==12.0.1
+fastparquet==2023.4.0
+
+# Visualization nâng cao
+plotly==5.15.0
+bokeh==3.1.1
+altair==5.0.1
+dash==2.11.1
+streamlit==1.25.0
+
+# NLP & Text
+nltk==3.8.1
+spacy==3.6.0
+gensim==4.3.1
+textblob==0.17.1
+
+# Web scraping & API
+requests==2.31.0
+beautifulsoup4==4.12.2
+lxml==4.9.3
+selenium==4.11.2
+
+# Jupyter & Dev
+jupyter==1.0.0
+jupyterlab==3.6.5
+notebook==6.5.4
+ipython==8.12.2
+tqdm==4.66.1
+black==23.3.0
+isort==5.12.0
+
+# Big data / Data Engineering tools
+pyspark==3.4.1
+dask[dataframe]==2023.6.1
+kafka-python==2.0.2
+pyhive==0.6.6
+pymongo==4.5.0
+psycopg2-binary==2.9.6
+
+# AutoML & EDA
+sweetviz==2.1.4
+pandas-profiling==3.6.6
+autoviz==0.1.476
+autogluon==0.8.2
