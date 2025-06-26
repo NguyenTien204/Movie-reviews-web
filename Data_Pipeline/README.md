@@ -99,6 +99,15 @@ The system uses a star schema-like structure with dimension and fact tables. Exa
 MongoDB stores data not suited for SQL (e.g., raw JSONs, raw log,..).  
 Designed to scale both for batch and streaming pipelines.  
 
+## 📚 Detailed documents:
+### **English version**
+> **[Database Design](./docs/Database.md)**  
+> **[Pipeline Design](./docs/Design.md)**
+### **Vietnamese version**
+> **[README](./docs/vietnamese/README_vi.md)**  
+> **[Database Design](./docs/vietnamese/Database_vi.md)**  
+> **[Pipeline Design](./docs/vietnamese/Design_vi.md)**
+
 ## 📫 Maintainer
 
 Data Engineering Lead: Nguyễn Văn Tiến  
