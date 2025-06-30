@@ -6,7 +6,7 @@
 
 CREATE TYPE watchlist_status_enum AS ENUM ('watching', 'completed', 'planned', 'dropped');
 
-CREATE TYPE trailer_type_enum AS ENUM ('Trailer', 'Teaser', 'Clip', 'Featurette');
+CREATE TYPE trailer_type_enum AS ENUM ('Trailer', 'Teaser', 'Clip', 'Featurette','Behind the Scenes', 'Bloopers', 'Opening Scene', 'Ending Scene', 'Deleted Scene');
 
 CREATE TYPE site_enum AS ENUM ('YouTube', 'Vimeo');
 
@@ -28,12 +28,13 @@ CREATE TABLE users (
 -- MOVIES & RELATIONS
 -- ========================
 CREATE TABLE movies (
-  movie_id SERIAL PRIMARY KEY,
+  movie_id INTEGER PRIMARY KEY,
   title VARCHAR NOT NULL,
   original_title VARCHAR NOT NULL,
   overview TEXT,
   tagline TEXT,
   runtime INTEGER,
+  homepage VARCHAR,
   language CHAR(2),
   poster_path VARCHAR,
   popularity DOUBLE PRECISION,
@@ -43,7 +44,7 @@ CREATE TABLE movies (
 );
 
 CREATE TABLE genres (
-  genre_id SERIAL PRIMARY KEY,
+  genre_id INTEGER PRIMARY KEY,
   name VARCHAR(50) UNIQUE NOT NULL
 );
 
@@ -146,7 +147,7 @@ CREATE TABLE release_calendar (
   country_code CHAR(2),
   release_date DATE NOT NULL,
   release_type VARCHAR(50),
-  status BOOLEAN
+  status VARCHAR
 );
 
 -- ========================
@@ -206,17 +207,18 @@ CREATE TABLE trailers (
 -- COLLECTIONS
 -- ========================
 CREATE TABLE collections (
-  id VARCHAR PRIMARY KEY,
+  collection_id VARCHAR PRIMARY KEY,
   name VARCHAR,
-  backdrop_path TEXT
-  poster_path TEXT,
+  backdrop_path TEXT,
+  poster_path TEXT
 );
 
-CREATE TABLE movie_collection (
+CREATE TABLE movie_collections (
   movie_id INTEGER NOT NULL REFERENCES movies(movie_id) ON DELETE CASCADE,
-  collection_id VARCHAR NOT NULL REFERENCES collections(id) ON DELETE CASCADE,
+  collection_id VARCHAR NOT NULL REFERENCES collections(collection_id) ON DELETE CASCADE,
   PRIMARY KEY (movie_id, collection_id)
 );
+
 
 -- ========================
 -- Indexes for faster access

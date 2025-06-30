@@ -68,4 +68,4 @@ def run_sql_file(path):
 
 # === CHẠY ===
 ensure_database_exists()
-run_sql_file("D:\WorkSpace\Do-an-2\Data_Pipeline\database\schema.sql")
+run_sql_file("..\\Do-an-2\\Data_Pipeline\\database\\schema.sql")
