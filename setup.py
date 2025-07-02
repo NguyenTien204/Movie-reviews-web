@@ -12,13 +12,13 @@ def run_script(module_path):
     print(result.stdout)
     if result.returncode != 0:
         print(result.stderr)
-        raise RuntimeError(f"[ERROR] {module_path} failed.")
+        raise RuntimeError(f"ERROR: {module_path} failed.")
 
 def main():
     print("  Starting project setup...\n")
     for script in scripts:
         run_script(script)
-    print("\n[✔] All setup steps completed.")
+    print("\nSUCCESS: All setup steps completed.")
 
 if __name__ == "__main__":
     main()
