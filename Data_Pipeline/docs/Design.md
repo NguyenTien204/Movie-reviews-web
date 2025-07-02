@@ -6,7 +6,7 @@
 
 This document details the end-to-end design of the data pipeline for the movie review web application. It covers data flow, ingestion, staging, modeling, serving, and analytics, with clear responsibilities, technology choices, and rationale for each layer. The goal is to ensure any team member can understand, contribute, or troubleshoot the system effectively.
 
----
+
 
 ## 🔄 Data Flow: From Source to Serving
 

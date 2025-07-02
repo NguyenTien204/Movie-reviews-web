@@ -56,8 +56,8 @@ movie_data_pipeline/
 │   ├── producer/             # Gửi log lên Kafka
 │   └── consumer/             # Job Spark Streaming
 │
-├── tmdb_ingestion/          # Thu thập & backup TMDB API
-├── spark_jobs/              # Làm sạch, biến đổi dữ liệu
+├── ingestion/          # Thu thập & backup TMDB API
+├── processing/              # Làm sạch, biến đổi dữ liệu
 ├── database/                # Schema SQL & loader dữ liệu
 ├── models/                  # Mô hình đề xuất (tùy chọn)
 ├── pipelines/               # DAG hoặc job theo lô (Airflow)

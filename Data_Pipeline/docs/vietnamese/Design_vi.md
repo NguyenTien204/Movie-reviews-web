@@ -6,7 +6,7 @@
 
 Tài liệu này mô tả chi tiết thiết kế end-to-end của pipeline dữ liệu cho ứng dụng web đánh giá phim. Bao gồm luồng dữ liệu, thu thập, staging, mô hình hóa, phục vụ và phân tích, với trách nhiệm, lựa chọn công nghệ và lý do rõ ràng cho từng lớp. Mục tiêu là đảm bảo mọi thành viên đều có thể hiểu, đóng góp hoặc xử lý sự cố hệ thống hiệu quả.
 
----
+
 
 ## 🔄 Luồng Dữ Liệu: Từ Nguồn Đến Phục Vụ
 
