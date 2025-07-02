@@ -1,0 +1,229 @@
+collection: raw_movies
+main_table: movies
+mappings:
+  # Trường đơn giản, ánh xạ trực tiếp sang bảng chính
+  simple_fields:
+    - source: id
+      target: movie_id
+      type: integer
+
+    - source : title
+      target: title
+      type: VARCHAR
+      nullable: false
+
+    - source: original_title
+      target: original_title
+      type: VARCHAR
+      nullable: false
+
+    - source: overview
+      target: overview
+      type: TEXT
+
+    - source: popularity
+      target: popularity
+      type: DOUBLE PRECISION
+
+    - source: homepage
+      target: homepage
+      type: VARCHAR
+
+    - source: tagline
+      target: tagline
+      type: TEXT
+
+    - source: adult
+      target: adult
+      type: BOOLEAN
+
+    - source: poster_path
+      target: poster_path
+      type: VARCHAR
+
+    - source: runtime
+      target: runtime
+      type: INTEGER
+      
+  # Trường object đơn giản, ánh xạ sang bảng phụ (1-1)
+  one_to_one:
+    release_calendar:
+      table: release_calendar
+      fields:
+
+        - source: release_date
+          target: release_date
+          type: DATE
+          nullable: false
+
+        - source: status
+          target: status
+          type: BOOLEAN
+          
+      relation:
+        local_key: movie_id
+        foreign_key: movie_id
+        fk_column_on_main_table: movie_id
+
+    belongs_to_collection:
+      table: collections
+      fields:
+        - source: belongs_to_collection.id
+          target: collection_id
+          type: VARCHAR
+
+        - source: belongs_to_collection.name
+          target: name
+          type: VARCHAR
+
+        - source: belongs_to_collection.poster_path
+          target: poster_path
+          type: VARCHAR
+
+        - source: belongs_to_collection.backdrop_path
+          target: backdrop_path
+          type: VARCHAR
+
+      relation:
+        from_main_table: true       # main table (movies) có khóa ngoại collection_id
+        local_key: collection_id
+        foreign_key: collection_id
+
+
+  # Object lồng, ánh xạ sang bảng phụ (1-nhiều)
+  nested_objects:
+    trailers:
+      source_path: videos.results
+      table: trailers
+      fields:
+        - source: id
+          target: id
+          type: VARCHAR
+
+        - source: name
+          target: name
+          type: VARCHAR
+          nullable: false
+
+        - source: site
+          target: site
+          type: enum
+          enum: site_enum[YouTube, Vimeo]
+          nullable: false
+
+        - source: key
+          target: key
+          type: VARCHAR
+          nullable: false
+
+        - source: type
+          target: type
+          type: enum
+          enum: trailers_type_enum[Trailer, Teaser, Clip, Featurette]
+          nullable: false
+
+        - source: official
+          target: official
+          type: BOOLEAN
+
+        - source: published_at
+          target: published_at
+          type: TIMESTAMP
+
+        - source: size
+          target: size
+          type: INTEGER
+
+      relation:
+        from_related_table: true
+        local_key: movie_id       
+        foreign_key: movie_id 
+
+  # Mảng object, ánh xạ sang bảng quan hệ nhiều-nhiều
+  arrays:
+    genres:
+      table: genres
+      fields:
+        - source: genres[].id
+          target: genre_id
+          type: integer
+
+        - source: genres[].name
+          target: name
+          type: VARCHAR
+          nullable: false
+
+      junction_table: movie_genres
+      relation_keys:
+        left_key: movie_id
+        right_key: genre_id
+
+    production_companies:
+      table: production_companies
+      fields:
+        - source: production_companies[].id
+          target: company_id
+          type: INTEGER
+
+        - source: production_companies[].name
+          target: name
+          type: VARCHAR
+          nullable: false
+
+        - source: production_companies[].logo_path
+          target: logo_path
+          type: VARCHAR
+
+        - source: production_companies[].origin_country
+          target: origin_country
+          type: CHAR(2)
+
+      junction_table: movie_production_companies
+      relation_keys:
+        left_key: movie_id
+        right_key: company_id
+
+    production_countries:
+      table: production_countries
+      fields:
+        - source: production_countries[].iso_3166_1
+          target: iso_3166_1
+          type: CHAR(2)
+
+        - source: production_countries[].name
+          target: name
+          type: VARCHAR
+          nullable: false
+
+      junction_table: movie_production_countries
+      relation_keys:
+        left_key: movie_id
+        right_key: iso_3166_1
+
+    spoken_languages:
+      table: spoken_languages
+      fields:
+        - source: spoken_languages[].iso_639_1
+          target: iso_639_1
+          type: CHAR(2)
+
+        - source: spoken_languages[].english_name
+          target: name
+          type: VARCHAR
+          nullable: false
+
+      junction_table: movie_spoken_languages
+      relation_keys:
+        left_key: movie_id
+        right_key: iso_639_1
+
+
+        
+# | Mục             | Ý nghĩa                                                | Gợi ý chỉnh sửa                                                              |
+# | --------------- | ------------------------------------------------------ | ---------------------------------------------------------------------------- |
+# | collection`     | Tên collection MongoDB gốc                             | Thay bằng tên bạn đang ETL                                                   |
+# | main_table`     | Tên bảng chính ở PostgreSQL                            | Thường là `movies`, `users`,...                                              |
+# | simple_fields`  | Các trường ánh xạ trực tiếp từ document vào bảng chính | Bổ sung nếu bạn thêm trường trong Mongo                                      |
+# | nested_objects` | Trường là object (ví dụ `belongs_to_collection`)       | Mỗi object -> 1 bảng riêng, có `foreign key` trỏ từ bảng chính               |
+# | arrays`         | Các trường là array (mảng object hoặc string)          | Ánh xạ sang bảng phụ hoặc bảng trung gian (junction) cho quan hệ nhiều-nhiều |
+# | junction_table` | Tên bảng trung gian nối nhiều-nhiều                    | Đặt tên dạng `movie_xxx` để dễ dùng sau                                      |

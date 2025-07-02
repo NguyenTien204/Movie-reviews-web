@@ -208,6 +208,7 @@ CREATE TABLE trailers (
 -- ========================
 CREATE TABLE collections (
   collection_id VARCHAR PRIMARY KEY,
+  movie_id INTEGER NOT NULL REFERENCES movies(movie_id) ON DELETE CASCADE,
   name VARCHAR,
   backdrop_path TEXT,
   poster_path TEXT
