@@ -56,8 +56,8 @@ movie_data_pipeline/
 │   ├── producer/             # Sends logs to Kafka
 │   └── consumer/             # Spark Streaming job
 │
-├── tmdb_ingestion/          # TMDB API ingestion & backup
-├── spark_jobs/              # Data cleaning, transformation
+├── ingestion/          # TMDB API ingestion & backup
+├── processing/              # Data cleaning, transformation
 ├── database/                # SQL schema & data loaders
 ├── models/                  # Recommendation model (optional)
 ├── pipelines/               # DAGs or batch jobs (e.g., Airflow)
