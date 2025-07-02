@@ -1,0 +1,23 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run Postgres Init",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/Data_Pipeline/database/init_postgres.py",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/Data_Pipeline"
+      }
+    },
+    {
+      "name": "Run Transform Config",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/Data_Pipeline/ingestion/tmdb_fetcher.py",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/Data_Pipeline"
+      }
+    }
+  ]
+}
