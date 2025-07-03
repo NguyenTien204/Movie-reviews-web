@@ -1,230 +1,400 @@
-import os
-import sys
+from abc import ABC, abstractmethod
+from typing import Dict, List, Any, Optional
 import pandas as pd
-from pymongo import MongoClient
-from sqlalchemy import create_engine
-import yaml
-from sqlalchemy.dialects.postgresql import insert as pg_insert
-from sqlalchemy import Table, MetaData
+import numpy as np
+from dataclasses import dataclass
+from enum import Enum
+import logging
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from Data_Pipeline.config.mongo_config import MONGO_URI, MONGO_DB_NAME, MOVIE_COLLECTION
-from Data_Pipeline.config.postgres_config import POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_HOST, POSTGRES_PORT
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
+class MappingType(Enum):
+    SIMPLE = "simple_fields"
+    ONE_TO_ONE = "one_to_one"
+    NESTED_OBJECTS = "nested_objects"
+    ARRAYS = "arrays"
 
-class BatchPipeline:
-    def __init__(self, mongo_collection, mongo_uri, mongo_db, postgres_db, postgres_user, postgres_password, postgres_host, postgres_port):
-        self.mongo_uri = mongo_uri
-        self.mongo_db_name = mongo_db
-        self.mongo_collection_name = mongo_collection
-        self.postgres_db = postgres_db
-        self.postgres_user = postgres_user
-        self.postgres_password = postgres_password
-        self.postgres_host = postgres_host
-        self.postgres_port = postgres_port
+@dataclass
+class FieldMapping:
+    source: str
+    target: str
+    data_type: Optional[str] = None
+    default_value: Any = None
 
-        self.main_id_col = None  # Thêm thuộc tính này để lưu tên cột id chính
+@dataclass
+class TableMapping:
+    table_name: str
+    fields: List[FieldMapping]
+    foreign_key: Optional[str] = None
+    primary_key: Optional[str] = None
 
-        self._connect_mongo()
-        self._connect_postgres()
+class DataExtractor(ABC):
+    @abstractmethod
+    def safe_extract(self, doc: Dict, path: str) -> Any:
+        pass
 
-    def _connect_mongo(self):
-        self.mongoclient = MongoClient(self.mongo_uri)
-        self.mongo_db = self.mongoclient[self.mongo_db_name]
-        self.mongo_collections = self.mongo_db[self.mongo_collection_name]
-
-    def _connect_postgres(self):
-        postgres_url = f"postgresql://{self.postgres_user}:{self.postgres_password}@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
-        self.pg_engine = create_engine(postgres_url)
-
-    def _load_config(self, config_path):
-        with open(config_path, 'r', encoding='utf-8') as f:
-            return yaml.safe_load(f)
-
-    def extract(self):
-        data = list(self.mongo_collections.find())
-        df = pd.DataFrame(data)
-        return df
-
-    def get_nested_field(self,doc, path):
-        """Truy cập giá trị lồng qua path như 'a.b.c' hoặc 'a[].b'"""
+class JSONPathExtractor(DataExtractor):
+    """Improved JSON path extraction with error handling"""
+    
+    def safe_extract(self, doc: Dict, path: str) -> Any:
+        try:
+            return self._extract_nested_field(doc, path)
+        except Exception as e:
+            logger.warning(f"Failed to extract path '{path}': {e}")
+            return None
+    
+    def _extract_nested_field(self, doc: Dict, path: str) -> Any:
+        """Enhanced version with better array handling"""
+        if not path or not isinstance(doc, dict):
+            return doc
+            
         keys = path.replace("[]", ".[]").split(".")
         current = doc
-        for k in keys:
-            if isinstance(current, list):
-                if k == "[]":
-                    return current  # Trả về mảng để xử lý bên ngoài
-                else:
-                    # Tự động lấy tất cả giá trị k từ list
-                    return [item.get(k) for item in current if k in item]
+        
+        for key in keys:
+            if key == "[]":
+                return current if isinstance(current, list) else []
+            elif isinstance(current, list):
+                return [item.get(key) for item in current if isinstance(item, dict) and key in item]
             elif isinstance(current, dict):
-                current = current.get(k)
+                current = current.get(key)
             else:
                 return None
+        
         return current
 
+class MappingStrategy(ABC):
+    @abstractmethod
+    def process(self, row_data: Dict, config: TableMapping, main_id: Any) -> Dict[str, List[Dict]]:
+        pass
 
-    def transform(self, df, config):
-        main_table_fields = config['mappings']['simple_fields']
-        one_to_one_mappings = config['mappings'].get('one_to_one', {})
-        nested_objects = config['mappings'].get('nested_objects', {})
-        arrays = config['mappings'].get('arrays', {})
+class SimpleFieldStrategy(MappingStrategy):
+    def __init__(self, extractor: DataExtractor):
+        self.extractor = extractor
+    
+    def process(self, row_data: Dict, config: TableMapping, main_id: Any) -> Dict[str, List[Dict]]:
+        result = {}
+        for field in config.fields:
+            value = self.extractor.safe_extract(row_data, field.source)
+            if field.source == "_id":
+                value = str(value)
+            result[field.target] = value
+        # Nếu có foreign_key, gán main_id vào trường đó
+        if config.foreign_key:
+            result[config.foreign_key] = main_id
+        return {config.table_name: [result]}
 
-        main_df_data = []
+class NestedObjectStrategy(MappingStrategy):
+    def __init__(self, extractor: DataExtractor):
+        self.extractor = extractor
+    
+    def process(self, row_data: Dict, config: TableMapping, main_id: Any) -> Dict[str, List[Dict]]:
+        source_path = getattr(config, 'source_path', '')
+        sub_items = self.extractor.safe_extract(row_data, source_path)
+        
+        if not isinstance(sub_items, list):
+            return {}
+        
+        results = []
+        for item in sub_items:
+            row = {}
+            for field in config.fields:
+                row[field.target] = item.get(field.source, field.default_value)
+            
+            if config.foreign_key:
+                row[config.foreign_key] = main_id
+            results.append(row)
+        
+        return {config.table_name: results}
+
+class ArrayStrategy(MappingStrategy):
+    def __init__(self, extractor: DataExtractor):
+        self.extractor = extractor
+    
+    def process(self, row_data: Dict, config: TableMapping, main_id: Any) -> Dict[str, List[Dict]]:
+        # Extract array items
+        array_path = config.fields[0].source.split("[]")[0]
+        sub_items = self.extractor.safe_extract(row_data, array_path)
+        
+        if not isinstance(sub_items, list):
+            return {}
+        
+        main_results = []
+        junction_results = []
+        
+        for item in sub_items:
+            # Main table record
+            row = {}
+            for field in config.fields:
+                source_field = field.source.split("[]")[-1].lstrip(".")
+                row[field.target] = item.get(source_field, field.default_value)
+            main_results.append(row)
+
+            # Junction table record
+            junction_config = getattr(config, 'junction_config', None)
+            if junction_config:
+                right_key = junction_config['right_key']
+                junction_row = {
+                    junction_config['left_key']: main_id,
+                    right_key: row.get(right_key)
+                }
+                junction_results.append(junction_row)
+        
+        result = {config.table_name: main_results}
+        if junction_results:
+            junction_table = getattr(config, 'junction_table', f"{config.table_name}_junction")
+            result[junction_table] = junction_results
+        
+        return result
+
+class TransformationEngine:
+    def __init__(self):
+        self.extractor = JSONPathExtractor()
+        self.strategies = {
+            MappingType.SIMPLE: SimpleFieldStrategy(self.extractor),
+            MappingType.ONE_TO_ONE: SimpleFieldStrategy(self.extractor),
+            MappingType.NESTED_OBJECTS: NestedObjectStrategy(self.extractor),
+            MappingType.ARRAYS: ArrayStrategy(self.extractor)
+        }
+    
+    def transform_batch(self, df: pd.DataFrame, config: Dict) -> tuple[pd.DataFrame, Dict[str, pd.DataFrame]]:
+        """Vectorized transformation approach"""
+        main_table_config = self._parse_main_table_config(config)
+        related_configs = self._parse_related_configs(config)
+        
+        # Process main table - vectorized approach
+        main_df = self._process_main_table_vectorized(df, main_table_config)
+        
+        # Process related tables
         related_dfs = {}
-
-        for _, row in df.iterrows():
-            row_dict = row.to_dict()
-            main_row = {}
-
-            # ✅ Simple fields → bảng chính
-            for field in main_table_fields:
-                value = self.get_nested_field(row_dict, field['source'])
-                if field['source'] == "_id":
-                    value = str(value)
-                main_row[field['target']] = value
-
-            movie_id = main_row.get('movie_id')
-            main_df_data.append(main_row)
-
-            # ✅ One-to-One: release_calendar, belongs_to_collection
-            for key, mapping in one_to_one_mappings.items():
-                table = mapping['table']
-                local_row = {}
-                for field in mapping['fields']:
-                    value = self.get_nested_field(row_dict, field['source'])
-                    local_row[field['target']] = value
-
-                # thêm khóa ngoại từ movie
-                rel = mapping['relation']
-                local_row[rel['foreign_key']] = movie_id
-
-                related_dfs.setdefault(table, []).append(local_row)
-
-            # ✅ Nested objects: trailers,...
-            for key, mapping in nested_objects.items():
-                source_path = mapping['source_path']
-                sub_items = self.get_nested_field(row_dict, source_path)
-                if not isinstance(sub_items, list):
-                    continue
-
-                table = mapping['table']
-                for item in sub_items:
-                    new_row = {}
-                    for field in mapping['fields']:
-                        new_row[field['target']] = item.get(field['source'])
-                    # thêm khóa ngoại
-                    rel = mapping['relation']
-                    new_row[rel['foreign_key']] = movie_id
-                    related_dfs.setdefault(table, []).append(new_row)
-
-            # ✅ Arrays: genres, companies,...
-            for key, mapping in arrays.items():
-                field_defs = mapping['fields']
-                junction_table = mapping['junction_table']
-                table = mapping['table']
-                sub_items = self.get_nested_field(row_dict, field_defs[0]['source'].split("[]")[0])
-                if not isinstance(sub_items, list):
-                    continue
-
-                for item in sub_items:
-                    item_row = {}
-                    for field in field_defs:
-                        source_field = field['source'].split("[]")[-1].lstrip(".")  
-                        item_row[field['target']] = item.get(source_field)
-                    related_dfs.setdefault(table, []).append(item_row)
-
-                    # junction
-                    left_key = mapping['relation_keys']['left_key']
-                    right_key = mapping['relation_keys']['right_key']
-                    junction_row = {
-                        left_key: movie_id,
-                        right_key: item_row.get(right_key)
-                    }
-                    related_dfs.setdefault(junction_table, []).append(junction_row)
-
-        # Chuyển về DataFrame
-        main_df = pd.DataFrame(main_df_data)
+        for mapping_type, table_configs in related_configs.items():
+            strategy = self.strategies[mapping_type]
+            
+            for table_config in table_configs:
+                table_results = self._process_related_table(df, table_config, strategy, main_df)
+                for table_name, data in table_results.items():
+                    if table_name not in related_dfs:
+                        related_dfs[table_name] = []
+                    related_dfs[table_name].extend(data)
+        
+        # Convert to DataFrames
         for table_name in related_dfs:
             related_dfs[table_name] = pd.DataFrame(related_dfs[table_name])
-
+        
         return main_df, related_dfs
-
-    def insert_on_conflict_do_nothing(self, df, table_name, engine, primary_key):
-        metadata = MetaData()
-        table = Table(table_name, metadata, autoload_with=engine)
-
-        with engine.begin() as conn:
-            for _, row in df.iterrows():
-                stmt = pg_insert(table).values(row.to_dict())
-                stmt = stmt.on_conflict_do_nothing(index_elements=[primary_key])
-                conn.execute(stmt)
-
-
-    def load(self, main_df, related_dfs, main_table):
-        # Bảng chính
-        main_df.to_sql(main_table, self.pg_engine, if_exists='append', index=False)
-
-        main_tables_first = [
-            "genres", 
-            "production_companies", 
-            "production_countries", 
-            "spoken_languages", 
-            "collections"
-        ]
-
-        primary_keys = {
-            "genres": "genre_id",
-            "production_companies": "company_id",
-            "production_countries": "iso_3166_1",
-            "spoken_languages": "iso_639_1",
-            "collections": "collection_id"
-        }
-
-        junction_tables = [
-            "movie_genres", 
-            "movie_production_companies", 
-            "movie_production_countries", 
-            "movie_spoken_languages",
-            "movie_collections"
-        ]
-
-        # Bảng chính phụ (1-nhiều, nhiều-nhiều)
-        for table_name in main_tables_first:
-            if table_name in related_dfs:
-                df = related_dfs[table_name].drop_duplicates(subset=[primary_keys[table_name]])
-                self.insert_on_conflict_do_nothing(df, table_name, self.pg_engine, primary_keys[table_name])
-
-        # Bảng nối (junction) - cần foreign key đã tồn tại
-        for table_name in junction_tables:
-            if table_name in related_dfs:
-                df = related_dfs[table_name].drop_duplicates()
-                if not df.empty:
-                    try:
-                        df.to_sql(table_name, self.pg_engine, if_exists='append', index=False)
-                    except Exception as e:
-                        print(f"❌ Lỗi khi insert vào {table_name}: {e}")
     
-    def run(self, config_path):
+    def _process_main_table_vectorized(self, df: pd.DataFrame, config: TableMapping) -> pd.DataFrame:
+        """Use pandas vectorized operations instead of iterrows"""
+        result_dict = {}
+        
+        for field in config.fields:
+            if field.source == "_id":
+                result_dict[field.target] = df['_id'].astype(str)
+            elif '.' in field.source:
+                # Handle nested fields
+                result_dict[field.target] = df.apply(
+                    lambda row: self.extractor.safe_extract(row.to_dict(), field.source), 
+                    axis=1
+                )
+            else:
+                result_dict[field.target] = df.get(field.source, field.default_value)
+        
+        return pd.DataFrame(result_dict)
+    
+    def _process_related_table(self, df: pd.DataFrame, config: TableMapping, 
+                             strategy: MappingStrategy, main_df: pd.DataFrame) -> Dict[str, List[Dict]]:
+        all_results = {}
+
+        # Determine the main table primary key name from config
+        # Try to get from config.foreign_key (for related table), else default to 'movie_id'
+        # But best is to get from main table config
+        main_table_pk = None
+        if hasattr(main_df, 'columns'):
+            # Try to get the first column that ends with '_id', else use the first column
+            id_cols = [col for col in main_df.columns if col.endswith('_id')]
+            if id_cols:
+                main_table_pk = id_cols[0]
+            else:
+                main_table_pk = main_df.columns[0]
+        else:
+            main_table_pk = 'movie_id'
+
+        for idx, row in df.iterrows():
+            main_id = main_df.iloc[idx].get(main_table_pk)
+            row_results = strategy.process(row.to_dict(), config, main_id)
+
+            for table_name, records in row_results.items():
+                if table_name not in all_results:
+                    all_results[table_name] = []
+                all_results[table_name].extend(records)
+
+        return all_results
+    
+    def _parse_main_table_config(self, config: Dict) -> TableMapping:
+        fields = []
+        for field_config in config['mappings']['simple_fields']:
+            # Map 'type' to 'data_type' for FieldMapping
+            field_kwargs = {
+                'source': field_config['source'],
+                'target': field_config['target'],
+                'data_type': field_config.get('type'),
+                'default_value': field_config.get('default_value')
+            }
+            fields.append(FieldMapping(**field_kwargs))
+        return TableMapping(table_name=config['main_table'], fields=fields)
+    
+    def _parse_related_configs(self, config: Dict) -> Dict[MappingType, List[TableMapping]]:
+        mappings = config.get("mappings", {})
+        related_configs = {}
+    
+        # Xử lý one_to_one
+        if "one_to_one" in mappings:
+            one_to_one = []
+            for key, val in mappings["one_to_one"].items():
+                fields = [
+                    FieldMapping(
+                        source=f['source'],
+                        target=f['target'],
+                        data_type=f.get('type'),
+                        default_value=f.get('default_value')
+                    ) for f in val["fields"]
+                ]
+                # Lấy foreign_key từ relation nếu có
+                foreign_key = None
+                if 'relation' in val and 'foreign_key' in val['relation']:
+                    foreign_key = val['relation']['foreign_key']
+                table = TableMapping(
+                    table_name=val.get("table", key),
+                    fields=fields,
+                    foreign_key=foreign_key,
+                    primary_key=val.get("primary_key")
+                )
+                # Gắn thêm source_path nếu cần (one_to_one thường không cần)
+                one_to_one.append(table)
+            related_configs[MappingType.ONE_TO_ONE] = one_to_one
+
+        if "nested_objects" in mappings:
+            nested = []
+            for key, val in mappings["nested_objects"].items():
+                # Map 'type' to 'data_type' for each field
+                fields = [
+                    FieldMapping(
+                        source=f['source'],
+                        target=f['target'],
+                        data_type=f.get('type'),
+                        default_value=f.get('default_value')
+                    ) for f in val["fields"]
+                ]
+                # Lấy foreign_key từ relation nếu có
+                foreign_key = None
+                if 'relation' in val and 'foreign_key' in val['relation']:
+                    foreign_key = val['relation']['foreign_key']
+                table = TableMapping(
+                    table_name=val.get("table_name", key),
+                    fields=fields,
+                    foreign_key=foreign_key,
+                    primary_key=val.get("primary_key")
+                )
+                # Gắn thêm source_path để extractor dùng
+                setattr(table, "source_path", val.get("source_path", key))
+                nested.append(table)
+            related_configs[MappingType.NESTED_OBJECTS] = nested
+
+        if "arrays" in mappings:
+            arrays = []
+            for key, val in mappings["arrays"].items():
+                # Map 'type' to 'data_type' for each field
+                fields = [
+                    FieldMapping(
+                        source=f['source'],
+                        target=f['target'],
+                        data_type=f.get('type'),
+                        default_value=f.get('default_value')
+                    ) for f in val["fields"]
+                ]
+                table = TableMapping(
+                    table_name=val.get("table_name", key),
+                    fields=fields,
+                    primary_key=val.get("primary_key"),
+                )
+                # Gắn thêm junction info
+                setattr(table, "junction_table", val.get("junction_table"))
+                setattr(table, "junction_config", val.get("relation_keys"))
+                arrays.append(table)
+            related_configs[MappingType.ARRAYS] = arrays
+
+        return related_configs
+
+
+class ImprovedBatchPipeline:
+    def __init__(self, mongo_connection, postgres_connection):
+        self.mongo_conn = mongo_connection
+        self.postgres_conn = postgres_connection
+        self.transformer = TransformationEngine()
+        self.validator = ConfigValidator()
+    
+    def run(self, config_path: str):
+        try:
+            # Validate config first
+            config = self._load_and_validate_config(config_path)
+            
+            # Extract
+            df = self.extract()
+            logger.info(f"Extracted {len(df)} records")
+            
+            # Transform
+            main_df, related_dfs = self.transformer.transform_batch(df, config)
+            logger.info(f"Transformed data into {len(related_dfs)} related tables")
+            
+            # Load
+            self.load_with_transaction(main_df, related_dfs, config)
+            logger.info("Data loaded successfully")
+            
+        except Exception as e:
+            logger.error(f"Pipeline failed: {e}")
+            raise
+    
+    def _load_and_validate_config(self, config_path: str) -> Dict:
         config = self._load_config(config_path)
-        main_table = config['main_table']
+        self.validator.validate(config)
+        return config
+    
+    def load_with_transaction(self, main_df: pd.DataFrame, 
+                            related_dfs: Dict[str, pd.DataFrame], config: Dict):
+        """Load data with proper transaction handling"""
+        with self.postgres_conn.begin() as trans:
+            try:
+                # Load main table
+                main_df.to_sql(config['main_table'], self.postgres_conn, 
+                             if_exists='append', index=False)
+                
+                # Load related tables in proper order
+                load_order = self._determine_load_order(config)
+                for table_name in load_order:
+                    if table_name in related_dfs:
+                        self._load_table_with_upsert(related_dfs[table_name], table_name)
+                
+                trans.commit()
+            except Exception as e:
+                trans.rollback()
+                raise
 
-        df = self.extract()
-        #test
-        #print('⚠️',df.columns)
-        #print('⚠️',df.head(1).to_dict())
-        main_df, related_dfs = self.transform(df, config)
-        self.load(main_df, related_dfs, main_table)
-
-
-pipeline = BatchPipeline(
-    mongo_collection=MOVIE_COLLECTION,
-    mongo_uri=MONGO_URI,
-    mongo_db=MONGO_DB_NAME,
-    postgres_db=POSTGRES_DB,
-    postgres_user=POSTGRES_USER,
-    postgres_password=POSTGRES_PASSWORD,
-    postgres_host=POSTGRES_HOST,
-    postgres_port=POSTGRES_PORT
-)
-pipeline.run("Data_Pipeline/config/transform_config.yaml")
+class ConfigValidator:
+    def validate(self, config: Dict) -> None:
+        """Validate configuration structure and required fields"""
+        required_keys = ['main_table', 'mappings']
+        for key in required_keys:
+            if key not in config:
+                raise ValueError(f"Missing required config key: {key}")
+        
+        # Validate mappings structure
+        mappings = config['mappings']
+        if 'simple_fields' not in mappings:
+            raise ValueError("Missing simple_fields in mappings")
+        
+        # Validate each field mapping
+        for field in mappings['simple_fields']:
+            if 'source' not in field or 'target' not in field:
+                raise ValueError(f"Invalid field mapping: {field}")
