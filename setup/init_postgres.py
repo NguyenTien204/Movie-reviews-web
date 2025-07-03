@@ -3,7 +3,7 @@ import psycopg2
 import sqlparse
 import time
 from psycopg2 import OperationalError, ProgrammingError, errors, sql
-from Data_Pipeline.config.postgres_config import POSTGRES_DB, POSTGRES_HOST, POSTGRES_PASSWORD, POSTGRES_USER
+from Data_Pipeline.config.postgres_config import POSTGRES_DB, POSTGRES_HOST, POSTGRES_PASSWORD, POSTGRES_USER, POSTGRES_PORT
 
 def ensure_database_exists():
     try:
@@ -11,7 +11,8 @@ def ensure_database_exists():
             dbname=POSTGRES_DB,
             user=POSTGRES_USER,
             password=POSTGRES_PASSWORD,
-            host=POSTGRES_HOST
+            host=POSTGRES_HOST,
+            port = POSTGRES_PORT  # Mặc định cổng PostgreSQL
         )
         conn.close()
         print("[Y] Database already exists.")
