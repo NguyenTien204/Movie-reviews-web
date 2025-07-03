@@ -214,11 +214,6 @@ CREATE TABLE collections (
   poster_path TEXT
 );
 
-CREATE TABLE movie_collections (
-  movie_id INTEGER NOT NULL REFERENCES movies(movie_id) ON DELETE CASCADE,
-  collection_id VARCHAR NOT NULL REFERENCES collections(collection_id) ON DELETE CASCADE,
-  PRIMARY KEY (movie_id, collection_id)
-);
 
 
 -- ========================

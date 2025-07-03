@@ -86,8 +86,8 @@ mappings:
 
       relation:
         from_main_table: true       # main table (movies) có khóa ngoại collection_id
-        local_key: collection_id
-        foreign_key: collection_id
+        local_key: movie_id
+        foreign_key: movie_id
 
 
   # Object lồng, ánh xạ sang bảng phụ (1-nhiều)
