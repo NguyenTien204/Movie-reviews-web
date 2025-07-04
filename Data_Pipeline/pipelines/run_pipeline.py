@@ -1,4 +1,3 @@
-
 import os
 import sys
 import pandas as pd
@@ -9,22 +8,16 @@ from typing import Dict, List, Any, Optional
 import logging
 
 # Import your new ETL components
-from Data_Pipeline.pipelines.batch_pipeline import (
-    ImprovedBatchPipeline, 
+from Data_Pipeline.pipelines.transform import (
     TransformationEngine, 
     ConfigValidator,
-    MappingType,
-    FieldMapping,
-    TableMapping
 )
 
-# Your existing config imports
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from Data_Pipeline.config.mongo_config import MONGO_URI, MONGO_DB_NAME, MOVIE_COLLECTION
 from Data_Pipeline.config.postgres_config import POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_HOST, POSTGRES_PORT
 
+# ETL run class
 class ModernETLPipeline:
-    """Wrapper class để integrate với code cũ của bạn"""
     
     def __init__(self, mongo_collection, mongo_uri, mongo_db, postgres_db, 
                  postgres_user, postgres_password, postgres_host, postgres_port):
@@ -74,7 +67,7 @@ class ModernETLPipeline:
             raise
     
     def load_and_validate_config(self, config_path: str) -> Dict:
-        """Load và validate configuration"""
+        """Load and validate configuration"""
         try:
             with open(config_path, 'r', encoding='utf-8') as f:
                 config = yaml.safe_load(f)
@@ -114,7 +107,6 @@ class ModernETLPipeline:
             'mappings': {}
         }
 
-        # ✅ Không convert sang FieldMapping, giữ nguyên dict
         if 'simple_fields' in config['mappings']:
             parsed['mappings']['simple_fields'] = config['mappings']['simple_fields']
 
@@ -128,27 +120,48 @@ class ModernETLPipeline:
     def load_with_proper_order(self, main_df: pd.DataFrame, 
                               related_dfs: Dict[str, pd.DataFrame], 
                               config: Dict):
-        """Load data với proper order và error handling"""
+        """Load data với proper order, chỉ check trùng lặp với bảng movies và loại bỏ toàn bộ dữ liệu liên quan nếu movie_id đã tồn tại."""
+        import pandas as pd
         try:
             self.logger.info("Starting data loading...")
-            
+            main_table = config['main_table']
+            # Xác định khóa chính của bảng chính
+            main_pk = None
+            for f in main_df.columns:
+                if f.endswith('_id'):
+                    main_pk = f
+                    break
+            if not main_pk:
+                raise Exception("Không tìm thấy khóa chính cho bảng chính!")
+
+            # Lấy danh sách movie_id đã tồn tại
+            existing_ids = set(pd.read_sql(f"SELECT {main_pk} FROM {main_table}", self.pg_engine)[main_pk].tolist())
+            # Lọc main_df và các related_dfs chỉ giữ lại các movie_id chưa tồn tại
+            mask_new = ~main_df[main_pk].isin(existing_ids)
+            filtered_main_df = main_df[mask_new]
+            new_ids = set(filtered_main_df[main_pk].tolist())
+            self.logger.info(f"Số lượng bản ghi mới sẽ insert vào {main_table}: {len(filtered_main_df)}")
+
+            # Lọc các related_dfs chỉ giữ lại các bản ghi liên quan đến movie_id mới
+            filtered_related_dfs = {}
+            for table_name, df in related_dfs.items():
+                if main_pk in df.columns:
+                    filtered_related_dfs[table_name] = df[df[main_pk].isin(new_ids)]
+                else:
+                    filtered_related_dfs[table_name] = df
+
             with self.pg_engine.begin():
-                # Load main table first
-                main_table = config['main_table']
-                main_df.to_sql(main_table, self.pg_engine, if_exists='append', index=False)
-                self.logger.info(f"Loaded {len(main_df)} records to {main_table}")
-                
+                # Load main table 
+                filtered_main_df.to_sql(main_table, self.pg_engine, if_exists='append', index=False)
+                self.logger.info(f"Loaded {len(filtered_main_df)} records to {main_table}")
+
                 # Load related tables in proper order
                 load_order = self._get_table_load_order()
-                
                 for table_name in load_order:
-                    if table_name in related_dfs:
-                        df = related_dfs[table_name]
+                    if table_name in filtered_related_dfs:
+                        df = filtered_related_dfs[table_name]
                         if not df.empty:
-                            # Handle duplicates
                             df_deduped = self._handle_duplicates(df, table_name)
-                            
-                            # Load with upsert logic
                             self._upsert_table(df_deduped, table_name)
                             self.logger.info(f"Loaded {len(df_deduped)} records to {table_name}")
                 self.logger.info("All data loaded successfully!")
@@ -259,74 +272,6 @@ class ModernETLPipeline:
             # Cleanup connections
             self.mongo_client.close()
             self.pg_engine.dispose()
-
-            
-class EnhancedConfigValidator(ConfigValidator):
-    """Enhanced validator with more comprehensive checks"""
-    
-    def validate(self, config: Dict) -> None:
-        """Validate configuration with detailed checks"""
-        super().validate(config)
-        
-        # Validate table dependencies
-        self._validate_table_dependencies(config)
-        
-        # Validate field mappings
-        self._validate_field_mappings(config)
-        
-        # Validate data types
-        self._validate_data_types(config)
-    
-    def _validate_table_dependencies(self, config: Dict):
-        """Check if foreign key relationships are properly defined"""
-        mappings = config['mappings']
-        
-        # Check one-to-one relationships
-        if 'one_to_one' in mappings:
-            for key, mapping in mappings['one_to_one'].items():
-                if 'relation' not in mapping:
-                    raise ValueError(f"Missing relation config for {key}")
-                
-                relation = mapping['relation']
-                if 'foreign_key' not in relation:
-                    raise ValueError(f"Missing foreign_key in relation for {key}")
-        
-        # Check arrays (many-to-many)
-        if 'arrays' in mappings:
-            for key, mapping in mappings['arrays'].items():
-                if 'junction_table' not in mapping:
-                    raise ValueError(f"Missing junction_table for array {key}")
-                
-                if 'relation_keys' not in mapping:
-                    raise ValueError(f"Missing relation_keys for array {key}")
-    
-    def _validate_field_mappings(self, config: Dict):
-        """Validate field mapping consistency"""
-        all_targets = []
-        
-        for mapping_type in ['simple_fields', 'one_to_one', 'nested_objects', 'arrays']:
-            if mapping_type in config['mappings']:
-                mapping = config['mappings'][mapping_type]
-                
-                if mapping_type == 'simple_fields':
-                    targets = [field['target'] for field in mapping]
-                    all_targets.extend(targets)
-                elif mapping_type in ['one_to_one', 'nested_objects']:
-                    for key, value in mapping.items():
-                        targets = [field['target'] for field in value['fields']]
-                        all_targets.extend(targets)
-        
-        # Check for duplicate targets
-        duplicates = [target for target in set(all_targets) if all_targets.count(target) > 1]
-        if duplicates:
-            raise ValueError(f"Duplicate target fields found: {duplicates}")
-    
-    def _validate_data_types(self, config: Dict):
-        """Validate data type specifications"""
-        # Implementation for data type validation
-        pass
-
-
 class ETLMetrics:
     """Class để track ETL metrics"""
     
@@ -368,8 +313,6 @@ class ETLMetrics:
     
 def main():
     """Main function để chạy ETL pipeline"""
-    
-    # Initialize pipeline với config cũ của bạn
     pipeline = ModernETLPipeline(
         mongo_collection=MOVIE_COLLECTION,
         mongo_uri=MONGO_URI,

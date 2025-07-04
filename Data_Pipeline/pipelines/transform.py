@@ -2,152 +2,12 @@ from abc import ABC, abstractmethod
 from typing import Dict, List, Any, Optional
 import pandas as pd
 import numpy as np
-from dataclasses import dataclass
-from enum import Enum
 import logging
-
+from Data_Pipeline.pipelines.extract import JSONPathExtractor, MappingStrategy
+from Data_Pipeline.pipelines.extract import SimpleFieldStrategy, NestedObjectStrategy, ArrayStrategy, MappingType, FieldMapping, TableMapping, DataExtractor
 # Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-class MappingType(Enum):
-    SIMPLE = "simple_fields"
-    ONE_TO_ONE = "one_to_one"
-    NESTED_OBJECTS = "nested_objects"
-    ARRAYS = "arrays"
-
-@dataclass
-class FieldMapping:
-    source: str
-    target: str
-    data_type: Optional[str] = None
-    default_value: Any = None
-
-@dataclass
-class TableMapping:
-    table_name: str
-    fields: List[FieldMapping]
-    foreign_key: Optional[str] = None
-    primary_key: Optional[str] = None
-
-class DataExtractor(ABC):
-    @abstractmethod
-    def safe_extract(self, doc: Dict, path: str) -> Any:
-        pass
-
-class JSONPathExtractor(DataExtractor):
-    """Improved JSON path extraction with error handling"""
-    
-    def safe_extract(self, doc: Dict, path: str) -> Any:
-        try:
-            return self._extract_nested_field(doc, path)
-        except Exception as e:
-            logger.warning(f"Failed to extract path '{path}': {e}")
-            return None
-    
-    def _extract_nested_field(self, doc: Dict, path: str) -> Any:
-        """Enhanced version with better array handling"""
-        if not path or not isinstance(doc, dict):
-            return doc
-            
-        keys = path.replace("[]", ".[]").split(".")
-        current = doc
-        
-        for key in keys:
-            if key == "[]":
-                return current if isinstance(current, list) else []
-            elif isinstance(current, list):
-                return [item.get(key) for item in current if isinstance(item, dict) and key in item]
-            elif isinstance(current, dict):
-                current = current.get(key)
-            else:
-                return None
-        
-        return current
-
-class MappingStrategy(ABC):
-    @abstractmethod
-    def process(self, row_data: Dict, config: TableMapping, main_id: Any) -> Dict[str, List[Dict]]:
-        pass
-
-class SimpleFieldStrategy(MappingStrategy):
-    def __init__(self, extractor: DataExtractor):
-        self.extractor = extractor
-    
-    def process(self, row_data: Dict, config: TableMapping, main_id: Any) -> Dict[str, List[Dict]]:
-        result = {}
-        for field in config.fields:
-            value = self.extractor.safe_extract(row_data, field.source)
-            if field.source == "_id":
-                value = str(value)
-            result[field.target] = value
-        # Nếu có foreign_key, gán main_id vào trường đó
-        if config.foreign_key:
-            result[config.foreign_key] = main_id
-        return {config.table_name: [result]}
-
-class NestedObjectStrategy(MappingStrategy):
-    def __init__(self, extractor: DataExtractor):
-        self.extractor = extractor
-    
-    def process(self, row_data: Dict, config: TableMapping, main_id: Any) -> Dict[str, List[Dict]]:
-        source_path = getattr(config, 'source_path', '')
-        sub_items = self.extractor.safe_extract(row_data, source_path)
-        
-        if not isinstance(sub_items, list):
-            return {}
-        
-        results = []
-        for item in sub_items:
-            row = {}
-            for field in config.fields:
-                row[field.target] = item.get(field.source, field.default_value)
-            
-            if config.foreign_key:
-                row[config.foreign_key] = main_id
-            results.append(row)
-        
-        return {config.table_name: results}
-
-class ArrayStrategy(MappingStrategy):
-    def __init__(self, extractor: DataExtractor):
-        self.extractor = extractor
-    
-    def process(self, row_data: Dict, config: TableMapping, main_id: Any) -> Dict[str, List[Dict]]:
-        # Extract array items
-        array_path = config.fields[0].source.split("[]")[0]
-        sub_items = self.extractor.safe_extract(row_data, array_path)
-        
-        if not isinstance(sub_items, list):
-            return {}
-        
-        main_results = []
-        junction_results = []
-        
-        for item in sub_items:
-            # Main table record
-            row = {}
-            for field in config.fields:
-                source_field = field.source.split("[]")[-1].lstrip(".")
-                row[field.target] = item.get(source_field, field.default_value)
-            main_results.append(row)
-
-            # Junction table record
-            junction_config = getattr(config, 'junction_config', None)
-            if junction_config:
-                right_key = junction_config['right_key']
-                junction_row = {
-                    junction_config['left_key']: main_id,
-                    right_key: row.get(right_key)
-                }
-                junction_results.append(junction_row)
-        
-        result = {config.table_name: main_results}
-        if junction_results:
-            junction_table = getattr(config, 'junction_table', f"{config.table_name}_junction")
-            result[junction_table] = junction_results
-        
-        return result
 
 class TransformationEngine:
     def __init__(self):
@@ -186,7 +46,6 @@ class TransformationEngine:
         return main_df, related_dfs
     
     def _process_main_table_vectorized(self, df: pd.DataFrame, config: TableMapping) -> pd.DataFrame:
-        """Use pandas vectorized operations instead of iterrows"""
         result_dict = {}
         
         for field in config.fields:
@@ -206,7 +65,6 @@ class TransformationEngine:
     def _process_related_table(self, df: pd.DataFrame, config: TableMapping, 
                              strategy: MappingStrategy, main_df: pd.DataFrame) -> Dict[str, List[Dict]]:
         all_results = {}
-
         # Determine the main table primary key name from config
         # Try to get from config.foreign_key (for related table), else default to 'movie_id'
         # But best is to get from main table config
@@ -327,59 +185,6 @@ class TransformationEngine:
 
         return related_configs
 
-
-class ImprovedBatchPipeline:
-    def __init__(self, mongo_connection, postgres_connection):
-        self.mongo_conn = mongo_connection
-        self.postgres_conn = postgres_connection
-        self.transformer = TransformationEngine()
-        self.validator = ConfigValidator()
-    
-    def run(self, config_path: str):
-        try:
-            # Validate config first
-            config = self._load_and_validate_config(config_path)
-            
-            # Extract
-            df = self.extract()
-            logger.info(f"Extracted {len(df)} records")
-            
-            # Transform
-            main_df, related_dfs = self.transformer.transform_batch(df, config)
-            logger.info(f"Transformed data into {len(related_dfs)} related tables")
-            
-            # Load
-            self.load_with_transaction(main_df, related_dfs, config)
-            logger.info("Data loaded successfully")
-            
-        except Exception as e:
-            logger.error(f"Pipeline failed: {e}")
-            raise
-    
-    def _load_and_validate_config(self, config_path: str) -> Dict:
-        config = self._load_config(config_path)
-        self.validator.validate(config)
-        return config
-    
-    def load_with_transaction(self, main_df: pd.DataFrame, 
-                            related_dfs: Dict[str, pd.DataFrame], config: Dict):
-        """Load data with proper transaction handling"""
-        with self.postgres_conn.begin() as trans:
-            try:
-                # Load main table
-                main_df.to_sql(config['main_table'], self.postgres_conn, 
-                             if_exists='append', index=False)
-                
-                # Load related tables in proper order
-                load_order = self._determine_load_order(config)
-                for table_name in load_order:
-                    if table_name in related_dfs:
-                        self._load_table_with_upsert(related_dfs[table_name], table_name)
-                
-                trans.commit()
-            except Exception as e:
-                trans.rollback()
-                raise
 
 class ConfigValidator:
     def validate(self, config: Dict) -> None:
