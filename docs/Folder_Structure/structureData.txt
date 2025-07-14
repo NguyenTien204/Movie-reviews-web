@@ -1,0 +1,44 @@
+movie_data_pipeline/
+│
+├── README.md
+├── requirements.txt
+├── .env                      # thông tin kết nối Kafka, DB, API Key TMDB
+│
+├── config/                  # cấu hình toàn bộ hệ thống
+│   ├── kafka_config.py
+│   ├── spark_config.py
+│   ├── postgres_config.py
+│   └── tmdb_config.py
+│
+├── kafka/
+│   ├── producer/            # sinh log từ frontend hoặc mô phỏng
+│   │   └── async_producer.py
+│   └── consumer/
+│       └── spark_stream_consumer.py  # Spark Streaming đọc user_log
+│
+├── tmdb_ingestion/
+│   ├── fetch_tmdb_data.py   # gọi API TMDB lưu vào MongoDB
+│   ├── backup_to_kafka.py   # đẩy dữ liệu từ MongoDB sang Kafka (backup)
+│   └── json_schema.py       # schema chuẩn hoá TMDB data
+│
+├── spark_jobs/
+│   ├── clean_transform.py   # xử lý dữ liệu (movies, logs)
+│   ├── enrich_data.py       # join log + movie + user
+│   └── utils.py
+│
+├── pipelines/
+│   ├── airflow_dag.py       # orchestration cho toàn bộ pipeline
+│   └── batch_pipeline.py    # batch ETL từ MongoDB -> PostgreSQL
+│
+├── database/
+│   ├── schema.sql           # toàn bộ lược đồ bạn cung cấp
+│   ├── init_postgres.py     # tạo bảng, migrate, index
+│   └── insert_data.py       # ghi từ Spark hoặc Python vào PostgreSQL
+│
+├── monitoring/
+│   └── logger.py            # logging cho các job ETL
+│
+└── tests/
+    ├── test_tmdb_fetch.py
+    ├── test_clean_transform.py
+    └── test_kafka_pipeline.py
