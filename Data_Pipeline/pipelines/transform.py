@@ -66,8 +66,6 @@ class TransformationEngine:
                              strategy: MappingStrategy, main_df: pd.DataFrame) -> Dict[str, List[Dict]]:
         all_results = {}
         # Determine the main table primary key name from config
-        # Try to get from config.foreign_key (for related table), else default to 'movie_id'
-        # But best is to get from main table config
         main_table_pk = None
         if hasattr(main_df, 'columns'):
             # Try to get the first column that ends with '_id', else use the first column
@@ -86,7 +84,19 @@ class TransformationEngine:
             for table_name, records in row_results.items():
                 if table_name not in all_results:
                     all_results[table_name] = []
-                all_results[table_name].extend(records)
+                
+                # Chỉ thêm records không null và có đủ dữ liệu
+                valid_records = []
+                for record in records:
+                    # Kiểm tra xem record có đủ dữ liệu không
+                    if any(record.values()):  # Chỉ thêm nếu có ít nhất một giá trị không null
+                        # Đối với bảng collections, kiểm tra thêm collection_id
+                        if table_name == 'collections' and not record.get('collection_id'):
+                            continue
+                        valid_records.append(record)
+                
+                if valid_records:
+                    all_results[table_name].extend(valid_records)
 
         return all_results
     
@@ -186,20 +196,3 @@ class TransformationEngine:
         return related_configs
 
 
-class ConfigValidator:
-    def validate(self, config: Dict) -> None:
-        """Validate configuration structure and required fields"""
-        required_keys = ['main_table', 'mappings']
-        for key in required_keys:
-            if key not in config:
-                raise ValueError(f"Missing required config key: {key}")
-        
-        # Validate mappings structure
-        mappings = config['mappings']
-        if 'simple_fields' not in mappings:
-            raise ValueError("Missing simple_fields in mappings")
-        
-        # Validate each field mapping
-        for field in mappings['simple_fields']:
-            if 'source' not in field or 'target' not in field:
-                raise ValueError(f"Invalid field mapping: {field}")

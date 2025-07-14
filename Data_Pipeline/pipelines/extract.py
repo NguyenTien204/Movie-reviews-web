@@ -6,7 +6,9 @@ import numpy as np
 from dataclasses import dataclass
 from enum import Enum
 import logging
-
+import pandas as pd
+from pymongo.collection import Collection
+from typing import Iterator
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -75,15 +77,31 @@ class SimpleFieldStrategy(MappingStrategy):
     
     def process(self, row_data: Dict, config: TableMapping, main_id: Any) -> Dict[str, List[Dict]]:
         result = {}
+        
+        # Kiểm tra xem có dữ liệu hợp lệ không trước khi xử lý
+        has_valid_data = False
         for field in config.fields:
             value = self.extractor.safe_extract(row_data, field.source)
-            if field.source == "_id":
-                value = str(value)
-            result[field.target] = value
-        # Nếu có foreign_key, gán main_id vào trường đó
+            if value is not None:
+                has_valid_data = True
+                if field.source == "_id":
+                    value = str(value)
+                result[field.target] = value
+            else:
+                result[field.target] = field.default_value
+                
+        # Nếu không có dữ liệu hợp lệ và đây là bảng collections, không tạo record
+        if not has_valid_data and config.table_name == "collections":
+            return {}
+            
+        # Thêm foreign key nếu cần
         if config.foreign_key:
             result[config.foreign_key] = main_id
-        return {config.table_name: [result]}
+            
+        # Chỉ trả về kết quả nếu có ít nhất một giá trị không null
+        if has_valid_data:
+            return {config.table_name: [result]}
+        return {}
 
 class NestedObjectStrategy(MappingStrategy):
     def __init__(self, extractor: DataExtractor):
@@ -164,3 +182,23 @@ class DuplicateRemover:
         except Exception as e:
             logger.error(f"ERORR: Lỗi khi kiểm tra trùng lặp với bảng {table_name}: {e}")
             return df
+
+
+# Data_Pipeline/pipelines/extractor.py
+
+
+class MongoExtractor:
+    def __init__(self, collection: Collection, batch_size: int = 1000):
+        self.collection = collection
+        self.batch_size = batch_size
+
+    def extract(self) -> Iterator[pd.DataFrame]:
+        cursor = self.collection.find(batch_size=self.batch_size)
+        batch = []
+        for idx, doc in enumerate(cursor, 1):
+            batch.append(doc)
+            if idx % self.batch_size == 0:
+                yield pd.DataFrame(batch)
+                batch = []
+        if batch:                       # last partial batch
+            yield pd.DataFrame(batch)
