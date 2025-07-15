@@ -40,114 +40,50 @@
   <!-- Featured Section -->
   <section class="featured">
     <div class="section-header">
-            <h2 class="section-title">Featured movie</h2>
-            <div class="featured-underline"></div>
-            <div class="navigation-arrows">
-                <div class="arrow">←</div>
-                <div class="arrow">→</div>
+            <div class="featured-title-group">
+              <h2 class="section-title">Featured movie</h2>
+              <div class="featured-underline"></div>
             </div>
-        </div>
+            <div class="navigation-arrows">
+                <div class="arrow"><img src="img/arrow left.png" alt=""></div>
+                <div class="arrow"><img src="img/arrow right.png" alt=""></div>
+            </div>
+    </div>
 
         <div class="movies-grid">
             <div class="movie-card">
                 <div class="movie-image">
-                    <div class="movie-poster"><img src="img/Nilou.jpg" alt="Nilou" class="card-img" /></div>
+                    <img src="img/Nilou.jpg" alt="Nilou" class="card-img" />
                 </div>
                 <div class="movie-info">
                     <h3 class="movie-title">Nilou</h3>
-                    <p class="movie-genre">game</p>
-                    
-                    <div class="meta-score-section">
-                        <p class="meta-label">META SCORE</p>
-                        <div class="score-container">
-                            <div class="score-box">61</div>
-                            <div>
-                                <div class="score-description">Nilou Genshin Impact</div>
-                                <div class="score-details">Based on 20 Critic Reviews</div>
-                            </div>
-                        </div>
+                    <div class = "movie-genre-container">
+                      <p class="movie-genre">game</p>
+                      <p class="movie-genre">genre</p>
                     </div>
-                    
-                    <div class="rating-bar">
-                        <div class="rating-fill"></div>
-                    </div>
-                </div>
-            </div>
+                    <div class="card-underline"></div>
 
-            <div class="movie-card">
-                <div class="movie-image">
-                    <div class="movie-poster"><img src="img/Nilou.jpg" alt="Nilou" class="card-img" /></div>
-                </div>
-                <div class="movie-info">
-                    <h3 class="movie-title">Nilou</h3>
-                    <p class="movie-genre">game</p>
-                    
                     <div class="meta-score-section">
                         <p class="meta-label">META SCORE</p>
                         <div class="score-container">
-                            <div class="score-box">61</div>
                             <div>
                                 <div class="score-description">Nilou Genshin Impact</div>
                                 <div class="score-details">Based on 20 Critic Reviews</div>
+                            </div>
+                            <div class="score-box">
+                              <span>61</span>
                             </div>
                         </div>
                     </div>
                     
                     <div class="rating-bar">
-                        <div class="rating-fill"></div>
+                        <div class="positive-bar"></div>
+                        <div class="mixed-bar"></div>
+                        <div class="negative-bar "></div>
                     </div>
                 </div>
             </div>
-
-            <div class="movie-card">
-                <div class="movie-image">
-                    <div class="movie-poster"><img src="img/Nilou.jpg" alt="Nilou" class="card-img" /></div>
-                </div>
-                <div class="movie-info">
-                    <h3 class="movie-title">Nilou</h3>
-                    <p class="movie-genre">game</p>
-                    
-                    <div class="meta-score-section">
-                        <p class="meta-label">META SCORE</p>
-                        <div class="score-container">
-                            <div class="score-box">61</div>
-                            <div>
-                                <div class="score-description">Nilou Genshin Impact</div>
-                                <div class="score-details">Based on 20 Critic Reviews</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="rating-bar">
-                        <div class="rating-fill"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="movie-card">
-                <div class="movie-image">
-                    <div class="movie-poster"><img src="img/Nilou.jpg" alt="Nilou" class="card-img" /></div>
-                </div>
-                <div class="movie-info">
-                    <h3 class="movie-title">Nilou</h3>
-                    <p class="movie-genre">game</p>
-                    
-                    <div class="meta-score-section">
-                        <p class="meta-label">META SCORE</p>
-                        <div class="score-container">
-                            <div class="score-box">61</div>
-                            <div>
-                                <div class="score-description">Nilou Genshin Impact</div>
-                                <div class="score-details">Based on 20 Critic Reviews</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="rating-bar">
-                        <div class="rating-fill"></div>
-                    </div>
-                </div>
-            </div>
+            
         </div>
   </section>
 
@@ -218,5 +154,62 @@
     </div>
   </footer>
 </div>
+<script>
+
+    const movies = [
+    {
+      title: "Nilou",
+      image: "img/Nilou.jpg",
+      genres: ["Game", "Genre"],
+      score: 61,
+      description: "Nilou Genshin Impact",
+      reviews: "Based on 20 Critic Reviews"
+    },
+    {
+      title: "The Flash",
+      image: "img/flash.jpg",
+      genres: ["Action"],
+      score: 75,
+      description: "The Flash Movie",
+      reviews: "Based on 30 Critic Reviews"
+    },
+    
+    ];
+
+  const container = document.querySelector('.movies-grid');
+
+  movies.forEach(movie => {
+    const card = document.createElement('div');
+    card.className = 'movie-card';
+    card.innerHTML = `
+      <div class="movie-image">
+        <img src="${movie.image}" alt="${movie.title}" class="card-img" />
+      </div>
+      <div class="movie-info">
+        <h3 class="movie-title">${movie.title}</h3>
+        <div class="movie-genre-container">
+          ${movie.genres.map(genre => `<p class="movie-genre">${genre}</p>`).join('')}
+        </div>
+        <div class="card-underline"></div>
+        <div class="meta-score-section">
+          <p class="meta-label">META SCORE</p>
+          <div class="score-container">
+            <div>
+              <div class="score-description">${movie.description}</div>
+              <div class="score-details">${movie.reviews}</div>
+            </div>
+            <div class="score-box"><span>${movie.score}</span></div>
+          </div>
+        </div>
+        <div class="rating-bar">
+          <div class="positive-bar"></div>
+          <div class="mixed-bar"></div>
+          <div class="negative-bar"></div>
+        </div>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+</script>
 </body>
 </html>
