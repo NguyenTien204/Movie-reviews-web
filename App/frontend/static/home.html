@@ -89,39 +89,35 @@
 
   <!-- Trending Movies -->
   <section class="section">
-    <h2>Trending Movies This Week</h2>
-    <div class="movie-list small">
-      <!-- Flash Card (x5) -->
-      <div class="movie-card">
-        <img src="https://via.placeholder.com/120x160" alt="The Flash">
-        <h3>The Flash</h3>
-        <p>Action</p>
+      <div class="section-header">
+            <div class="featured-title-group">
+              <h2 class="section-title">Movies For You</h2>
+              <div class="featured-underline"></div>
+            </div>
+            <div class="navigation-arrows">
+                <div class="arrow"><img src="img/arrow left.png" alt=""></div>
+                <div class="arrow"><img src="img/arrow right.png" alt=""></div>
+            </div>
+    </div>
+
+    <div class="movie-list-small">
+      <div class="small-movie-card">
+        <img src="img/flash.jpg" alt="The Flash">
+        <div class="small-movie-title">
+          <h3>The Flash</h3>
+        </div>
+        <div class="small-score-box">
+          <span>75</span>
+          <p>Generally Favorable</p>
+        </div>
+
       </div>
-      <div class="movie-card">
-        <img src="https://via.placeholder.com/120x160" alt="The Flash">
-        <h3>The Flash</h3>
-        <p>Action</p>
-      </div>
-      <div class="movie-card">
-        <img src="https://via.placeholder.com/120x160" alt="The Flash">
-        <h3>The Flash</h3>
-        <p>Action</p>
-      </div>
-      <div class="movie-card">
-        <img src="https://via.placeholder.com/120x160" alt="The Flash">
-        <h3>The Flash</h3>
-        <p>Action</p>
-      </div>
-      <div class="movie-card">
-        <img src="https://via.placeholder.com/120x160" alt="The Flash">
-        <h3>The Flash</h3>
-        <p>Action</p>
-      </div>
+      
     </div>
   </section>
 
   <!-- Latest Videos -->
-  <section class="section">
+  <!-- <section class="section">
     <h2>Latest Videos</h2>
     <div class="latest-videos">
       <div class="main-video">
@@ -136,7 +132,7 @@
         <img src="https://via.placeholder.com/120x70" alt="">
       </div>
     </div>
-  </section>
+  </section> -->
 
   <!-- Footer -->
   <footer class="footer">
@@ -173,6 +169,15 @@
       description: "The Flash Movie",
       reviews: "Based on 30 Critic Reviews"
     },
+    {
+      title: "The Flash",
+      image: "img/flash.jpg",
+      genres: ["Action"],
+      score: 75,
+      description: "The Flash Movie",
+      reviews: "Based on 30 Critic Reviews"
+    },
+   
     
     ];
 
@@ -188,7 +193,7 @@
       <div class="movie-info">
         <h3 class="movie-title">${movie.title}</h3>
         <div class="movie-genre-container">
-          ${movie.genres.map(genre => `<p class="movie-genre">${genre}</p>`).join('')}
+          ${movie.genres.map( genre => `<p class="movie-genre">${genre}</p>`).join('')}
         </div>
         <div class="card-underline"></div>
         <div class="meta-score-section">
@@ -209,6 +214,66 @@
       </div>
     `;
     container.appendChild(card);
+  });
+</script>
+<script>
+   const trending_movies = [
+    {
+      title: "Nilou",
+      image: "img/Nilou.jpg",
+      score: 61,
+      reviews: "Generally Favorable"
+    },
+    {
+      title: "The Flash",
+      image: "img/flash.jpg",
+      score: 75,
+      reviews: "Generally Favorable"
+    },
+    {
+      title: "The Flash",
+      image: "img/flash.jpg",
+      score: 75,
+      reviews: "Generally Favorable"
+    },
+    {
+      title: "The Flash",
+      image: "img/flash.jpg",
+      score: 75,
+      reviews: "Generally Favorable"
+    },
+    {
+      title: "The Flash",
+      image: "img/flash.jpg",
+      score: 75,
+      reviews: "Generally Favorable"
+    },
+    {
+      title: "The Flash",
+      image: "img/flash.jpg",
+      score: 75,
+      reviews: "Generally Favorable"
+    }
+
+
+  ];
+
+  const small_container = document.querySelector('.movie-list-small');
+
+  trending_movies.forEach(movie => {
+    const small_card = document.createElement('div');
+    small_card.className = 'small-movie-card';
+    small_card.innerHTML = `
+      <img src="${movie.image}" alt="${movie.title}">
+      <div class="small-movie-title">
+        <h3>${movie.title}</h3>
+      </div>
+      <div class="small-score-box">
+        <span>${movie.score}</span>
+        <p>${movie.reviews}</p>
+      </div>
+    `;
+    small_container.appendChild(small_card);
   });
 </script>
 </body>

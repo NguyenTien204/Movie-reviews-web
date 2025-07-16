@@ -202,9 +202,10 @@ body {
         }
 
         .movies-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
         }
 
         .movie-card {
@@ -214,6 +215,7 @@ body {
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             overflow: hidden;
             transition: transform 0.3s, box-shadow 0.3s;
+        
         }
         .movie-card img {
             width: 100%;
@@ -230,7 +232,7 @@ body {
             width: 100%;
             height: 170px;
             border-radius: 5px 5px 0 0;
-            background: linear-gradient(135deg, #7dd87d, #4caf50);
+            background: linear-gradient(135deg, #5356f2, #7212d8);
             position: relative;
             display: flex;
             align-items: center;
@@ -387,6 +389,76 @@ body {
             .search-box {
                 width: 150px;
             }
+        }
+.movie-list-small {
+  display: flex;
+  flex-direction: row; /* ngang */
+  gap: 20px;
+  overflow-x: auto;
+  overflow: hidden;
+  padding: 20px 0;
+  white-space: nowrap;
+  scrollbar-width: thin;
+  scrollbar-color: #888 #eee;
+}
+
+.movie-list.small::-webkit-scrollbar {
+  height: 8px;
+}
+.movie-list.small::-webkit-scrollbar-thumb {
+  background-color: #aaa;
+  border-radius: 4px;
+}
+
+.small-movie-card {
+            width: 159px;
+            height: 330px;
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .small-movie-card img {
+            width: 100%;
+            height: 200px;
+            overflow: hidden;
+            border-radius: 5px 5px 5px 5px;
+            
+        }
+        .small-movie-card img:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+        .small-movie-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: -10px;
+            margin-top: -10px;
+
+        }
+        .small-score-box{
+          display: flex;
+        
+        }
+        .small-score-box span{
+            width: 20px;
+            height: 20px;
+            background-color: #7dd87d;
+            color: black;
+            padding: 5px 5px;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;  
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .small-score-box p {
+            font-size: 13px;
+            color: #666;
+            margin-left: 5px;
+            margin-top: 5px;
         }
 
 /* ==============footer============== */
