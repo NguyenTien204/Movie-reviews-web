@@ -6,7 +6,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import sessionmaker, Session, declarative_base
 from schema.movie import MovieDetail, MovieShortDetail, MovieTrailer, Genre, MovieFilter
 from db.config import PostgresConnection
-from App.backend.models.base_movie import Movie, MovieGenre, GenreModel, Trailer
+from models import Movie, MovieGenre, Genre, Trailer
 # Define SQLAlchemy Base
 Base = declarative_base()
 
@@ -40,7 +40,7 @@ class MovieService:
         if not movie:
             raise HTTPException(status_code=404, detail="Movie not found")
 
-        genres = db.query(GenreModel).join(MovieGenre).filter(
+        genres = db.query(Genre).join(MovieGenre).filter(
             MovieGenre.movie_id == movie_id
         ).all()
 
@@ -66,7 +66,7 @@ class MovieService:
         if not movie:
             raise HTTPException(status_code=404, detail="Movie not found")
         
-        genres = db.query(GenreModel).join(MovieGenre).filter(
+        genres = db.query(Genre).join(MovieGenre).filter(
             MovieGenre.movie_id == movie_id
         ).all()
         
@@ -102,7 +102,7 @@ class MovieService:
                 title=movie.title,
                 poster_path=movie.poster_path,
                 popularity=movie.popularity,
-                genres=[Genre(genre_id=g.genre_id, name=g.name) for g in db.query(GenreModel)
+                genres=[Genre(genre_id=g.genre_id, name=g.name) for g in db.query(Genre)
                         .join(MovieGenre)
                         .filter(MovieGenre.movie_id == movie.movie_id).all()]
             )
@@ -118,7 +118,7 @@ class MovieService:
                 title=movie.title,
                 poster_path=movie.poster_path,
                 popularity=movie.popularity,
-                genres=[Genre(genre_id=g.genre_id, name=g.name) for g in db.query(GenreModel)
+                genres=[Genre(genre_id=g.genre_id, name=g.name) for g in db.query(Genre)
                         .join(MovieGenre)
                         .filter(MovieGenre.movie_id == movie.movie_id).all()]
             )
@@ -163,7 +163,7 @@ class MovieService:
                 title=movie.title,
                 poster_path=movie.poster_path,
                 popularity=movie.popularity,
-                genres=[Genre(genre_id=g.genre_id, name=g.name) for g in db.query(GenreModel)
+                genres=[Genre(genre_id=g.genre_id, name=g.name) for g in db.query(Genre)
                         .join(MovieGenre)
                         .filter(MovieGenre.movie_id == movie.movie_id).all()]
             )
