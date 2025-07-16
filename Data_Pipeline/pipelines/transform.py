@@ -85,12 +85,10 @@ class TransformationEngine:
                 if table_name not in all_results:
                     all_results[table_name] = []
                 
-                # Chỉ thêm records không null và có đủ dữ liệu
                 valid_records = []
                 for record in records:
-                    # Kiểm tra xem record có đủ dữ liệu không
-                    if any(record.values()):  # Chỉ thêm nếu có ít nhất một giá trị không null
-                        # Đối với bảng collections, kiểm tra thêm collection_id
+                    
+                    if any(record.values()): 
                         if table_name == 'collections' and not record.get('collection_id'):
                             continue
                         valid_records.append(record)

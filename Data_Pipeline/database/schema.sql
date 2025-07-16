@@ -35,7 +35,6 @@ CREATE TABLE movies (
   tagline TEXT,
   runtime INTEGER,
   homepage VARCHAR,
-  language CHAR(2),
   poster_path VARCHAR,
   popularity DOUBLE PRECISION,
   adult BOOLEAN,
