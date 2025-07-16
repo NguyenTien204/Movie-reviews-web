@@ -1,5 +1,4 @@
 from sqlalchemy import create_engine
-from typing import Any
 
 POSTGRES_HOST = 'localhost'
 POSTGRES_PORT = 5432

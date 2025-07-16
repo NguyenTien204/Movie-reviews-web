@@ -1,216 +1,171 @@
-from typing import List, Optional
-from datetime import datetime
-from schema.movie import MovieDetail, MovieShortDetail, MovieTrailer, Genre
-from fastapi import HTTPException
+from typing import List
+from fastapi import Depends, HTTPException
 from sqlalchemy import (
-    create_engine, select, and_, desc, func, 
-    Column, Integer, String, Text, Float, Boolean, 
-    DateTime, ForeignKey, Enum
+    create_engine, and_, desc, func
 )
-from sqlalchemy.orm import sessionmaker, Session, relationship
-from Data_Pipeline.config.postgres_config import PostgresConnection
-from sqlalchemy.ext.declarative import declarative_base
-
+from sqlalchemy.orm import sessionmaker, Session, declarative_base
+from schema.movie import MovieDetail, MovieShortDetail, MovieTrailer, Genre, MovieFilter
+from db.config import PostgresConnection
+from App.backend.models.base_movie import Movie, MovieGenre, GenreModel, Trailer
+# Define SQLAlchemy Base
 Base = declarative_base()
 
-class Movie(Base):
-    __tablename__ = 'movies'
-    movie_id = Column(Integer, primary_key=True)
-    title = Column(String, nullable=False)
-    original_title = Column(String, nullable=False)
-    overview = Column(Text)
-    tagline = Column(Text)
-    runtime = Column(Integer)
-    homepage = Column(String)
-    poster_path = Column(String)
-    popularity = Column(Float)
-    adult = Column(Boolean)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow)
-
-class MovieGenre(Base):
-    __tablename__ = 'movie_genres'
-    movie_id = Column(Integer, ForeignKey('movies.movie_id'), primary_key=True)
-    genre_id = Column(Integer, ForeignKey('genres.genre_id'), primary_key=True)
-
-class GenreModel(Base):
-    __tablename__ = 'genres'
-    genre_id = Column(Integer, primary_key=True)
-    name = Column(String(50), unique=True, nullable=False)
-
-class Trailer(Base):
-    __tablename__ = 'trailers'
-    id = Column(String, primary_key=True)
-    movie_id = Column(Integer, ForeignKey('movies.movie_id'))
-    name = Column(String, nullable=False)
-    site = Column(Enum('YouTube', 'Vimeo', name='site_enum'), nullable=False)
-    key = Column(String, nullable=False)
-    type = Column(Enum('Trailer', 'Teaser', 'Clip', 'Featurette', 
-                      'Behind the Scenes', 'Bloopers', 'Opening Scene', 
-                      'Ending Scene', 'Deleted Scene', name='trailer_type_enum'), nullable=False)
-    official = Column(Boolean)
-    published_at = Column(DateTime)
-    size = Column(Integer)
 
 class MovieService:
     def __init__(self):
-        self.engine = create_engine(PostgresConnection.get_connection_string())
-        self.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
+        # Create engine with connection pooling
+        self.engine = create_engine(
+            PostgresConnection.get_connection_string(),
+            pool_size=5,  # Connection pool size
+            max_overflow=10,  # Allow overflow connections
+            pool_timeout=30  # Timeout for getting a connection from pool
+        )
+        self.SessionLocal = sessionmaker(
+            autocommit=False,
+            autoflush=False,
+            bind=self.engine
+        )
 
-    def get_db(self):
+    def get_db(self) -> Session:
+        """Dependency for getting database session"""
         db = self.SessionLocal()
         try:
             yield db
         finally:
             db.close()
-        
-    async def get_movie_detail(self, movie_id: int) -> MovieDetail:
-        db = next(self.get_db())
-        try:
-            movie = db.query(Movie).filter(Movie.movie_id == movie_id).first()
-            if not movie:
-                raise HTTPException(status_code=404, detail="Movie not found")
 
-            genres = db.query(GenreModel).join(MovieGenre).filter(
-                MovieGenre.movie_id == movie_id
-            ).all()
-            
-            return MovieDetail(
+    async def get_movie_detail(self, movie_id: int, db: Session = Depends(get_db)) -> MovieDetail:
+        """Get detailed information about a specific movie"""
+        movie = db.query(Movie).filter(Movie.movie_id == movie_id).first()
+        if not movie:
+            raise HTTPException(status_code=404, detail="Movie not found")
+
+        genres = db.query(GenreModel).join(MovieGenre).filter(
+            MovieGenre.movie_id == movie_id
+        ).all()
+
+        return MovieDetail(
+            movie_id=movie.movie_id,
+            title=movie.title,
+            original_title=movie.original_title,
+            overview=movie.overview,
+            tagline=movie.tagline,
+            runtime=movie.runtime,
+            homepage=movie.homepage,
+            poster_path=movie.poster_path,
+            popularity=movie.popularity,
+            adult=movie.adult,
+            genres=[Genre(genre_id=g.genre_id, name=g.name) for g in genres],
+            created_at=movie.created_at,
+            updated_at=movie.updated_at
+        )
+
+    async def get_movie_short_detail(self, movie_id: int, db: Session = Depends(get_db)) -> MovieShortDetail:
+        """Get short details of a movie for home page display"""
+        movie = db.query(Movie).filter(Movie.movie_id == movie_id).first()
+        if not movie:
+            raise HTTPException(status_code=404, detail="Movie not found")
+        
+        genres = db.query(GenreModel).join(MovieGenre).filter(
+            MovieGenre.movie_id == movie_id
+        ).all()
+        
+        return MovieShortDetail(
+            movie_id=movie.movie_id,
+            title=movie.title,
+            poster_path=movie.poster_path,
+            popularity=movie.popularity,
+            genres=[Genre(genre_id=g.genre_id, name=g.name) for g in genres]
+        )
+
+    async def filter_movies(self, filter_params: MovieFilter = Depends(), db: Session = Depends(get_db)) -> List[MovieShortDetail]:
+        """Filter movies based on various criteria"""
+        query = db.query(Movie)
+
+        if filter_params.genre:
+            query = query.join(MovieGenre).filter(MovieGenre.genre_id.in_(filter_params.genre))
+        
+        if filter_params.year:
+            query = query.filter(func.extract('year', Movie.release_date) == filter_params.year)
+
+        if filter_params.sort_by == "popularity.desc":
+            query = query.order_by(desc(Movie.popularity))
+        elif filter_params.sort_by == "popularity.asc":
+            query = query.order_by(Movie.popularity)
+        
+        offset = (filter_params.page - 1) * filter_params.limit
+        movies = query.offset(offset).limit(filter_params.limit).all()
+
+        return [
+            MovieShortDetail(
                 movie_id=movie.movie_id,
                 title=movie.title,
-                original_title=movie.original_title,
-                overview=movie.overview,
-                tagline=movie.tagline,
-                runtime=movie.runtime,
-                homepage=movie.homepage,
                 poster_path=movie.poster_path,
                 popularity=movie.popularity,
-                adult=movie.adult,
-                genres=[Genre(genre_id=g.genre_id, name=g.name) for g in genres],
-                created_at=movie.created_at,
-                updated_at=movie.updated_at
+                genres=[Genre(genre_id=g.genre_id, name=g.name) for g in db.query(GenreModel)
+                        .join(MovieGenre)
+                        .filter(MovieGenre.movie_id == movie.movie_id).all()]
             )
-        finally:
-            db.close()
+            for movie in movies
+        ]
 
-    async def get_movie_short_detail(self, movie_id: int) -> MovieShortDetail:
-        db = next(self.get_db())
-        try:
-            movie = db.query(Movie).filter(Movie.movie_id == movie_id).first()
-            if not movie:
-                raise HTTPException(status_code=404, detail="Movie not found")
-
-            return MovieShortDetail(
+    async def get_trending_movies(self, db: Session = Depends(get_db)) -> List[MovieShortDetail]:
+        """Get trending movies based on popularity"""
+        movies = db.query(Movie).order_by(desc(Movie.popularity)).limit(20).all()
+        return [
+            MovieShortDetail(
                 movie_id=movie.movie_id,
                 title=movie.title,
                 poster_path=movie.poster_path,
-                popularity=movie.popularity
+                popularity=movie.popularity,
+                genres=[Genre(genre_id=g.genre_id, name=g.name) for g in db.query(GenreModel)
+                        .join(MovieGenre)
+                        .filter(MovieGenre.movie_id == movie.movie_id).all()]
             )
-        finally:
-            db.close()
+            for movie in movies
+        ]
 
-    async def filter_movies(self, genre_ids: Optional[List[int]] = None,
-                          year: Optional[int] = None,
-                          sort_by: str = "popularity.desc",
-                          page: int = 1,
-                          limit: int = 20) -> List[MovieShortDetail]:
-        db = next(self.get_db())
-        try:
-            query = db.query(Movie)
+    async def get_movie_trailers(self, movie_id: int, db: Session = Depends(get_db)) -> List[MovieTrailer]:
+        """Get available trailers for a movie"""
+        trailers = db.query(Trailer).filter(
+            and_(
+                Trailer.movie_id == movie_id,
+                Trailer.type == 'Trailer'
+            )
+        ).all()
 
-            if genre_ids:
-                query = query.join(MovieGenre).filter(MovieGenre.genre_id.in_(genre_ids))
-            
-            if sort_by == "popularity.desc":
-                query = query.order_by(desc(Movie.popularity))
-            elif sort_by == "popularity.asc":
-                query = query.order_by(Movie.popularity)
-            
-            offset = (page - 1) * limit
-            movies = query.offset(offset).limit(limit).all()
+        return [MovieTrailer(
+            id=t.id,
+            movie_id=t.movie_id,
+            name=t.name,
+            site=t.site,
+            key=t.key,
+            type=t.type,
+            official=t.official,
+            published_at=t.published_at,
+            size=t.size
+        ) for t in trailers]
 
-            return [
-                MovieShortDetail(
-                    movie_id=movie.movie_id,
-                    title=movie.title,
-                    poster_path=movie.poster_path,
-                    popularity=movie.popularity
-                )
-                for movie in movies
-            ]
-        finally:
-            db.close()
+    async def get_movie_recommendations(self, movie_id: int, db: Session = Depends(get_db)) -> List[MovieShortDetail]:
+        """Get movie recommendations based on genre similarity"""
+        movie_genres = db.query(MovieGenre.genre_id).filter(MovieGenre.movie_id == movie_id).subquery()
+        
+        recommended_movies = db.query(Movie).join(MovieGenre).filter(
+            and_(
+                MovieGenre.genre_id.in_(movie_genres),
+                Movie.movie_id != movie_id
+            )
+        ).order_by(desc(Movie.popularity)).limit(20).all()
 
-    async def get_trending_movies(self) -> List[MovieShortDetail]:
-        """
-        Get trending movies based on popularity (temporary implementation)
-        Will be replaced with ML model recommendations later
-        """
-        db = next(self.get_db())
-        try:
-            movies = db.query(Movie).order_by(desc(Movie.popularity)).limit(20).all()
-            return [
-                MovieShortDetail(
-                    movie_id=movie.movie_id,
-                    title=movie.title,
-                    poster_path=movie.poster_path,
-                    popularity=movie.popularity
-                )
-                for movie in movies
-            ]
-        finally:
-            db.close()
-
-    async def get_movie_trailers(self, movie_id: int) -> List[MovieTrailer]:
-        db = next(self.get_db())
-        try:
-            trailers = db.query(Trailer).filter(
-                and_(
-                    Trailer.movie_id == movie_id,
-                    Trailer.type == 'Trailer'
-                )
-            ).all()
-
-            if not trailers:
-                return []
-
-            return [MovieTrailer(
-                id=t.id,
-                movie_id=t.movie_id,
-                name=t.name,
-                site=t.site,
-                key=t.key,
-                type=t.type,
-                official=t.official,
-                published_at=t.published_at,
-                size=t.size
-            ) for t in trailers]
-        finally:
-            db.close()
-
-    async def get_movie_recommendations(self, movie_id: int) -> List[MovieShortDetail]:
-        """
-        Get movie recommendations based on genre similarity (temporary implementation)
-        Will be replaced with ML model recommendations later
-        """
-        db = next(self.get_db())
-        try:
-            movie_genres = db.query(MovieGenre.genre_id).filter(MovieGenre.movie_id == movie_id).subquery()
-            
-            recommended_movies = db.query(Movie).join(MovieGenre).filter(
-                and_(
-                    MovieGenre.genre_id.in_(movie_genres),
-                    Movie.movie_id != movie_id
-                )
-            ).order_by(
-                desc(Movie.popularity)
-            ).limit(20).all()
-
-            return [MovieShortDetail(
+        return [
+            MovieShortDetail(
                 movie_id=movie.movie_id,
                 title=movie.title,
                 poster_path=movie.poster_path,
-                popularity=movie.popularity
-            ) for movie in recommended_movies]
-        finally:
-            db.close()
+                popularity=movie.popularity,
+                genres=[Genre(genre_id=g.genre_id, name=g.name) for g in db.query(GenreModel)
+                        .join(MovieGenre)
+                        .filter(MovieGenre.movie_id == movie.movie_id).all()]
+            )
+            for movie in recommended_movies
+        ]

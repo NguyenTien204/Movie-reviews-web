@@ -1,12 +1,10 @@
-# Database Models
-from typing import List, Optional
+
 from datetime import datetime
-from fastapi import Depends, HTTPException
 from sqlalchemy import (
-    create_engine, select, and_, desc, func, Column, Integer, String, Text,
+    Column, Integer, String, Text,
     Float, Boolean, DateTime, ForeignKey, Enum
 )
-from sqlalchemy.orm import sessionmaker, Session, declarative_base
+from sqlalchemy.orm import declarative_base
 
 
 Base = declarative_base()
@@ -23,7 +21,7 @@ class Movie(Base):
     poster_path = Column(String)
     popularity = Column(Float)
     adult = Column(Boolean)
-    release_date = Column(DateTime)  # ✅ Thêm trường này nếu bạn muốn filter theo năm
+    release_date = Column(DateTime) 
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow)
 
@@ -50,3 +48,4 @@ class Trailer(Base):
     official = Column(Boolean)
     published_at = Column(DateTime)
     size = Column(Integer)
+
