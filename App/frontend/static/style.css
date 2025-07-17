@@ -271,14 +271,16 @@ body {
         }
 
         .movie-genre {
-            text-align: center;
+            display: flex;
+            border: #000 1px solid;
+            align-items: center;
+            justify-content: center;
             height: 23px;
             width: 50px;
             border-radius: 3px;
             color: #fff;
             font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 0px;
+            font-weight: 600px;
             background-color: #6c6e6c;
             box-shadow: #b6b6b6 0px 0px 5px;
 
@@ -412,7 +414,8 @@ body {
 
 .small-movie-card {
             width: 159px;
-            height: 330px;
+            height: 270px;
+            margin-bottom: 20px;
             background-color: white;
             border-radius: 8px;
             overflow: hidden;
@@ -462,17 +465,93 @@ body {
         }
 
 /* ==============footer============== */
+.footer-bar {
+  width: 100%;
+  height: 10px;
+  margin-bottom: 230px;
+  background: linear-gradient(
+    to right,
+    #4caf50 0%,
+    #4caf50 33%,
+    #fbc02d 33%,
+    #fbc02d 67%,
+    #e53935 67%,
+    #e53935 100%
+  );
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: -1;
+
+}
+
 .footer {
   display: flex;
   text-align: center;
   margin-top: 30px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: bottom;
+  height: 300px;
+
+
+}
+.footer-content {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  
+}
+.footer-content div {
+  margin-top: 20px;
+  margin-left: 100px;
+  margin-right: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  
 }
 
 .footer-box {
+  display: flex;
   flex: 1;
-  padding: 15px;
-  color: white;
+  flex-direction: column;
+  
+
+  color: rgb(27, 26, 26);
 }
+.footer-box h4 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  width: 100%;
+  padding: 5px 10px;
+  border-radius: 3px;
+  font-size: 18px;
+  color: #fff;
+}
+
+.footer-box p {
+  margin-top: 0px;
+  margin-bottom: 30px;
+  font-size: 14px;
+  color: #151515;
+  font-weight: bold;
+  text-align: center;
+}
+.logo-footer{
+  margin-top: 0px;
+  margin-bottom: 30px;
+  margin-left: 35px;
+}
+.footer-box img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 10px;
+}
+
 
 .green { background: #4caf50; }
 .yellow { background: #fbc02d; }
