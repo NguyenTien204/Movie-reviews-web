@@ -213,6 +213,21 @@ CREATE TABLE collections (
   poster_path TEXT
 );
 
+CREATE TABLE cosine_similarity_results (
+    id SERIAL PRIMARY KEY,
+    movie_id_1 INTEGER NOT NULL REFERENCES movies(movie_id) ON DELETE CASCADE,
+    movie_id_2 INTEGER NOT NULL REFERENCES movies(movie_id) ON DELETE CASCADE,
+    similarity DOUBLE PRECISION NOT NULL,
+    UNIQUE (movie_id_1, movie_id_2)
+);
+
+CREATE TABLE cosine_similarity_results (
+    id SERIAL PRIMARY KEY,
+    movie_id_1 INTEGER NOT NULL REFERENCES movies(movie_id) ON DELETE CASCADE,
+    movie_id_2 INTEGER NOT NULL REFERENCES movies(movie_id) ON DELETE CASCADE,
+    similarity DOUBLE PRECISION NOT NULL,
+    UNIQUE (movie_id_1, movie_id_2)
+);
 
 
 -- ========================
