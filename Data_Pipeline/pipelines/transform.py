@@ -1,10 +1,10 @@
-from abc import ABC, abstractmethod
-from typing import Dict, List, Any, Optional
+from typing import Dict, List
 import pandas as pd
-import numpy as np
 import logging
-from Data_Pipeline.pipelines.extract import JSONPathExtractor, MappingStrategy
-from Data_Pipeline.pipelines.extract import SimpleFieldStrategy, NestedObjectStrategy, ArrayStrategy, MappingType, FieldMapping, TableMapping, DataExtractor
+from Data_Pipeline.pipelines.extract import (
+    JSONPathExtractor, MappingStrategy, SimpleFieldStrategy, 
+    NestedObjectStrategy, ArrayStrategy, MappingType, FieldMapping, TableMapping)
+
 # Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

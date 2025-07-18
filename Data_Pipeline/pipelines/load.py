@@ -1,18 +1,8 @@
-import os
-import sys
 import pandas as pd
-from pymongo import MongoClient
-from sqlalchemy import create_engine
-import yaml
-from typing import Dict, List, Any, Optional
-import logging
-import pandas as pd
-from sqlalchemy import create_engine
 from typing import Dict, List
+import logging
 from Data_Pipeline.pipelines.extract import DuplicateRemover
 
-from Data_Pipeline.config.mongo_config import MONGO_URI, MONGO_DB_NAME, MOVIE_COLLECTION
-from Data_Pipeline.config.postgres_config import POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_HOST, POSTGRES_PORT
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -55,8 +45,8 @@ class PostgresLoader:
 
     # ---------- helpers ----------
     _LOAD_ORDER: List[str] = [
-        "movies",  # Load bảng chính trước
-        "collections", # Sau đó load các bảng phụ thuộc
+        "movies",  
+        "collections", 
         "genres", "production_companies", "production_countries",
         "spoken_languages", "release_calendar", "trailers",
         "movie_genres", "movie_production_companies",
@@ -153,22 +143,25 @@ class PostgresLoader:
                 else:
                     related_new[tbl] = df  # Giữ nguyên dữ liệu collections đã được xử lý
 
-        with self.engine.begin():
-            if not main_new.empty:
+        if not main_new.empty:
+            try:
                 main_new.to_sql(main_table, self.engine, if_exists="append", index=False)
                 logger.info(f"Inserted {len(main_new)} records into {main_table}")
+            except Exception as e:
+                logger.error(f"Error inserting into {main_table}: {str(e)}")
+                raise
 
-            for tbl in self._LOAD_ORDER:
-                if tbl == main_table or tbl not in related_new:
-                    continue
-                    
-                df_tbl = related_new[tbl]
-                if df_tbl.empty:
-                    continue
-
-                logger.info(f"Inserting {len(df_tbl)} records into {tbl}")
-                try:
-                    df_tbl.to_sql(tbl, self.engine, if_exists="append", index=False)
-                except Exception as e:
-                    logger.error(f"Error inserting into {tbl}: {str(e)}")
-                    raise
+        for tbl in self._LOAD_ORDER:
+            if tbl == main_table or tbl not in related_new:
+                continue
+                
+            df_tbl = related_new[tbl]
+            if df_tbl.empty:
+                continue
+                
+            logger.info(f"Inserting {len(df_tbl)} records into {tbl}")
+            try:
+                df_tbl.to_sql(tbl, self.engine, if_exists="append", index=False)
+            except Exception as e:
+                logger.error(f"Error inserting into {tbl}: {str(e)}")
+                raise

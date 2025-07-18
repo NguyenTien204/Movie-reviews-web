@@ -2,13 +2,12 @@
 from abc import ABC, abstractmethod
 from typing import Dict, List, Any, Optional
 import pandas as pd
-import numpy as np
 from dataclasses import dataclass
 from enum import Enum
 import logging
-import pandas as pd
 from pymongo.collection import Collection
 from typing import Iterator
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
