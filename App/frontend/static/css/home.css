@@ -1,0 +1,347 @@
+/* ==================== BASIC STYLES ==================== */
+.section {
+    margin-bottom: 50px;
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 30px;
+}
+
+.section-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 2px;
+}
+
+.featured-underline {
+    width: 1100px;
+    height: 2px;
+    background: #222;
+    margin: 5px 0;
+    border-radius: 2px;
+}
+
+/* ==================== NAVIGATION ARROWS ==================== */
+.navigation-arrows {
+    display: flex;
+    gap: 10px;
+}
+
+.arrow {
+    width: 40px;
+    height: 40px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    opacity: 0.7;
+}
+
+.arrow img {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+}
+
+.arrow:hover {
+    opacity: 1;
+    transform: scale(1.1);
+    border-color: #000;
+    background-color: #f0f0f0;
+}
+
+.arrow.disabled {
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+/* ==================== MOVIE CARDS CONTAINER ==================== */
+.movies-grid-container {
+    position: relative;
+    overflow: hidden;
+}
+
+.movies-grid {
+    display: flex;
+    gap: 20px;
+    transition: transform 0.3s ease;
+}
+
+.movie-card {
+    flex: 0 0 280px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+    will-change: transform;
+    contain: content;
+}
+
+.movie-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+}
+
+.movie-image {
+    width: 100%;
+    height: 170px;
+    border-radius: 5px 5px 0 0;
+    background: linear-gradient(135deg, #5356f2, #7212d8);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.movie-image img {
+    margin-top: 35px;
+    width: 90%;
+    height: 100%;
+    /* object-fit: cover; */
+    border-radius: 5px;
+    transition: transform 0.3s;
+    position: absolute;
+}
+
+.movie-info {
+    padding: 15px;
+}
+
+.movie-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.movie-genre-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 15px;
+}
+
+.movie-genre {
+    display: flex;
+    border: #000 1px solid;
+    align-items: center;
+    justify-content: center;
+    padding: 3px;
+    height: 23px;
+    width: fit-content;
+    min-width: 50px;
+    border-radius: 3px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    background-color: #6c6e6c;
+    box-shadow: #b6b6b6 0px 0px 5px;
+}
+
+.card-underline {
+    width: 100%;
+    height: 1px;
+    background: #505050;
+    margin: 10px 0;
+    border-radius: 2px;
+}
+
+.meta-score-section {
+    margin-bottom: 15px;
+}
+
+.meta-label {
+    font-size: 12px;
+    color: #999;
+    margin-bottom: 5px;
+}
+
+.score-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.score-box {
+    background-color: #7dd87d;
+    color: black;
+    border-radius: 4px;
+    font-size: 24px;
+    font-weight: bold;
+    padding: 4px 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.score-info {
+    flex: 1;
+    margin-left: 0px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.score-description {
+    font-size: 12px;
+    color: #76c976d0;
+    font-weight: 550;
+}
+
+.score-details {
+    font-size: 11px;
+    color: #999;
+}
+
+.rating-bar {
+    width: 100%;
+    height: 6px;
+    background-color: #f0f0f0;
+    margin-top: 10px;
+    display: flex;
+}
+
+.positive-bar {
+    width: 60%;
+    background-color: #7dd87d;
+    height: 100%;
+    border-radius: 3px 0px 0px 3px;
+    margin-right: 5px;
+}
+
+.mixed-bar {
+    width: 30%;
+    background-color: #ffcc00;
+    height: 100%;
+    margin-right: 5px;
+}
+
+.negative-bar {
+    width: 10%;
+    background-color: #ff4444;
+    height: 100%;
+    border-radius: 0px 3px 3px 0px;
+}
+
+/* ==================== SMALL MOVIE CARDS ==================== */
+.movie-list-container {
+    position: relative;
+    overflow: hidden;
+}
+
+.movie-list-small {
+    display: flex;
+    gap: 20px;
+    transition: transform 0.3s ease;
+}
+
+.small-movie-card {
+    flex: 0 0 170px;
+    height: 270px;
+    background-color: white;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.small-movie-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+}
+
+.small-movie-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 5px 5px 5px 5px;
+}
+
+.small-movie-title {
+    font-size: 14px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: -5px;
+}
+
+.small-score-box {
+    display: flex;
+    align-items: center;
+    margin: 0 10px;
+}
+
+.small-score-box span {
+    width: 25px;
+    height: 25px;
+    background-color: #7dd87d;
+    color: black;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.small-score-box p {
+    font-size: 13px;
+    color: #666;
+    margin-left: 8px;
+}
+
+/* ==================== RESPONSIVE DESIGN ==================== */
+@media (max-width: 768px) {
+    .movies-grid {
+        gap: 15px;
+    }
+    
+    .movie-card {
+        flex: 0 0 200px;
+    }
+    
+    .small-movie-card {
+        flex: 0 0 140px;
+        height: 240px;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .featured-underline {
+        width: 150px;
+    }
+    
+    .navigation-arrows {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .movie-card {
+        flex: 0 0 180px;
+    }
+    
+    .small-movie-card {
+        flex: 0 0 120px;
+        height: 200px;
+    }
+    
+    .small-movie-card img {
+        height: 160px;
+    }
+    
+    .section-title {
+        font-size: 20px;
+    }
+}
