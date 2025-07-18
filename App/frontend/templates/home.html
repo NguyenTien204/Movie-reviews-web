@@ -4,78 +4,52 @@
 
 {% block content %}
 <!-- Featured Movies -->
-<section class="featured">
-  <div class="section-header">
-    <div class="featured-title-group">
-      <h2 class="section-title">Featured movie</h2>
-      <div class="featured-underline"></div>
-    </div>
-    <div class="navigation-arrows">
-      <div class="arrow"><img src="/static/img/arrow left.png" alt=""></div>
-      <div class="arrow"><img src="/static/img/arrow right.png" alt=""></div>
-    </div>
-  </div>
-  
-  <div class="movies-grid">
-    <!-- <div class="movie-card">
-      <div class="movie-image">
-        <img src="/static/img/Nilou.jpg" alt="Nilou" class="card-img" />
-      </div>
-      <div class="movie-info">
-        <h3 class="movie-title">Nilou</h3>
-        <div class="movie-genre-container">
-          <p class="movie-genre">game</p>
-          <p class="movie-genre">genre</p>
+<section class="featured section">
+    <div class="section-header">
+        <div class="featured-title-group">
+            <h2 class="section-title">Featured Movies</h2>
+            <div class="featured-underline"></div>
         </div>
-        <div class="card-underline"></div>
-        
-        <div class="meta-score-section">
-          <p class="meta-label">META SCORE</p>
-          <div class="score-container">
-            <div>
-              <div class="score-description">Nilou Genshin Impact</div>
-              <div class="score-details">Based on 20 Critic Reviews</div>
+        <div class="navigation-arrows">
+            <div class="arrow arrow-left" data-target="featured">
+                <img src="/static/img/arrow left.png" alt="Previous">
             </div>
-            <div class="score-box">
-              <span>61</span>
+            <div class="arrow arrow-right" data-target="featured">
+                <img src="/static/img/arrow right.png" alt="Next">
             </div>
-          </div>
         </div>
-        
-        <div class="rating-bar">
-          <div class="positive-bar"></div>
-          <div class="mixed-bar"></div>
-          <div class="negative-bar"></div>
+    </div>
+    
+    <div class="movies-grid-container">
+        <div class="movies-grid" id="featured-grid">
+            <!-- Featured movies will be loaded here by JavaScript -->
         </div>
-      </div>
-    </div> -->
-  </div>
+    </div>
 </section>
 
-<!-- Trending Movies -->
+<!-- Movies For You -->
 <section class="section">
-  <div class="section-header">
-    <div class="featured-title-group">
-      <h2 class="section-title">Movies For You</h2>
-      <div class="featured-underline"></div>
+    <div class="section-header">
+        <div class="featured-title-group">
+            <h2 class="section-title">Movies For You</h2>
+            <div class="featured-underline"></div>
+        </div>
+        <div class="navigation-arrows">
+            <div class="arrow arrow-left" data-target="trending">
+                <img src="/static/img/arrow left.png" alt="Previous">
+            </div>
+            <div class="arrow arrow-right" data-target="trending">
+                <img src="/static/img/arrow right.png" alt="Next">
+            </div>
+        </div>
     </div>
-    <div class="navigation-arrows">
-      <div class="arrow"><img src="/static/img/arrow left.png" alt=""></div>
-      <div class="arrow"><img src="/static/img/arrow right.png" alt=""></div>
+    
+    <div class="movie-list-container">
+        <div class="movie-list-small" id="trending-grid">
+            <!-- Trending movies will be loaded here by JavaScript -->
+        </div>
     </div>
-  </div>
-  
-  <div class="movie-list-small">
-    <!-- <div class="small-movie-card">
-      <img src="/static/img/flash.jpg" alt="The Flash">
-      <div class="small-movie-title">
-        <h3>The Flash</h3>
-      </div>
-      <div class="small-score-box">
-        <span>75</span>
-        <p>Generally Favorable</p>
-      </div> -->
-    </div>
-  </div>
 </section>
+
+
 {% endblock %}
