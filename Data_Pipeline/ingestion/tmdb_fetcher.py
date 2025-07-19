@@ -1,6 +1,7 @@
 import requests
 import time
-from Data_Pipeline.config.tmdb_config import TMDB_API_KEY, TMDB_BASE_URL
+TMDB_API_KEY = 'your api key'
+TMDB_BASE_URL = 'https://api.themoviedb.org/3'
 
 class TMDBClient:
     def __init__(self, api_key=TMDB_API_KEY, base_url=TMDB_BASE_URL):

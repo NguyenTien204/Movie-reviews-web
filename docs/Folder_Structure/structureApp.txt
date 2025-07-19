@@ -1,0 +1,45 @@
+📦 Project Root
+├── 📁 App
+│   └── (Mã nguồn chính của ứng dụng)
+├── 📁 backend
+│   ├── 📁 api
+│   │   ├── auth.py
+│   │   ├── movie.py
+│   │   ├── rating.py
+│   │   ├── reviews.py
+│   │   ├── search.py
+│   │   └── user.py
+│   ├── 📁 core
+│   │   └── (Cấu hình và logic cốt lõi)
+│   ├── 📁 db
+│   │   ├── __init__.py
+│   │   └── config.py
+│   ├── 📁 models
+│   │   ├── base.py
+│   │   ├── enums.py
+│   │   ├── event.py
+│   │   ├── movie.py
+│   │   └── user.py
+│   ├── 📁 schema
+│   │   ├── movie.py
+│   │   ├── review.py
+│   │   └── user.py
+│   └── 📁 service
+│       ├── auth_service.py
+│       ├── movie_service.py
+│       ├── main.py
+│       └── requirements.txt
+├── 📁 doc
+│   └── (Tài liệu kỹ thuật hoặc hướng dẫn)
+├── 📁 frontend
+│   ├── 📁 static
+│   │   ├── base.css
+│   │   └── home.css
+│   ├── 📁 img
+│   ├── 📁 js
+│   │   ├── create_html.js
+│   │   └── router.js
+│   └── 📁 templates
+│       ├── app.py
+│       ├── main.py
+│       └── __init__.py
