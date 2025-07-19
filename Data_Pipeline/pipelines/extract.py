@@ -192,12 +192,29 @@ class MongoExtractor:
         self.batch_size = batch_size
 
     def extract(self) -> Iterator[pd.DataFrame]:
-        cursor = self.collection.find(batch_size=self.batch_size)
+        # Tạo index cho title nếu chưa có
+        self.collection.create_index([("title", 1)])
+        
+        # Sử dụng aggregation để lấy document mới nhất cho mỗi title
+        pipeline = [
+            # Nhóm theo title và lấy document mới nhất
+            {"$group": {
+                "_id": "$title",
+                "doc": {"$first": "$$ROOT"},
+                "count": {"$sum": 1}
+            }},
+            # Chỉ lấy document
+            {"$replaceRoot": {"newRoot": "$doc"}}
+        ]
+        
+        cursor = self.collection.aggregate(pipeline, batchSize=self.batch_size)
         batch = []
+        
         for idx, doc in enumerate(cursor, 1):
             batch.append(doc)
             if idx % self.batch_size == 0:
                 yield pd.DataFrame(batch)
                 batch = []
-        if batch:                       # last partial batch
+                
+        if batch:  # last partial batch
             yield pd.DataFrame(batch)

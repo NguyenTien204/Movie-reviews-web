@@ -10,14 +10,68 @@ class MongoSaver:
         self.client = MongoClient(uri)
         self.db = self.client[db_name]
         self.collection = self.db[collection_name]
+        self._ensure_indexes()
 
+    def _ensure_indexes(self):
+        """Tạo các index cần thiết cho collection"""
+        # Index cho title để tìm kiếm nhanh
+        self.collection.create_index("title")
+        # Index cho id để tìm kiếm document nhanh
+        self.collection.create_index("id", unique=True)
+        
     def save_movies(self, data_list):
-        if data_list:
+        if not data_list:
+            return
+            
+        # Lưu dữ liệu mới
+        try:
             self.collection.insert_many(data_list)
             print(f"✅ Saved {len(data_list)} movies to MongoDB '{self.db.name}.{self.collection.name}'")
+        except Exception as e:
+            print(f"❌ Error saving movies: {str(e)}")
+            return
+            
+        # Xử lý dữ liệu trùng lặp
+        self.remove_duplicates_by_title()
 
     def get_existing_movie_ids(self):
         return set(doc["id"] for doc in self.collection.find({}, {"id": 1}))
+        
+    def remove_duplicates_by_title(self):
+        """Xóa các document có title trùng lặp, giữ lại document mới nhất"""
+        pipeline = [
+            # Nhóm theo title và lấy thông tin cần thiết
+            {"$group": {
+                "_id": "$title",
+                "count": {"$sum": 1},
+                "docs": {"$push": {
+                    "_id": "$_id",
+                    "id": "$id",
+                    "release_date": "$release_date"
+                }}
+            }},
+            # Lọc ra các nhóm có nhiều hơn 1 document
+            {"$match": {"count": {"$gt": 1}}}
+        ]
+        
+        duplicates = list(self.collection.aggregate(pipeline))
+        total_removed = 0
+        
+        for group in duplicates:
+            docs = group["docs"]
+            # Sắp xếp theo release_date để giữ lại bản mới nhất
+            sorted_docs = sorted(docs, key=lambda x: x.get("release_date", ""), reverse=True)
+            # Lấy ra các document cũ hơn để xóa
+            docs_to_remove = sorted_docs[1:]
+            ids_to_remove = [doc["_id"] for doc in docs_to_remove]
+            
+            # Xóa các document trùng lặp
+            if ids_to_remove:
+                result = self.collection.delete_many({"_id": {"$in": ids_to_remove}})
+                total_removed += result.deleted_count
+                
+        if total_removed > 0:
+            print(f"🧹 Removed {total_removed} duplicate movies based on title")
 
 
 if __name__ == "__main__":
@@ -30,7 +84,7 @@ if __name__ == "__main__":
 
     # ========================== #
     #     Lấy phim theo năm     #
-    years = range(1990, 2020)
+    years = range(2020, 2025)
     movie_ids = []
 
     for year in years:
