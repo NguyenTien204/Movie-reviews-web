@@ -50,6 +50,89 @@
         </div>
     </div>
 </section>
+<section>
+  <div class="featured-title-group">
+    <h2 class="section-title">Latest Videos</h2>
+    <div class="featured-underline featured-underline-1"></div>
+  </div>
+
+  <div class="video-container">
+    <!-- Video bên trái -->
+    <div class="video-player">
+      <video id="main-video" controls muted poster="static/img/saber.png">
+        <source src="static/img/Trailer_saber.mp4" >
+        Trình duyệt của bạn không hỗ trợ video.
+      </video>
+      <div class="video-info">
+        <h3 id="video-title">Saber Trailer</h3>
+
+        <div class="meta-label">METASCORE</div>
+        <div class="score-container score-container-video">
+            <div class="score-box">70</div>
+            <p id="video-desc">Based 20 on critic reviews</p>
+        </div>
+        
+      </div>
+        
+        
+    </div>
+
+    <!-- Danh sách video bên phải với thumbnail -->
+    <div class="video-list">
+      <div class="video-thumb" onclick="changeVideo('static/img/Trailer_saber.mp4', 'Saber Trailer', 'Based 20 on critic reviews', 'static/img/saber.jpg', '70')">
+        <div class="video-item">
+          <img src="static/img/saber.png" alt="Saber" />
+          <div class="video-overlay">
+            <span class="video-time">1:30</span>
+          </div>
+          <div class="video-title">
+            <h4>Saber Trailer</h4>
+          </div>
+        </div>
+        
+      </div>
+
+      <div class="video-thumb" onclick="changeVideo('static/img/Trailer_saber.mp4', 'Archer Trailer', 'Based 20 on critic reviews', 'static/img/Nilou.jpg', '80')">
+         <div class="video-item">
+          <img src="static/img/saber.png" alt="Saber" />
+          <div class="video-overlay">
+            <span class="video-time">1:30</span>
+          </div>
+          <div class="video-title">
+            <h4>Saber Trailer</h4>
+          </div>
+        </div>
+      </div>
+
+      <div class="video-thumb" onclick="changeVideo('static/img/Trailer_saber.mp4', 'Rider Trailer', 'Based 20 on critic reviews', 'static/img/kokomi.jpg', '75')">
+        <div class="video-item">
+          <img src="static/img/saber.png" alt="Saber" />
+          <div class="video-overlay">
+            <span class="video-time">1:30</span>
+          </div>
+          <div class="video-title">
+            <h4>Saber Trailer</h4>
+          </div>
+        </div>
+      </div>
+        <div class="video-thumb" onclick="changeVideo('static/img/Trailer_saber.mp4', 'Rider Trailer', 'Based 20 on critic reviews', 'static/img/kokomi.jpg', '75')">
+        <div class="video-item">
+          <img src="static/img/saber.png" alt="Saber" />
+          <div class="video-overlay">
+            <span class="video-time">1:30</span>
+          </div>
+          <div class="video-title">
+            <h4>Saber Trailer</h4>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add more video-thumbs as needed -->
+    </div>
+  </div>
+</section>
+
+
 
 
 {% endblock %}

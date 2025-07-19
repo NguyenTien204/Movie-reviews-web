@@ -24,6 +24,10 @@
     margin: 5px 0;
     border-radius: 2px;
 }
+.featured-underline-1 {
+    width: 100%;
+  
+}
 
 /* ==================== NAVIGATION ARROWS ==================== */
 .navigation-arrows {
@@ -246,7 +250,7 @@
 }
 
 .small-movie-card {
-    flex: 0 0 170px;
+    flex: 0 0 180px;
     height: 270px;
     background-color: white;
     border-radius: 8px;
@@ -309,7 +313,7 @@
     }
     
     .small-movie-card {
-        flex: 0 0 140px;
+        flex: 0 0 150px;
         height: 240px;
     }
     
@@ -345,3 +349,116 @@
         font-size: 20px;
     }
 }
+
+.video-container {
+  display: flex;
+  gap: 30px;
+  margin-top: 30px;
+}
+.score-container-video {
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  gap: 10px;
+}
+
+.video-player {
+  flex: 2;
+}
+
+.video-player video {
+  width: 100%;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.video-info {
+  display: grid;
+  grid-template-columns: 1fr auto; /* Cột 1 co dãn, cột 2 tự động */
+  align-items: center;
+  
+}
+#video-title {
+  grid-column: 1;
+}
+.meta-label,
+.score-container-video {
+  grid-column: 2;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.video-info h3 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.video-info p {
+  color: #666;
+}
+
+.video-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.video-thumb {
+  
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+  border-radius: 10px;
+  transition: transform 0.2s;
+}
+
+.video-thumb:hover {
+  transform: scale(1.03);
+  text-decoration: underline; /* Gạch chân mặc định */
+  text-decoration-color: #0c0c0c; /* Màu gạch chân (tùy chọn) */
+  opacity: 0.7; /* Giảm độ đậm (30% trong suốt) */
+}
+
+.video-thumb img {
+  width: 200px;
+  border-radius: 10px;
+  display: block;
+  object-fit: cover;
+  transition: opacity 0.3s ease; /* Hiệu ứng mượt */
+}
+
+.video-overlay {
+  width: 175px;
+  position: absolute;
+  bottom: 5px;
+  left: 5px;
+  right: 5px;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 8px;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 12px;
+}
+.video-overlay span {
+  display: block;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 3px;
+  border-radius: 4px;
+}
+.video-item {
+  display: flex;
+  text-align: start;
+  gap: 10px;
+}
+.video-item h4 {
+  margin: 0;
+  font-size: 16px;
+  color: #333;
+
+}
+
+
+

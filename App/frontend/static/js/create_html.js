@@ -47,47 +47,47 @@ const trendingMovies = [
     {
         title: "Batman",
         score: 82,
-        image: "https://via.placeholder.com/159x200/7212d8/ffffff?text=Batman"
+        image: "https://tse4.mm.bing.net/th/id/OIP.Amtb86pqYYfYzrHEv4XPnQHaEK?pid=Api&P=0&h=220"
     },
     {
         title: "Iron Man",
         score: 79,
-        image: "https://via.placeholder.com/159x200/5356f2/ffffff?text=Iron+Man"
+        image: "/static/img/flash.jpg"
     },
     {
         title: "Thor",
         score: 77,
-        image: "https://via.placeholder.com/159x200/7212d8/ffffff?text=Thor"
+        image: "/static/img/flash.jpg"
     },
     {
         title: "Captain America",
         score: 81,
-        image: "https://via.placeholder.com/159x200/5356f2/ffffff?text=Captain+America"
+        image: "/static/img/flash.jpg"
     },
     {
         title: "Wonder Woman",
         score: 84,
-        image: "https://via.placeholder.com/159x200/7212d8/ffffff?text=Wonder+Woman"
+        image: "/static/img/flash.jpg"
     },
     {
         title: "Aquaman",
         score: 73,
-        image: "https://via.placeholder.com/159x200/5356f2/ffffff?text=Aquaman"
+        image: "/static/img/flash.jpg"
     },
     {
         title: "Black Panther",
         score: 88,
-        image: "https://via.placeholder.com/159x200/7212d8/ffffff?text=Black+Panther"
+        image: "/static/img/flash.jpg"
     },
     {
         title: "Doctor Strange",
         score: 75,
-        image: "https://via.placeholder.com/159x200/5356f2/ffffff?text=Doctor+Strange"
+        image: "/static/img/flash.jpg"
     },
     {
         title: "Green Lantern",
         score: 65,
-        image: "https://via.placeholder.com/159x200/7212d8/ffffff?text=Green+Lantern"
+        image: "/static/img/flash.jpg"
     }
 ];
 
@@ -158,7 +158,7 @@ class MovieCarousel {
                         <div class="mixed-bar"></div>
                         <div class="negative-bar"></div>
                     </div>
-                </div>
+                </div>\ 
             </div>
         `;
     }
@@ -246,7 +246,7 @@ class MovieCarousel {
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize carousels with responsive settings
     const featuredCarousel = new MovieCarousel('featured-grid', 4, 280, 20);
-    const trendingCarousel = new MovieCarousel('trending-grid', 7, 159, 20);
+    const trendingCarousel = new MovieCarousel('trending-grid', 7, 159, 40);
 
     // Setup carousels with data
     featuredCarousel.init(featuredMovies, 'movie-card');
@@ -282,7 +282,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             // Desktop settings
             featuredCarousel.updateSettings(4, 280);
-            trendingCarousel.updateSettings(7, 159);
+            trendingCarousel.updateSettings(6, 159);
         }
     }
 
@@ -301,3 +301,26 @@ document.addEventListener('DOMContentLoaded', function() {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { MovieCarousel, featuredMovies, trendingMovies };
 }
+// Function to change video source and details
+
+
+function changeVideo(src, title, desc, poster, score) {
+    const video = document.getElementById("main-video");
+    const videoTitle = document.getElementById("video-title");
+    const videoDesc = document.getElementById("video-desc");
+    const scoreBox = document.querySelector(".score-box");
+    const metaScore = document.querySelector(".meta-label");
+
+    video.pause();
+    video.setAttribute("src", src);
+    video.setAttribute("poster", poster);
+    video.load();
+    videoTitle.textContent = title;
+    metaScore.textContent = "METASCORE";
+    videoDesc.textContent = desc;
+    scoreBox.textContent = score;
+    
+}
+
+// ✅ Gắn hàm vào window để gọi được từ HTML
+window.changeVideo = changeVideo;
