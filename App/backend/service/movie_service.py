@@ -4,7 +4,8 @@ from sqlalchemy import (
     create_engine, and_, desc, func
 )
 from sqlalchemy.orm import sessionmaker, Session, declarative_base
-from schema.movie import MovieDetail, MovieShortDetail, MovieTrailer, Genre, MovieFilter
+from schema.movie import MovieDetail, MovieShortDetail, MovieTrailer, MovieFilter
+from schema.movie import Genre as GenreSchema
 from db.config import PostgresConnection
 from models import Movie, MovieGenre, Genre, Trailer
 # Define SQLAlchemy Base
@@ -40,9 +41,9 @@ class MovieService:
         if not movie:
             raise HTTPException(status_code=404, detail="Movie not found")
 
-        genres = db.query(Genre).join(MovieGenre).filter(
-            MovieGenre.movie_id == movie_id
-        ).all()
+        genres = db.query(Genre).join(MovieGenre).filter(MovieGenre.movie_id == movie_id).all()
+        genres=[GenreSchema(genre_id=g.genre_id, name=g.name) for g in genres]
+
 
         return MovieDetail(
             movie_id=movie.movie_id,
@@ -65,10 +66,9 @@ class MovieService:
         movie = db.query(Movie).filter(Movie.movie_id == movie_id).first()
         if not movie:
             raise HTTPException(status_code=404, detail="Movie not found")
-        
-        genres = db.query(Genre).join(MovieGenre).filter(
-            MovieGenre.movie_id == movie_id
-        ).all()
+        genres = db.query(Genre).join(MovieGenre).filter(MovieGenre.movie_id == movie_id).all()
+        genres=[GenreSchema(genre_id=g.genre_id, name=g.name) for g in genres]
+
         
         return MovieShortDetail(
             movie_id=movie.movie_id,
@@ -109,7 +109,7 @@ class MovieService:
             for movie in movies
         ]
 
-    async def get_trending_movies(self, db: Session = Depends(get_db)) -> List[MovieShortDetail]:
+    async def get_trending_movies(self, db: Session) -> List[MovieShortDetail]:
         """Get trending movies based on popularity"""
         movies = db.query(Movie).order_by(desc(Movie.popularity)).limit(20).all()
         return [
@@ -118,7 +118,7 @@ class MovieService:
                 title=movie.title,
                 poster_path=movie.poster_path,
                 popularity=movie.popularity,
-                genres=[Genre(genre_id=g.genre_id, name=g.name) for g in db.query(Genre)
+                genres=[GenreSchema(genre_id=g.genre_id, name=g.name) for g in db.query(Genre)
                         .join(MovieGenre)
                         .filter(MovieGenre.movie_id == movie.movie_id).all()]
             )
@@ -163,9 +163,10 @@ class MovieService:
                 title=movie.title,
                 poster_path=movie.poster_path,
                 popularity=movie.popularity,
-                genres=[Genre(genre_id=g.genre_id, name=g.name) for g in db.query(Genre)
+                genres=[GenreSchema(genre_id=g.genre_id, name=g.name) for g in db.query(Genre)
                         .join(MovieGenre)
                         .filter(MovieGenre.movie_id == movie.movie_id).all()]
+
             )
             for movie in recommended_movies
         ]
