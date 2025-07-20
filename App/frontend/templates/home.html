@@ -59,10 +59,7 @@
   <div class="video-container">
     <!-- Video bên trái -->
     <div class="video-player">
-      <!-- <video id="main-video" controls muted poster="static/img/saber.png">
-        <source src="static/img/Trailer_saber.mp4" >
-        Trình duyệt của bạn không hỗ trợ video.
-      </video> -->
+    
     <iframe 
       id="main-video" 
       src="https://www.youtube.com/embed/ASR41LdpTKw" 
@@ -72,7 +69,7 @@
       style="width: 100%; height: 400px;">
     </iframe>
       <div class="video-info">
-        <h3 id="video-title">Saber Trailer</h3>
+        <h3 id="video-title">Nilou Trailer</h3>
 
         <div class="meta-label">METASCORE</div>
         <div class="score-container score-container-video">
@@ -87,24 +84,25 @@
 
     <!-- Danh sách video bên phải với thumbnail -->
     <div class="video-list">
-      <div class="video-thumb active" onclick="changeVideo('static/img/Trailer_saber.mp4', 'Saber Trailer', 'Based 20 on critic reviews', '', '70')">
-        <div class="video-item">
-          <img src="static/img/saber.png" alt="Saber" />
-          <div class="video-overlay">
-            <span class="video-time">1:30</span>
-          </div>
-          <div class="video-title">
-            <h4>Saber Trailer</h4>
+      <div class="active">
+        <div class="video-thumb" onclick="changeVideo('/ASR41LdpTKw', 'Nilou Trailer', 'Based 20 on critic reviews', '', '70')">
+          <div class="video-item">
+            <img src="static/img/Nilou.jpg" alt="Nilou" />
+            <div class="video-overlay">
+              <span class="video-time">2:08</span>
+            </div>
+            <div class="video-title">
+              <h4>Nilou Trailer</h4>
+            </div>
           </div>
         </div>
-        
       </div>
-
-      <div class="video-thumb" onclick="changeVideo('www.youtube.com/watch?v=ASR41LdpTKw', 'Archer Trailer', 'Based 20 on critic reviews', 'static/img/Nilou.jpg', '80')">
+      
+      <div class="video-thumb " onclick="changeVideo('/watch?v=51_UUJ7Sx-I', 'Saber Trailer', 'Based 20 on critic reviews', 'static/img/Nilou.jpg', '80')">
          <div class="video-item">
           <img src="static/img/saber.png" alt="Saber" />
           <div class="video-overlay">
-            <span class="video-time">1:30</span>
+            <span class="video-time">1:15</span>
           </div>
           <div class="video-title">
             <h4>Saber Trailer</h4>
@@ -112,22 +110,23 @@
         </div>
       </div>
 
-      <div class="video-thumb" onclick="changeVideo('static/img/Trailer_saber.mp4', 'Rider Trailer', 'Based 20 on critic reviews', 'static/img/kokomi.jpg', '75')">
+      <div class="video-thumb" onclick="changeVideo('/watch?v=51_UUJ7Sx-I', 'Saber Trailer', 'Based 20 on critic reviews', 'static/img/kokomi.jpg', '75')">
         <div class="video-item">
           <img src="static/img/saber.png" alt="Saber" />
           <div class="video-overlay">
-            <span class="video-time">1:30</span>
+            <span class="video-time">1:15</span>
           </div>
           <div class="video-title">
             <h4>Saber Trailer</h4>
           </div>
         </div>
       </div>
-        <div class="video-thumb" onclick="changeVideo('static/img/Trailer_saber.mp4', 'Rider Trailer', 'Based 20 on critic reviews', 'static/img/kokomi.jpg', '75')">
+
+        <div class="video-thumb" onclick="changeVideo('/watch?v=51_UUJ7Sx-I', 'Saber Trailer', 'Based 20 on critic reviews', 'static/img/kokomi.jpg', '75')">
         <div class="video-item">
           <img src="static/img/saber.png" alt="Saber" />
           <div class="video-overlay">
-            <span class="video-time">1:30</span>
+            <span class="video-time">1:15</span>
           </div>
           <div class="video-title">
             <h4>Saber Trailer</h4>
@@ -139,71 +138,5 @@
     </div>
   </div>
 </section>
-<!-- <script>
-const BASE_URL = "http://localhost:5000/api/v1";  // Cần thay nếu bạn deploy
-const POSTER_BASE = "https://image.tmdb.org/t/p/w500";
-
-// Hàm tiện ích để build poster URL
-function getPosterUrl(path) {
-  return path ? `${POSTER_BASE}${path}` : "https://image.tmdb.org/t/p/w500/c32TsWLES7kL1uy6fF03V67AIYX.jpg";
-}
-
-// Load featured movies
-async function loadFeaturedMovies() {
-  try {
-    const response = await fetch(`${BASE_URL}/movies/trending`);
-    const movies = await response.json();
-
-    const featuredGrid = document.getElementById("featured-grid");
-    featuredGrid.innerHTML = "";
-
-    movies.forEach(movie => {
-      const poster = getPosterUrl(movie.poster_path);
-      const html = `
-        <div class="movie-card">
-          <img src="${poster}" alt="${movie.title}" />
-          <h3 class="movie-title">${movie.title}</h3>
-        </div>
-      `;
-      featuredGrid.insertAdjacentHTML("beforeend", html);
-    });
-  } catch (err) {
-    console.error("Error loading featured movies:", err);
-  }
-}
-
-// Load trending movies
-async function loadTrendingMovies() {
-  try {
-    const response = await fetch(`${BASE_URL}/movies/trending`);
-    const movies = await response.json();
-
-    const trendingGrid = document.getElementById("trending-grid");
-    trendingGrid.innerHTML = "";
-
-    movies.forEach(movie => {
-      const poster = getPosterUrl(movie.poster_path);
-      const html = `
-        <div class="movie-card-small">
-          <img src="${poster}" alt="${movie.title}" />
-          <h4 class="movie-title-small">${movie.title}</h4>
-        </div>
-      `;
-      trendingGrid.insertAdjacentHTML("beforeend", html);
-    });
-  } catch (err) {
-    console.error("Error loading trending movies:", err);
-  }
-}
-
-// Gọi khi trang tải
-window.addEventListener("DOMContentLoaded", () => {
-  loadFeaturedMovies();
-  loadTrendingMovies();
-});
-
-</script> -->
-
-
 
 {% endblock %}

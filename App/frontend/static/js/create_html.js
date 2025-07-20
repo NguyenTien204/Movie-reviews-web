@@ -305,7 +305,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 });
 
-// Video function - giữ nguyên
+// Video function - đã sửa để hoạt động với HTML hiện tại
 function changeVideo(src, title, desc, poster, score) {
     const iframe = document.getElementById("main-video");
     const videoTitle = document.getElementById("video-title");
@@ -313,22 +313,48 @@ function changeVideo(src, title, desc, poster, score) {
     const scoreBox = document.querySelector(".score-box");
     const metaScore = document.querySelector(".meta-label");
 
+    // Xử lý videoId từ src
     let videoId = "";
     if (src.includes("watch?v=")) {
         videoId = src.split("watch?v=")[1];
     } else if (src.includes("youtu.be/")) {
         videoId = src.split("youtu.be/")[1];
+    } else if (src.startsWith("/")) {
+        // Nếu src bắt đầu bằng "/", loại bỏ dấu "/"
+        videoId = src.substring(1);
     } else {
         videoId = src;
     }
 
+    // Cập nhật iframe
     iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
 
+    // Cập nhật thông tin video
     videoTitle.textContent = title;
     metaScore.textContent = "METASCORE";
     videoDesc.textContent = desc;
     scoreBox.textContent = score;
 }
+
+// Thêm event listener cho tất cả video-thumb khi page load
+document.addEventListener('DOMContentLoaded', function() {
+    const videoThumbs = document.querySelectorAll('.video-thumb');
+    
+    videoThumbs.forEach(thumb => {
+        thumb.addEventListener('click', function() {
+            // Xóa active khỏi tất cả video items
+            document.querySelectorAll(".video-list > div").forEach(item => {
+                item.classList.remove("active");
+            });
+            
+            // Thêm active cho video item chứa thumb được click
+            const parentDiv = this.closest('.video-list > div');
+            if (parentDiv) {
+                parentDiv.classList.add("active");
+            }
+        });
+    });
+});
 
 window.changeVideo = changeVideo;
 
@@ -336,3 +362,4 @@ window.changeVideo = changeVideo;
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { MovieCarousel };
 }
+

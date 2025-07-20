@@ -117,6 +117,8 @@
 }
 
 .movie-info {
+    position: relative;
+    height: 230px;
     padding: 15px;
 }
 
@@ -152,15 +154,25 @@
 }
 
 .card-underline {
-    width: 100%;
+    width: 90%;
     height: 1px;
     background: #505050;
-    margin: 10px 0;
-    border-radius: 2px;
+    margin-bottom: 100px;
+    position: absolute;
+    bottom: 0;
+ 
+    
+
 }
 
 .meta-score-section {
-    margin-bottom: 15px;
+    position: absolute;
+    bottom: 0;
+    width: 90%;
+    margin-bottom: 10px;
+    
+    
+    
 }
 
 .meta-label {
@@ -250,8 +262,9 @@
 }
 
 .small-movie-card {
+    position: relative;
     flex: 0 0 180px;
-    height: 270px;
+    height: 290px;
     background-color: white;
     border-radius: 8px;
     overflow: hidden;
@@ -281,6 +294,8 @@
     display: flex;
     align-items: center;
     margin: 0 10px;
+    position: absolute;
+    bottom: 0;
 }
 
 .small-score-box span {
@@ -381,6 +396,7 @@
 }
 #video-title {
   grid-column: 1;
+  margin-top: 10px;
 }
 .meta-label,
 .score-container-video {
