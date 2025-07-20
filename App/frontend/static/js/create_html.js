@@ -1,95 +1,40 @@
-// Sample movie data - Replace with your Django data
-const featuredMovies = [
-    {
-        title: "Avengers: Endgame",
-        genres: ["Action", "Adventure", "Drama"],
-        score: 94,
-        image: "/static/img/Nilou.jpg"
-    },
-    {
-        title: "The Dark Knight",
-        genres: ["Action", "Crime", "Drama"],
-        score: 87,
-        image: "/static/img/GI_Ganyu_Hu_Tao_Qiqi.png"
-    },
-    {
-        title: "Inception",
-        genres: ["Action", "Sci-Fi", "Thriller"],
-        score: 91,
-        image: "/static/img/yoimiya.png"
-    },
-    {
-        title: "Interstellar",
-        genres: ["Adventure", "Drama", "Sci-Fi"],
-        score: 89,
-        image: "/static/img/kokomi.jpg"
-    },
-    {
-        title: "Pulp Fiction",
-        genres: ["Crime", "Drama"],
-        score: 95,
-        image: "https://via.placeholder.com/280x420/5356f2/ffffff?text=Pulp+Fiction"
-    },
-    {
-        title: "The Matrix",
-        genres: ["Action", "Sci-Fi"],
-        score: 88,
-        image: "https://via.placeholder.com/280x420/7212d8/ffffff?text=The+Matrix"
-    }
-];
+// API Configuration
+const BASE_URL = "http://localhost:5000/api/v1";  // Cần thay nếu bạn deploy
+const POSTER_BASE = "https://image.tmdb.org/t/p/w500";
 
-const trendingMovies = [
-    {
-        title: "Spider-Man",
-        score: 85,
-        image: "/static/img/flash.jpg"
-    },
-    {
-        title: "Batman",
-        score: 82,
-        image: "https://tse4.mm.bing.net/th/id/OIP.Amtb86pqYYfYzrHEv4XPnQHaEK?pid=Api&P=0&h=220"
-    },
-    {
-        title: "Iron Man",
-        score: 79,
-        image: "/static/img/flash.jpg"
-    },
-    {
-        title: "Thor",
-        score: 77,
-        image: "/static/img/flash.jpg"
-    },
-    {
-        title: "Captain America",
-        score: 81,
-        image: "/static/img/flash.jpg"
-    },
-    {
-        title: "Wonder Woman",
-        score: 84,
-        image: "/static/img/flash.jpg"
-    },
-    {
-        title: "Aquaman",
-        score: 73,
-        image: "/static/img/flash.jpg"
-    },
-    {
-        title: "Black Panther",
-        score: 88,
-        image: "/static/img/flash.jpg"
-    },
-    {
-        title: "Doctor Strange",
-        score: 75,
-        image: "/static/img/flash.jpg"
-    },
-    {
-        title: "Green Lantern",
-        score: 65,
-        image: "/static/img/flash.jpg"
+const API_CONFIG = {
+    FEATURED_MOVIES_URL: `${BASE_URL}/movies/trending`,  // Sử dụng endpoint từ code cũ
+    TRENDING_MOVIES_URL: `${BASE_URL}/movies/trending`,  // Hoặc có thể khác nếu bạn có endpoint riêng
+    POSTER_BASE_URL: POSTER_BASE
+};
+
+// Hàm tiện ích để build poster URL (từ code cũ)
+function getPosterUrl(path) {
+    return path ? `${POSTER_BASE}${path}` : `${POSTER_BASE}/c32TsWLES7kL1uy6fF03V67AIYX.jpg`;
+}
+
+// API Service Functions
+async function fetchMovieData(url) {
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error fetching movie data:', error);
+        return [];
     }
-];
+}
+
+async function fetchFeaturedMovies() {
+    return await fetchMovieData(API_CONFIG.FEATURED_MOVIES_URL);
+}
+
+async function fetchTrendingMovies() {
+    return await fetchMovieData(API_CONFIG.TRENDING_MOVIES_URL);
+}
 
 // MovieCarousel Class
 class MovieCarousel {
@@ -127,58 +72,101 @@ class MovieCarousel {
             this.container.appendChild(card);
         });
     }
-
+    
     createMovieCard(movie) {
-        const genresHtml = movie.genres.map(genre => 
+        // Sử dụng hàm getPosterUrl từ code cũ
+        const imageUrl = getPosterUrl(movie.poster_path);
+
+        // Xử lý genres từ API data
+        const genresHtml = this.processGenres(movie.genres).map(genre =>
             `<span class="movie-genre">${genre}</span>`
         ).join('');
 
+        // Xử lý score - sử dụng từ API nếu có, không thì để placeholder
+        const score = movie.score || movie.vote_average || 'N/A';
+        const scoreDescription = score !== 'N/A' ? this.getScoreDescription(score) : 'No rating yet';
+
         return `
-            <div class="movie-image">
-                <img src="${movie.image}" alt="${movie.title}" loading="lazy">
-            </div>
-            <div class="movie-info">
-                <h3 class="movie-title">${movie.title}</h3>
-                <div class="movie-genre-container">
-                    ${genresHtml}
+            <div class="movie-card">
+                <div class="movie-image">
+                    <img src="${imageUrl}" alt="${movie.title}" loading="lazy">
                 </div>
-                <div class="card-underline"></div>
-                <div class="meta-score-section">
-                    <div class="meta-label">METASCORE</div>
-                    <div class="score-container">
-                        
-                        <div class="score-info">
-                            <div class="score-description">${this.getScoreDescription(movie.score)}</div>
-                            <div class="score-details">Based 20 on critic reviews</div>
+                <div class="movie-info">
+                    <h3 class="movie-title">${movie.title}</h3>
+                    <div class="movie-genre-container">
+                        ${genresHtml}
+                    </div>
+                    <div class="card-underline"></div>
+                    <div class="meta-score-section">
+                        <div class="meta-label">METASCORE</div>
+                        <div class="score-container">
+                            <div class="score-info">
+                                <div class="score-description">${scoreDescription}</div>
+                                <div class="score-details">${movie.review_count ? `Based on ${movie.review_count} reviews` : 'Based on critic reviews'}</div>
+                            </div>
+                            <div class="score-box">${score}</div>
                         </div>
-                        <div class="score-box">${movie.score}</div>
+                        <div class="rating-bar">
+                            <div class="positive-bar"></div>
+                            <div class="mixed-bar"></div>
+                            <div class="negative-bar"></div>
+                        </div>
                     </div>
-                    <div class="rating-bar">
-                        <div class="positive-bar"></div>
-                        <div class="mixed-bar"></div>
-                        <div class="negative-bar"></div>
-                    </div>
-                </div>\ 
+                </div>
             </div>
         `;
     }
 
     createSmallMovieCard(movie) {
+        // Sử dụng hàm getPosterUrl từ code cũ  
+        const imageUrl = getPosterUrl(movie.poster_path);
+
+        // Xử lý score
+        const score = movie.score || movie.vote_average || 'N/A';
+        const scoreDescription = score !== 'N/A' ? this.getScoreDescription(score) : 'No rating';
+
         return `
-            <img src="${movie.image}" alt="${movie.title}" loading="lazy">
-            <div class="small-movie-title">${movie.title}</div>
-            <div class="small-score-box">
-                <span>${movie.score}</span>
-                <p>${this.getScoreDescription(movie.score)}</p>
+            <div class="movie-card-small">
+                <img src="${imageUrl}" alt="${movie.title}" loading="lazy">
+                <div class="small-movie-title">${movie.title}</div>
+                <div class="small-score-box">
+                    <span>${score}</span>
+                    <p>${scoreDescription}</p>
+                </div>
             </div>
         `;
     }
 
+    // Helper function để xử lý genres từ API
+    processGenres(genres) {
+        if (!genres) return [];
+        
+        // Nếu genres là array of objects (như từ API mẫu)
+        if (Array.isArray(genres) && genres.length > 0 && typeof genres[0] === 'object') {
+            return genres.map(genre => genre.name || genre.genre_name || genre);
+        }
+        
+        // Nếu genres là array of strings
+        if (Array.isArray(genres)) {
+            return genres;
+        }
+        
+        // Nếu genres là string phân cách bởi dấu phẩy
+        if (typeof genres === 'string') {
+            return genres.split(',').map(g => g.trim());
+        }
+        
+        return [];
+    }
+
     getScoreDescription(score) {
-        if (score >= 90) return "Universal acclaim";
-        if (score >= 80) return "Generally favorable";
-        if (score >= 70) return "Generally positive";
-        if (score >= 60) return "Mixed reviews";
+        const numScore = parseFloat(score);
+        if (isNaN(numScore)) return "No rating";
+        
+        if (numScore >= 9.0) return "Universal acclaim";
+        if (numScore >= 8.0) return "Generally favorable";
+        if (numScore >= 7.0) return "Generally positive";
+        if (numScore >= 6.0) return "Mixed reviews";
         return "Generally negative";
     }
 
@@ -199,7 +187,6 @@ class MovieCarousel {
         
         this.updateArrows();
         
-        // Reset transition flag after animation completes
         setTimeout(() => {
             this.isTransitioning = false;
         }, 300);
@@ -212,14 +199,12 @@ class MovieCarousel {
         
         if (!leftArrow || !rightArrow) return;
         
-        // Update left arrow
         if (this.currentIndex === 0) {
             leftArrow.classList.add('disabled');
         } else {
             leftArrow.classList.remove('disabled');
         }
         
-        // Update right arrow
         const maxIndex = Math.max(0, this.totalCards - this.maxVisible);
         if (this.currentIndex >= maxIndex) {
             rightArrow.classList.add('disabled');
@@ -234,7 +219,6 @@ class MovieCarousel {
         this.updateArrows();
     }
 
-    // Method to update carousel settings based on screen size
     updateSettings(maxVisible, cardWidth) {
         this.maxVisible = maxVisible;
         this.cardWidth = cardWidth;
@@ -243,84 +227,112 @@ class MovieCarousel {
 }
 
 // Initialize carousels when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize carousels with responsive settings
-    const featuredCarousel = new MovieCarousel('featured-grid', 4, 280, 20);
-    const trendingCarousel = new MovieCarousel('trending-grid', 7, 159, 40);
+document.addEventListener('DOMContentLoaded', async function() {
+    // Show loading state
+    const featuredContainer = document.getElementById('featured-grid');
+    const trendingContainer = document.getElementById('trending-grid');
+    
+    if (featuredContainer) featuredContainer.innerHTML = '<div class="loading">Loading featured movies...</div>';
+    if (trendingContainer) trendingContainer.innerHTML = '<div class="loading">Loading trending movies...</div>';
 
-    // Setup carousels with data
-    featuredCarousel.init(featuredMovies, 'movie-card');
-    trendingCarousel.init(trendingMovies, 'small-movie-card');
+    try {
+        // Fetch data from API
+        const [featuredMoviesData, trendingMoviesData] = await Promise.all([
+            fetchFeaturedMovies(),
+            fetchTrendingMovies()
+        ]);
 
-    // Add event listeners for arrow clicks
-    document.addEventListener('click', (e) => {
-        const arrow = e.target.closest('.arrow');
-        if (!arrow) return;
-        
-        const target = arrow.dataset.target;
-        const direction = arrow.classList.contains('arrow-left') ? 'left' : 'right';
-        
-        if (target === 'featured') {
-            featuredCarousel.scroll(direction);
-        } else if (target === 'trending') {
-            trendingCarousel.scroll(direction);
-        }
-    });
+        // Initialize carousels with responsive settings
+        const featuredCarousel = new MovieCarousel('featured-grid', 4, 280, 20);
+        const trendingCarousel = new MovieCarousel('trending-grid', 7, 159, 40);
 
-    // Handle responsive behavior
-    function handleResize() {
-        const screenWidth = window.innerWidth;
-        
-        if (screenWidth <= 480) {
-            // Mobile settings
-            featuredCarousel.updateSettings(2, 180);
-            trendingCarousel.updateSettings(3, 120);
-        } else if (screenWidth <= 768) {
-            // Tablet settings
-            featuredCarousel.updateSettings(3, 200);
-            trendingCarousel.updateSettings(5, 140);
+        // Setup carousels with API data
+        if (featuredMoviesData && featuredMoviesData.length > 0) {
+            featuredCarousel.init(featuredMoviesData, 'movie-card');
         } else {
-            // Desktop settings
-            featuredCarousel.updateSettings(4, 280);
-            trendingCarousel.updateSettings(6, 159);
+            if (featuredContainer) featuredContainer.innerHTML = '<div class="error">No featured movies available</div>';
         }
+
+        if (trendingMoviesData && trendingMoviesData.length > 0) {
+            trendingCarousel.init(trendingMoviesData, 'small-movie-card');
+        } else {
+            if (trendingContainer) trendingContainer.innerHTML = '<div class="error">No trending movies available</div>';
+        }
+
+        // Add event listeners for arrow clicks
+        document.addEventListener('click', (e) => {
+            const arrow = e.target.closest('.arrow');
+            if (!arrow) return;
+            
+            const target = arrow.dataset.target;
+            const direction = arrow.classList.contains('arrow-left') ? 'left' : 'right';
+            
+            if (target === 'featured') {
+                featuredCarousel.scroll(direction);
+            } else if (target === 'trending') {
+                trendingCarousel.scroll(direction);
+            }
+        });
+
+        // Handle responsive behavior
+        function handleResize() {
+            const screenWidth = window.innerWidth;
+            
+            if (screenWidth <= 480) {
+                featuredCarousel.updateSettings(2, 180);
+                trendingCarousel.updateSettings(3, 120);
+            } else if (screenWidth <= 768) {
+                featuredCarousel.updateSettings(3, 200);
+                trendingCarousel.updateSettings(5, 140);
+            } else {
+                featuredCarousel.updateSettings(4, 280);
+                trendingCarousel.updateSettings(6, 159);
+            }
+        }
+
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(handleResize, 250);
+        });
+
+        handleResize();
+
+    } catch (error) {
+        console.error('Error initializing movie carousels:', error);
+        if (featuredContainer) featuredContainer.innerHTML = '<div class="error">Error loading movies</div>';
+        if (trendingContainer) trendingContainer.innerHTML = '<div class="error">Error loading movies</div>';
     }
-
-    // Handle window resize with debounce
-    let resizeTimeout;
-    window.addEventListener('resize', () => {
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(handleResize, 250);
-    });
-
-    // Initial resize check
-    handleResize();
 });
 
-// Export for use in other modules (if needed)
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { MovieCarousel, featuredMovies, trendingMovies };
-}
-// Function to change video source and details
-
-
+// Video function - giữ nguyên
 function changeVideo(src, title, desc, poster, score) {
-    const video = document.getElementById("main-video");
+    const iframe = document.getElementById("main-video");
     const videoTitle = document.getElementById("video-title");
     const videoDesc = document.getElementById("video-desc");
     const scoreBox = document.querySelector(".score-box");
     const metaScore = document.querySelector(".meta-label");
 
-    video.pause();
-    video.setAttribute("src", src);
-    video.setAttribute("poster", poster);
-    video.load();
+    let videoId = "";
+    if (src.includes("watch?v=")) {
+        videoId = src.split("watch?v=")[1];
+    } else if (src.includes("youtu.be/")) {
+        videoId = src.split("youtu.be/")[1];
+    } else {
+        videoId = src;
+    }
+
+    iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+
     videoTitle.textContent = title;
     metaScore.textContent = "METASCORE";
     videoDesc.textContent = desc;
     scoreBox.textContent = score;
-    
 }
 
-// ✅ Gắn hàm vào window để gọi được từ HTML
 window.changeVideo = changeVideo;
+
+// Export for use in other modules (if needed)
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { MovieCarousel };
+}
