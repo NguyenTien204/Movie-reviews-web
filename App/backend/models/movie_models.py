@@ -35,6 +35,7 @@ class Movie(Base):
     production_countries = relationship("MovieProductionCountry", back_populates="movie")
     spoken_languages = relationship("MovieSpokenLanguage", back_populates="movie")
     collections = relationship("Collection", back_populates="movie")
+    release_dates = relationship("ReleaseCalendar", back_populates="movie")
 
 class Genre(Base):
     __tablename__ = 'genres'
@@ -128,3 +129,16 @@ class Collection(Base):
     poster_path = Column(Text)
     
     movie = relationship("Movie", back_populates="collections")
+
+
+class ReleaseCalendar(Base):
+    __tablename__ = 'release_calendar'
+
+    id = Column(Integer, primary_key=True)
+    movie_id = Column(Integer, ForeignKey('movies.movie_id', ondelete='CASCADE'), nullable=False)
+    country_code = Column(CHAR(2))
+    release_date = Column(Date, nullable=False)
+    release_type = Column(String(50))
+    status = Column(String)
+
+    movie = relationship("Movie", back_populates="release_dates")

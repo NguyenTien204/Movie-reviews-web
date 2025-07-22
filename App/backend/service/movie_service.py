@@ -1,25 +1,36 @@
 from typing import List
 from fastapi import Depends, HTTPException
-from sqlalchemy import (
-    create_engine, and_, desc, func
-)
+from sqlalchemy import create_engine, and_, desc, func
 from sqlalchemy.orm import sessionmaker, Session, declarative_base
-from schema.movie import MovieDetail, MovieShortDetail, MovieTrailer, MovieFilter
-from schema.movie import Genre as GenreSchema
+from schema.movie_schema import (
+    MovieDetail,
+    MovieShortDetail,
+    MovieTrailer,
+    MovieFilter,
+    Genre as GenreSchema,
+    ProductionCompany as ProductionCompanySchema,
+    ProductionCountry as ProductionCountrySchema,
+    SpokenLanguage as SpokenLanguageSchema,
+    Collection as CollectionSchema,
+    Rating as RatingSchema,
+    Comment as CommentSchema
+)
 from db.config import PostgresConnection
-from models import Movie, MovieGenre, Genre, Trailer
+from models import (Movie, MovieGenre, Genre, Trailer,
+    ProductionCompany, MovieProductionCompany, ProductionCountry,
+    MovieProductionCountry, SpokenLanguage, MovieSpokenLanguage, 
+    Collection, Rating, ReleaseCalendar)
+
+
 # Define SQLAlchemy Base
 Base = declarative_base()
-
-
 class MovieService:
     def __init__(self):
-        # Create engine with connection pooling
         self.engine = create_engine(
             PostgresConnection.get_connection_string(),
-            pool_size=5,  # Connection pool size
-            max_overflow=10,  # Allow overflow connections
-            pool_timeout=30  # Timeout for getting a connection from pool
+            pool_size=5,  
+            max_overflow=10, 
+            pool_timeout=30  
         )
         self.SessionLocal = sessionmaker(
             autocommit=False,
@@ -35,15 +46,56 @@ class MovieService:
         finally:
             db.close()
 
-    async def get_movie_detail(self, movie_id: int, db: Session = Depends(get_db)) -> MovieDetail:
+    async def get_movie_detail(self, movie_id: int, db: Session) -> MovieDetail:
         """Get detailed information about a specific movie"""
+        # Get base movie info
         movie = db.query(Movie).filter(Movie.movie_id == movie_id).first()
         if not movie:
             raise HTTPException(status_code=404, detail="Movie not found")
 
+        # Get genres
         genres = db.query(Genre).join(MovieGenre).filter(MovieGenre.movie_id == movie_id).all()
-        genres=[GenreSchema(genre_id=g.genre_id, name=g.name) for g in genres]
+        genres = [GenreSchema(genre_id=g.genre_id, name=g.name) for g in genres]
 
+        # Get production companies
+        production_companies = db.query(ProductionCompany)\
+            .join(MovieProductionCompany)\
+            .filter(MovieProductionCompany.movie_id == movie_id).all()
+
+        # Get production countries
+        production_countries = db.query(ProductionCountry)\
+            .join(MovieProductionCountry)\
+            .filter(MovieProductionCountry.movie_id == movie_id).all()
+
+        # Get spoken languages
+        spoken_languages = db.query(SpokenLanguage)\
+            .join(MovieSpokenLanguage)\
+            .filter(MovieSpokenLanguage.movie_id == movie_id).all()
+
+        # Get collections
+        collections = db.query(Collection)\
+            .filter(Collection.movie_id == movie_id).all()
+
+        # Get comments using CommentService
+        from App.backend.service.user_service import CommentService
+        comments = await CommentService.get_movie_comments(movie_id, db)
+
+        # Get ratings and calculate average
+        ratings = db.query(Rating)\
+            .filter(Rating.movie_id == movie_id).all()
+        
+        average_rating = db.query(func.avg(Rating.score))\
+            .filter(Rating.movie_id == movie_id)\
+            .scalar() or 0.0
+
+        # Get release date (using first available release date)
+        release_date = db.query(ReleaseCalendar)\
+            .filter(ReleaseCalendar.movie_id == movie_id)\
+            .order_by(ReleaseCalendar.release_date)\
+            .first()
+
+        if not release_date:
+            raise HTTPException(status_code=404, detail="Release date not found")
 
         return MovieDetail(
             movie_id=movie.movie_id,
@@ -56,9 +108,35 @@ class MovieService:
             poster_path=movie.poster_path,
             popularity=movie.popularity,
             adult=movie.adult,
-            genres=[Genre(genre_id=g.genre_id, name=g.name) for g in genres],
             created_at=movie.created_at,
-            updated_at=movie.updated_at
+            updated_at=movie.updated_at,
+            genres=genres,
+            release_date=release_date.release_date,
+            production_companies=[
+                ProductionCompanySchema.model_validate(pc, from_attributes=True)
+                for pc in production_companies
+            ],
+            production_countries=[
+                ProductionCountrySchema.model_validate(pc, from_attributes=True)
+                for pc in production_countries
+            ],
+            spoken_languages=[
+                SpokenLanguageSchema.model_validate(sl, from_attributes=True)
+                for sl in spoken_languages
+            ],
+            collections=[
+                CollectionSchema.model_validate(c, from_attributes=True)
+                for c in collections
+            ],
+            comments=[
+                CommentSchema.model_validate(c, from_attributes=True)
+                for c in comments
+            ],
+            ratings=[
+                RatingSchema.model_validate(r, from_attributes=True)
+                for r in ratings
+            ],
+            average_rating=round(average_rating, 1)
         )
 
     async def get_movie_short_detail(self, movie_id: int, db: Session = Depends(get_db)) -> MovieShortDetail:

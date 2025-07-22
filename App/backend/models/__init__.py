@@ -4,12 +4,12 @@ from .user import (
     User, WatchHistory, Rating, Comment, 
     CommentVote, Follow, Watchlist
 )
-from .movie import (
+from .movie_models import (
     Movie, Genre, MovieGenre, Trailer,
     ProductionCompany, MovieProductionCompany,
     ProductionCountry, MovieProductionCountry,
     SpokenLanguage, MovieSpokenLanguage,
-    Collection
+    Collection, ReleaseCalendar
 )
 from .event import DimSession, FactUserEvent
 
@@ -25,7 +25,7 @@ __all__ = [
     'ProductionCompany', 'MovieProductionCompany',
     'ProductionCountry', 'MovieProductionCountry',
     'SpokenLanguage', 'MovieSpokenLanguage',
-    'Collection',
+    'Collection', 'ReleaseCalendar',
     # Event related
     'DimSession', 'FactUserEvent'
 ]

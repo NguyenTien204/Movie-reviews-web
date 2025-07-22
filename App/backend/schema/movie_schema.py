@@ -16,6 +16,50 @@ class MovieBase(BaseModel):
     popularity: Optional[float] = None
     adult: Optional[bool] = False
 
+class ProductionCompany(BaseModel):
+    company_id: int
+    name: str
+    origin_country: Optional[str] = None
+    logo_path: Optional[str] = None
+
+class ProductionCountry(BaseModel):
+    iso_3166_1: str
+    name: str
+
+class SpokenLanguage(BaseModel):
+    iso_639_1: str 
+    name: str
+
+class Collection(BaseModel):
+    collection_id: str
+    name: str
+    backdrop_path: Optional[str] = None
+    poster_path: Optional[str] = None
+
+class CommentVote(BaseModel):
+    user_id: int
+    comment_id: str
+    vote_type: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class Comment(BaseModel):
+    id: str
+    user_id: int
+    body: str
+    created_at: datetime
+    is_deleted: bool = False
+    votes: List[CommentVote] = []
+    vote_count: Optional[int] = 0
+
+class Rating(BaseModel):
+    rating_id: int
+    user_id: int
+    score: float
+    created_at: datetime
+
 class MovieDetail(MovieBase):
     movie_id: int
     genres: List[Genre]
@@ -24,7 +68,14 @@ class MovieDetail(MovieBase):
     tagline: Optional[str] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
-
+    production_companies: List[ProductionCompany]
+    production_countries: List[ProductionCountry]
+    spoken_languages: List[SpokenLanguage]
+    collections: List[Collection]
+    comments: List[Comment]
+    ratings: List[Rating]
+    average_rating: Optional[float] = None
+    
     class Config:
         from_attributes = True  # Enable ORM mode for SQLAlchemy
 
