@@ -39,4 +39,53 @@ iframe{
     background-color: #fff;
     box-shadow: 0 2px 8px rgba(0,0,0,0.12);
 }
+.detail-myscore{
+  position: relative;
+}
+.circle-score{
+  position: absolute;
+  right: 0;
+  bottom: 100px;
+  border-radius: 100%;
+  background-color: #7dd87d;
+  color: black;
+  font-size: 24px;
+  font-weight: bold;
+  padding: 4px 16px;
+  max-width: 40px;
+  max-width: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+}
+.myscore-bar{
+  margin-top: 10px;
+  display: flex;
+  flex-direction: row;
+  justify-content:space-around;
+}
+.piece-score-bar{
+  background-color: rgb(195, 195, 195);
+  
+  height: 8px;
+  width: 28px;
+}
+.piece-0 {
+  border-radius: 5px 0px 0px 5px ;
+}
+.piece-10{
+  border-radius: 0px 5px 5px 0px;
+}
+.post-myreview{
+  display: grid;
+  margin-top: 40px;
+  width: 100%;
+  height: 30px;
+  place-content: center;
+  border: 1px solid gray;
+  border-radius: 5px;
+  
+}
+
 

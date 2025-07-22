@@ -45,10 +45,24 @@
             </div>
         </div>
         <div class="detail-myscore">
-            <p style="color:gray; letter-spacing: 1px;">MY SCORE</p>
+            <p style="color:gray; letter-spacing: 1px; margin-bottom: 5px;">MY SCORE</p>
+            <div class="circle-score">7</div>
             <div class="score-description">Generally Favorable</div>
             <div class="myscore-bar">
-              
+                <div class="piece-score-bar piece-0"></div>
+                <div class="piece-score-bar piece-1"></div>
+                <div class="piece-score-bar piece-2"></div>
+                <div class="piece-score-bar piece-3"></div>
+                <div class="piece-score-bar piece-4"></div>
+                <div class="piece-score-bar piece-5"></div>
+                <div class="piece-score-bar piece-6"></div>
+                <div class="piece-score-bar piece-7"></div>
+                <div class="piece-score-bar piece-8"></div>
+                <div class="piece-score-bar piece-9"></div>
+                <div class="piece-score-bar piece-10"></div>
+            </div>
+            <div class="post-myreview">
+                <a href="#">Edit My Review</a>
             </div>
         </div>
 
@@ -59,4 +73,51 @@
         <div class="featured-underline featured-underline-1"></div>
     </div>
 </section>
+
+
+<!-- MODAL -->
+<div id="reviewModal" class="modal">
+  <div class="modal-content">
+    <!-- Nút đóng modal -->
+    <span class="close-btn">&times;</span>
+
+    <h3 class="modal-title">Add My Review</h3>
+
+    <!-- Thông tin phim -->
+    <div class="movie-info">
+      <img src="/static/img/flash.jpg" alt="Poster">
+      <div class="movie-meta">
+        <strong>Jurassic World Rebirth</strong>
+        <p>Release Date : Jul 2, 2025</p>
+      </div>
+    </div>
+
+    <!-- Phần chấm điểm -->
+    <div class="myscore-section">
+      <div class="score-circle">7</div>
+      <div class="score-text">
+        <p>MY SCORE</p>
+        <strong>Generally Favorable</strong>
+        <div class="score-bar">
+          <span class="bar active"></span><span class="bar active"></span><span class="bar active"></span>
+          <span class="bar active"></span><span class="bar active"></span><span class="bar"></span>
+          <span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form review -->
+    <form class="review-form">
+      <label>Write a review for <strong>Jurassic World Rebirth</strong></label>
+      <textarea placeholder="Minimum 75 characters" maxlength="5000"></textarea>
+      <div class="char-count">5000 Characters remaining</div>
+
+      <div class="modal-buttons">
+        <button type="button" class="btn cancel">Cancel</button>
+        <button type="submit" class="btn post">Post</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 {% endblock %}
