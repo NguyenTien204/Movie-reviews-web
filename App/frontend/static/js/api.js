@@ -61,5 +61,23 @@ async function filterMovies(params) {
   return await response.json();
 }
 
-// Example:
-filterMovies({ genre: "Action", year: 2024, limit: 10 });
+
+document.addEventListener("DOMContentLoaded", () => {
+  const movieId = window.location.pathname.split("/").pop();
+
+  fetch(`${BASE_URL}/api/v1/movies/${movieId}`)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error("Failed to fetch movie details");
+      }
+      return response.json();
+    })
+    .then(data => {
+      const jsonContainer = document.getElementById("json-output");
+      jsonContainer.textContent = JSON.stringify(data, null, 2); 
+    })
+    .catch(error => {
+      console.error("Error:", error);
+      document.getElementById("json-output").textContent = "Lỗi khi lấy dữ liệu.";
+    });
+});
