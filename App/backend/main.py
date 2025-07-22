@@ -1,13 +1,14 @@
 from fastapi import FastAPI
 from api.movie import router as movie_router
 from api.auth import router as auth_router
+from api.search import router as search_router
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
     title="Movie API",
-    description="API for managing and retrieving movie information",
-    version="1.0.0"
+    description="Backend API",
+    version="2.0.0"
 )
 
 app.add_middleware(
@@ -25,8 +26,16 @@ app.include_router(
     prefix="/api/v1",
     tags=["movies"]
 )
-
-app.include_router(auth_router)
+app.include_router(
+    search_router,
+    prefix="/api/v1",
+    tags=["movies"]
+)
+app.include_router(
+    auth_router,
+    prefix="/api/v1",
+    tags=["movies"]
+)
 
 @app.get("/")
 async def root():

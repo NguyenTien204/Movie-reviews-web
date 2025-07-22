@@ -40,6 +40,5 @@ async def category_page(request: Request):  # Đổi tên hàm để tránh trù
 async def detail_page(request: Request):  # Đổi tên hàm để tránh trùng
     return templates.TemplateResponse("detail.html", {"request": request})
 
-
 if __name__ == "__main__":
     uvicorn.run("app:app", host="127.0.0.1", port=8000, reload=True)
