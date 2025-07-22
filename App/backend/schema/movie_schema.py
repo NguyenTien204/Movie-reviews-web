@@ -6,6 +6,9 @@ from enum import Enum
 class Genre(BaseModel):
     genre_id: int
     name: str
+    class Config:
+        from_attributes = True
+
 
 class MovieBase(BaseModel):
     title: str

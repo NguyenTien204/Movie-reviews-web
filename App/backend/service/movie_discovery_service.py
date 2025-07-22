@@ -1,4 +1,3 @@
-from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import desc, func, and_
 from typing import List

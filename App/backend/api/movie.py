@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends
 from typing import List
 from sqlalchemy.orm import Session
-
 from schema.movie_schema import (
     MovieDetail,
     MovieShortDetail,
@@ -10,7 +9,7 @@ from schema.movie_schema import (
 )
 from service.movie_service import MovieDisplayService
 from service.movie_discovery_service import MovieDiscoveryService
-from db.config import get_db  # Cập nhật đường dẫn nếu bạn để chỗ khác
+from db.config import get_db
 
 router = APIRouter()
 
@@ -24,12 +23,10 @@ async def filter_movies(
     """Filter movies based on various criteria"""
     return await MovieDiscoveryService.filter_movies(filter_params, db)
 
-
 @router.get("/movies/trending", response_model=List[MovieShortDetail])
 async def trending_movies(db: Session = Depends(get_db)):
     """Get trending movies"""
     return await MovieDiscoveryService.get_trending_movies(db)
-
 
 @router.get("/movies/{movie_id}/recommendations", response_model=List[MovieShortDetail])
 async def get_movie_recommendations(movie_id: int, db: Session = Depends(get_db)):
@@ -49,8 +46,9 @@ async def get_movie_short_detail(movie_id: int, db: Session = Depends(get_db)):
     """Get short details of a movie for home page display"""
     return await MovieDisplayService.get_movie_short_detail(movie_id, db)
 
-
 @router.get("/movies/{movie_id}/trailer", response_model=List[MovieTrailer])
 async def get_movie_trailers(movie_id: int, db: Session = Depends(get_db)):
     """Get available trailers for a movie"""
     return await MovieDisplayService.get_movie_trailers(movie_id, db)
+
+# ---- Route gợi ý phim cá nhân hóa dựa trên log ---- #

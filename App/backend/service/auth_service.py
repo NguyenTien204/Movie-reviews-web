@@ -3,18 +3,9 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from schema.user import UserCreate, UserLogin
 from models import User
-from db.config import SessionLocal
 from core.security import hash_password, verify_password, create_access_token
 from datetime import timedelta
 
-
-def get_db(self) -> Session:
-        """Dependency for getting database session"""
-        db = self.SessionLocal()
-        try:
-            yield db
-        finally:
-            db.close()
 
 def register(user_data: UserCreate, db: Session):
     user = db.query(User).filter(

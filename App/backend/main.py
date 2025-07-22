@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from api.movie import router as movie_router
 from api.auth import router as auth_router
+from api.search import router as search_router
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -18,14 +19,23 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 # Include routers from different modules
 app.include_router(
     movie_router,
     prefix="/api/v1",
     tags=["movies"]
 )
-
-app.include_router(auth_router)
+app.include_router(
+    search_router,
+    prefix="/api/v1",
+    tags=["movies"]
+)
+app.include_router(
+    auth_router,
+    prefix="/api/v1",
+    tags=["movies"]
+)
 
 @app.get("/")
 async def root():
