@@ -29,11 +29,16 @@ class PostgresConnection:
         port = POSTGRES_PORT
         return f"postgresql://{user}:{pwd}@{host}:{port}/{db}"
 
+def get_db() -> Session:
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 
 
 
-
-engine = create_engine(POSTGRES_URL, connect_args={"check_same_thread": False})
+engine = create_engine(POSTGRES_URL)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 Base = declarative_base()

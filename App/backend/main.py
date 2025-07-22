@@ -6,8 +6,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
     title="Movie API",
-    description="API for managing and retrieving movie information",
-    version="1.0.0"
+    description="Backend API",
+    version="2.0.0"
 )
 
 app.add_middleware(
@@ -17,7 +17,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 # Include routers from different modules
 app.include_router(
