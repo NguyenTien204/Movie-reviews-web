@@ -92,7 +92,9 @@ class MovieCarousel {
                     <img src="${imageUrl}" alt="${movie.title}" loading="lazy">
                 </div>
                 <div class="movie-info">
-                    <h3 class="movie-title">${movie.title}</h3>
+                    <h3 class="movie-title">
+                        <a href="/detail" id="detail-movie">${movie.title}</a>
+                    </h3>
                     <div class="movie-genre-container">
                         ${genresHtml}
                     </div>
@@ -128,7 +130,9 @@ class MovieCarousel {
         return `
             <div class="movie-card-small">
                 <img src="${imageUrl}" alt="${movie.title}" loading="lazy">
-                <div class="small-movie-title">${movie.title}</div>
+                <div class="small-movie-title">
+                    <a href="/detail" id="detail-movie">${movie.title}</a>
+                </div>
                 <div class="small-score-box">
                     <span>${score}</span>
                     <p>${scoreDescription}</p>

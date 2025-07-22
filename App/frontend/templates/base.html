@@ -6,6 +6,7 @@
   <title>{% block title %}Filmritic - Metacritic Clone{% endblock %}</title>
   <link rel="stylesheet" href="/static/css/base.css">
   <link rel="stylesheet" href="/static/css/home.css">
+  <link rel="stylesheet" href="/static/css/detail.css">
 </head>
 <body>
 <div class="container">
@@ -13,10 +14,15 @@
   <header class="header">
     <div class="header-content">
       <div class="header-left">
-        <div class="logo" id="home-logo"><img src="/static/img/logonew.png" alt="logonew">Filmritic</div>
+        <div class="logo" id="home-logo">
+          <a href="/home">
+            <img src="/static/img/logonew.png" alt="logonew">
+            <h4>Filmritic</h4>
+          </a>
+        </div>
         <nav>
           <div class="dropdown-trigger">
-            <a href="#" id="category-link">Category</a>
+            <a href="/category" id="category-link">Category</a>
             <div class="dropdown-box" >
               <ul>
                 <li>Action</li>
@@ -63,7 +69,7 @@
   </footer>
 </div>
 
-<script src="/static/js/create_html.js"></script>
+<script src="/static/js/home.js"></script>
 <script src="/static/js/router.js"></script>
 </div>
 </body>

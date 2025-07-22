@@ -13,6 +13,10 @@ const Router = {
     {
       path: '/category',
       elementId: 'category-link'
+    },
+    {
+      path: '/detail',
+      elementId: 'detail-movie'
     }
 
     // Thêm route mới vào đây
@@ -25,16 +29,19 @@ const Router = {
   },
 
   // Thiết lập event listeners cho tất cả route
-  setupEventListeners() {
-    this.routes.forEach(route => {
-      const element = document.getElementById(route.elementId);
+setupEventListeners() {
+  this.routes.forEach(route => {
+    const ids = Array.isArray(route.elementIds) ? route.elementIds : [route.elementIds];
+    ids.forEach(id => {
+      const element = document.getElementById(id);
       if (element) {
         element.addEventListener('click', (e) => this.navigate(e, route.path));
       } else {
-        console.warn(`Element #${route.elementId} not found for route: ${route.path}`);
+        console.warn(`Element #${id} not found for route: ${route.path}`);
       }
     });
-  },
+  });
+},
 
   // Xử lý chuyển trang
   navigate(event, path) {

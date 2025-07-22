@@ -36,5 +36,10 @@ async def home(request: Request):
 async def category_page(request: Request):  # Đổi tên hàm để tránh trùng
     return templates.TemplateResponse("category.html", {"request": request})
 
+@app.get("/detail", response_class=HTMLResponse)
+async def detail_page(request: Request):  # Đổi tên hàm để tránh trùng
+    return templates.TemplateResponse("detail.html", {"request": request})
+
+
 if __name__ == "__main__":
     uvicorn.run("app:app", host="127.0.0.1", port=8000, reload=True)

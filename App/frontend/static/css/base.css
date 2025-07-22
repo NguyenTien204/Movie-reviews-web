@@ -4,6 +4,15 @@ body {
   padding: 0;
   box-sizing: border-box;
 }
+a,
+a:visited,
+a:hover,
+a:active,
+a:focus {
+  text-decoration: none;
+  color: inherit;
+  outline: none;
+}
 /* ==============header============== */
 .container {
   max-width: 1200px;
@@ -29,6 +38,7 @@ body {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+
   align-items: center;
   padding: 0 20px;
   height: 60px;
@@ -45,17 +55,25 @@ body {
 }
 .logo {
   display: flex;
+  
   align-items: center;
   font-size: 20px;
   font-weight: bold;
   font-family: Geneva, Tahoma, sans-serif;
   margin-right: 50px;
+  
 }
-.logo img {
+.logo a {
+  display: flex; 
+  flex-direction: row;
+  align-items: center;
+}
+.logo a img {
   height: 40px;
   width: auto;
   margin-right: 10px;
 }
+
 .header nav {
   display: flex;
   align-items: center;
@@ -161,10 +179,10 @@ body {
   background: linear-gradient(
     to right,
     #4caf50 0%,
-    #4caf50 33%,
-    #fbc02d 33%,
-    #fbc02d 67%,
-    #e53935 67%,
+    #4caf50 32%,
+    #fbc02d 32%,
+    #fbc02d 68%,
+    #e53935 68%,
     #e53935 100%
   );
   position: absolute;
@@ -232,6 +250,13 @@ body {
   margin-top: 20px;
   margin-bottom: 0px;
   margin-left: 40px;
+  
+}
+.logo-footer img{
+  width:40px;
+  height:40px;
+  margin-right: 10px;
+
 }
 .footer-box img {
   width: 50px;

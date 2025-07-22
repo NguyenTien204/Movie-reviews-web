@@ -1,0 +1,42 @@
+
+.box-detail{
+    position: absolute;
+    left: 0;
+    width: 100%;
+    background-color: #fbc02d;
+    height: 100px;
+    z-index: 0; 
+}
+.section-detail-movie { 
+  display: flex;
+  flex-direction: row;
+
+}
+.detail-video,
+.detail-rating {
+  margin-top: 50px;
+  
+}
+.detail-video{
+    z-index: 2;
+    width:70%;
+    border-radius: 5px;
+    
+    
+}
+iframe{
+    border-radius:10px;
+    
+}
+.detail-rating{
+    z-index: 1;
+    right:195px;
+    border: 2px solid white;
+    border-radius: 10px 10px 10px 10px;
+    padding: 15px 20px;
+    width: 30%;
+    height: 450px;
+    background-color: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+
