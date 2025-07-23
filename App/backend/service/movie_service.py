@@ -86,14 +86,15 @@ class MovieDisplayService:
         movie = db.query(Movie).filter(Movie.movie_id == movie_id).first()
         if not movie:
             raise HTTPException(status_code=404, detail="Movie not found")
-        
         genres = db.query(Genre).join(MovieGenre).filter(MovieGenre.movie_id == movie_id).all()
+        average_rating = db.query(func.avg(Rating.score)).filter(Rating.movie_id == movie_id).scalar() or 0.0
         return MovieShortDetail(
             movie_id=movie.movie_id,
             title=movie.title,
             poster_path=movie.poster_path,
             popularity=movie.popularity,
-            genres=[GenreSchema(genre_id=g.genre_id, name=g.name) for g in genres]
+            genres=[GenreSchema(genre_id=g.genre_id, name=g.name) for g in genres],
+            average_rating=round(average_rating, 1)
         )
 
     @staticmethod
