@@ -1,13 +1,23 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import from_json, col
-from kafka_schemas import userlog_schema
-from mongo_writer import write_to_mongo
+from kafka_consumer.kafka_schemas import userlog_schema
+from kafka_consumer.mongo_writer import write_to_mongo
 from config.connection import KAFKA_BOOTSTRAP_SERVERS, KAFKA_TOPICS
+import os
+
+PYTHON_PATH = r"C:\Users\Admin\AppData\Local\Programs\Python\Python310\python.exe"
+os.environ["PYSPARK_PYTHON"] = PYTHON_PATH
+os.environ["PYSPARK_DRIVER_PYTHON"] = PYTHON_PATH
 
 def start_click_stream():
     spark = SparkSession.builder \
-        .appName("ClickStreamConsumer") \
-        .getOrCreate()
+    .appName("ClickStreamConsumer") \
+    .config("spark.jars.packages", "org.apache.spark:spark-sql-kafka-0-10_2.12:3.4.1") \
+    .config("spark.ui.showConsoleProgress", "true") \
+    .config("spark.python.worker.reuse", "true") \
+    .config("spark.executorEnv.PYSPARK_PYTHON", PYTHON_PATH) \
+    .getOrCreate()
+
 
     spark.sparkContext.setLogLevel("WARN")
 
@@ -16,7 +26,7 @@ def start_click_stream():
         .format("kafka")
         .option("kafka.bootstrap.servers", KAFKA_BOOTSTRAP_SERVERS)
         .option("subscribe", KAFKA_TOPICS["click"])
-        .option("startingOffsets", "latest")
+        .option("startingOffsets", "earliest")
         .load()
     )
 
