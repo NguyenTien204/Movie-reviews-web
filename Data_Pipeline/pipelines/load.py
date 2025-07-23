@@ -45,7 +45,7 @@ class PostgresLoader:
         "movie_production_countries", "movie_spoken_languages", "movie_collections"
     ]
 
-    def _filter_new_records(self, df: pd.DataFrame, table: str) -> pd.DataFrame:
+    def _process_new_records(self, df: pd.DataFrame, table: str) -> pd.DataFrame:
         """Lọc ra các bản ghi mới chưa tồn tại trong database"""
         if df is None or df.empty:
             return pd.DataFrame()
@@ -66,7 +66,7 @@ class PostgresLoader:
         return new_records
 
     def _filter_new_records(self, df: pd.DataFrame, table: str) -> pd.DataFrame:
-        """Lọc ra các bản ghi mới chưa tồn tại trong database"""
+        """Lọc ra các bản ghi mới chưa tồn tại trong database bảng phụ thuộc"""
         if df is None or df.empty:
             return pd.DataFrame()
             
@@ -144,7 +144,7 @@ class PostgresLoader:
         """Load dữ liệu vào database"""
         
         # Lọc main table
-        main_new = self._filter_new_records(main_df, main_table)
+        main_new = self._process_new_records(main_df, main_table)
         
         if main_new.empty:
             logger.info("No new records to insert")
