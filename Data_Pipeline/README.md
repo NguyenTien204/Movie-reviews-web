@@ -7,19 +7,16 @@ This module contains the core **data engineering pipeline** for a movie recommen
 ## 📦 Components Overview
 
 ### 1. **Kafka** (Streaming Ingestion)
-- `user_logs` topic: receives user interactions (watch, rate, comment, etc.)
-- `movie` topic: backup or async movie data from TMDB API
-- `async_producer.py`: pushes user logs from the frontend
-- `spark_stream_consumer.py`: consumes logs in real-time via Spark Streaming
+- `Topic`: click, rating, trailer, search, dwelltime 
+- `clean_transform.py`: consumes logs in real-time via Spark Streaming
 
 ### 2. **TMDB Ingestion**
 - `tmdb_fetcher.py`: pulls movie data from the TMDB API
-- `backup_to_kafka.py`: stores movie data in Kafka for redundancy
 - `MongoDB`: stores raw JSON movie documents, backup raw user log from frontend
 
 ### 3. **Spark Jobs**
-- `clean_transform.py`: processes and normalizes movie and user data
-- `enrich_data.py`: enriches user logs with metadata before insertion into PostgreSQL
+- `clean_transform.py`: processes user log data
+- `enrich_data.py`: enriches user logs with metadata from history and PostgreSQL
 
 ### 4. **PostgreSQL**
 Stores the structured and relational version of:
@@ -44,23 +41,20 @@ Stores the structured and relational version of:
 | **PostgreSQL**       | Structured data warehouse             |
 | **Python (Pandas)**  | Batch data processing & utilities     |
 | **Apache Airflow**   | Scheduling and orchestration          |
-| **Flask API**        | Receives user events from frontend    |
+| **FAST API**        | Receives user events from frontend    |
 
 ---
-### 📁 Project Structure (Simplified)
+### 📁 Data Structure (Simplified)
 
 ```text
 movie_data_pipeline/
 │
-├── kafka/
-│   ├── producer/             # Sends logs to Kafka
-│   └── consumer/             # Spark Streaming job
+├── kafka_consumer/          # Kafka consumer 
 │
-├── ingestion/          # TMDB API ingestion & backup
-├── processing/              # Data cleaning, transformation
+├── ingestion/               # TMDB API ingestion & backup
+├── processing/              # Data cleaning, processing transformation
 ├── database/                # SQL schema & data loaders
-├── models/                  # Recommendation model (optional)
-├── pipelines/               # DAGs or batch jobs (e.g., Airflow)
+├── pipelines/               # DAGs or batch jobs 
 ├── config/                  # Connection & auth configs
 ├── monitoring/              # Logging utilities
 ├── tests/                   # Unit tests for data modules
