@@ -70,8 +70,18 @@
   </footer>
 </div>
 
-<script src="/static/js/home.js"></script>
+      
+<!-- <script src="/static/js/api.js"></script> -->
+<!-- <script src="/static/js/config.js"></script>   -->
 <script src="/static/js/router.js"></script>
-</div>
+<!-- <script src="/static/js/apiService.js"></script>     -->
+<!-- <script src="/static/js/main.js"></script> -->
+<!-- <script src="/static/js/createHome.js"></script> -->
+<script src="/static/js/home.js"></script>
+{% if request.url.path == "/movies" %}
+  <script src="/static/js/detail.js"></script>
+{% endif %}
+
+
 </body>
 </html>

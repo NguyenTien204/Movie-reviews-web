@@ -15,7 +15,7 @@ const Router = {
       elementId: 'category-link'
     },
     {
-      path: '/detail',
+      path: '/movies',
       elementId: 'detail-movie'
     }
 

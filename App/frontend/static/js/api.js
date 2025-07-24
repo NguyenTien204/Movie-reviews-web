@@ -65,7 +65,7 @@ async function filterMovies(params) {
 document.addEventListener("DOMContentLoaded", () => {
   const movieId = window.location.pathname.split("/").pop();
 
-  fetch(`${BASE_URL}/api/v1/movies/${movieId}`)
+  fetch(`${BASE_URL}/movies/12`)
     .then(response => {
       if (!response.ok) {
         throw new Error("Failed to fetch movie details");
