@@ -1,17 +1,4 @@
 
-async function fetchMovieDetailData(movieId) {
-    try {
-        const response = await fetch(`${API_CONFIG.MOVIE_DETAIL_URL}${movieId}`);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error('Error fetching movie detail data:', error);
-        return null;
-    }
-}
 
 // Function tạo HTML cho video section từ dữ liệu API
 async function createDetailVideoHTML(movieData) {

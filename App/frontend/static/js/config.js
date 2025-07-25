@@ -14,27 +14,19 @@ function getPosterUrl(path) {
     return path ? `${POSTER_BASE}${path}` : `${POSTER_BASE}/c32TsWLES7kL1uy6fF03V67AIYX.jpg`;
 }
 
-// Hàm lấy video URL từ API
 async function getVideoUrl(movieId) {
     try {
-        // Gọi API để lấy thông tin trailer
         const response = await fetch(`${BASE_URL}/movies/${movieId}/trailer`);
-        if (!response.ok) {
-            throw new Error('Failed to fetch trailer');
-        }
+        if (!response.ok) throw new Error('Failed to fetch trailer');
         const data = await response.json();
-        
-        // Kiểm tra nếu có key video từ API
-        if (data && data.key) {
-            // Tạo URL YouTube embed
-            return `https://www.youtube.com/embed/${data.key}`;
+        const url = data[0].key
+        if (url) {
+            return `https://www.youtube.com/embed/${url}`;
         } else {
-            // Trả về ảnh poster mặc định nếu không có trailer
             return `${POSTER_BASE}/c32TsWLES7kL1uy6fF03V67AIYX.jpg`;
         }
     } catch (error) {
         console.error('Error fetching video URL:', error);
-        // Trả về ảnh poster mặc định nếu có lỗi
         return `${POSTER_BASE}/c32TsWLES7kL1uy6fF03V67AIYX.jpg`;
     }
 }
