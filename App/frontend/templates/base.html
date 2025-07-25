@@ -1,55 +1,145 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{% block title %}Filmritic - Metacritic Clone{% endblock %}</title>
+  <link rel="icon" href="/static/img/logonew.png" type="image/x-icon" />
   <link rel="stylesheet" href="/static/css/base.css">
   <link rel="stylesheet" href="/static/css/home.css">
   <link rel="stylesheet" href="/static/css/detail.css">
+  <link rel="stylesheet" href="/static/css/lognIn_register.css">
 </head>
+
 <body>
-<div class="container">
-  <!-- Header -->
-  <header class="header">
-    <div class="header-content">
-      <div class="header-left">
-        <div class="logo" id="home-logo">
-          <a href="/home">
-            <img src="/static/img/logonew.png" alt="logonew">
-            <h4>Filmritic</h4>
-          </a>
-        </div>
-        <nav>
-          <div class="dropdown-trigger">
-            <a href="/category" id="category-link">Category</a>
-            <div class="dropdown-box" >
-              <ul>
-                <li>Action</li>
-                <li>Adventure</li>
-                <li>Drama</li>
-                <li>Comedy</li>
-              </ul>
-            </div>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-content">
+        <div class="header-left">
+          <div class="logo" id="home-logo">
+            <a href="/home" class="logo-link">
+              <img src="/static/img/logonew.png" class="logo-img" alt="logonew">
+              <h4 style="color: white;">Filmritic</h4>
+            </a>
           </div>
-        </nav>
+          <nav>
+            <div class="dropdown-trigger">
+              <a href="/category" id="category-link">Category</a>
+              <div class="dropdown-box">
+                <ul>
+                  <li>Action</li>
+                  <li>Adventure</li>
+                  <li>Drama</li>
+                  <li>Comedy</li>
+                </ul>
+              </div>
+            </div>
+          </nav>
+        </div>
+        <div class="search-user">
+          <div class="search-wrapper">
+            <input type="text" placeholder="Search" />
+            <button type="submit">
+              <img src="/static/img/kinhlup.png" alt="Search">
+            </button>
+          </div>
+          <a href="#" class="register-link demo-btn">Register</a>
+          <!-- <a class="user-icon"><img src="/static/img/user.png" alt="user"></a> -->
+
+        </div>
       </div>
-      <div class="search-user">
-        <input type="text" placeholder="Search" />
-        <button><img src="/static/img/kinhlup.png" alt="Search"></button>
-        <span class="user-icon"><img src="/static/img/user.png" alt="user"></span>
+    </header>
+
+
+
+    <!-- Auth Modal -->
+    <div class="auth-modal" id="authModal">
+      <div class="auth-container">
+        <!-- Close button -->
+        <button class="close-btn" id="closeBtn">&times;</button>
+
+        <!-- Logo section -->
+        <div class="logo-section">
+          <img src="/static/img/logonew.png" class="logo-img" alt="logonew">
+          <h4>Filmritic</h4>
+        </div>
+
+        <!-- Tab navigation -->
+        <div class="tab-navigation">
+          <button class="tab-btn" id="registerTab">Register</button>
+          <button class="demo-btn login-link tab-btn active" id="loginTab">Sign In</button>
+        </div>
+
+        <!-- Form container -->
+        <div class="form-container">
+          <!-- Register Form -->
+          <form class="auth-form" id="registerForm">
+            <div class="welcome-text">
+              Get started with a free Filmritic account to rate, review, and discover top movies
+            </div>
+
+            <div class="message" id="registerMessage"></div>
+
+            <div class="form-group">
+              <label class="form-label" for="registerEmail">Email</label>
+              <input type="email" class="form-input" id="registerEmail" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="registerUsername">Username</label>
+              <input type="text" class="form-input" id="registerUsername" required>
+              <div class="form-hint">15 characters max, letters and numbers only</div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="registerPassword">Password</label>
+              <input type="password" class="form-input" id="registerPassword" required>
+              <div class="form-hint">Must be at least 6 characters with 1 number and special character</div>
+            </div>
+
+            <button type="submit" class="submit-btn">Register</button>
+
+            <div class="terms-text">
+              By joining Metacritic, you agree to Metacritic's <a href="#">Terms of Use</a> and <a href="#">Privacy
+                Policy</a>.
+            </div>
+          </form>
+
+          <!-- Login Form -->
+          <form class="auth-form active" id="loginForm">
+            <div class="welcome-text">
+              Welcome back!
+            </div>
+
+            <div class="message" id="loginMessage"></div>
+
+            <div class="form-group">
+              <label class="form-label" for="loginEmail">Email</label>
+              <input type="email" class="form-input" id="loginEmail" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="loginPassword">Password</label>
+              <input type="password" class="form-input" id="loginPassword" required>
+            </div>
+
+            <button type="submit" class="submit-btn">Sign In</button>
+
+            <div class="forgot-password">
+              <a href="#">Forgot Password?</a>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
-  </header>
-
-  <!-- Content Block -->
-  {% block content %}{% endblock %}
-
-  <!-- Footer -->
-  <footer class="footer">
-    <div class="footer-bar"></div>
-    <div class="logo logo-footer"><img src="/static/img/logonew.png" alt="logonew">Filmritic</div>
-    <div class="footer-content">
+    {% block content %}{% endblock %}
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-bar"></div>
+      <div class="logo logo-footer"><img src="/static/img/logonew.png" alt="logonew">Filmritic</div>
+      <div class="footer-content">
         <div class="footer-box">
           <h4 class="green">Data Science</h4>
           <img src="/static/img/logodev.png" alt="">
@@ -65,12 +155,23 @@
           <img src="/static/img/logodev.png" alt="">
           <p>Nguyễn Văn Tiến</p>
         </div>
-    </div>
-  </footer>
-</div>
+      </div>
+    </footer>
+  </div>
 
-<script src="/static/js/home.js"></script>
-<script src="/static/js/router.js"></script>
-</div>
+  <!-- <script src="/static/js/api.js"></script> -->
+  <script src="/static/js/config.js"></script>
+  <script src="/static/js/router.js"></script>
+  <script src="/static/js/apiService.js"></script>
+  <script src="/static/js/main.js"></script>
+  <script src="/static/js/createHome.js"></script>
+  <script src="/static/js/lognIn_register.js"></script>
+  <!-- <script src="/static/js/home.js"></script> -->
+  {% if request.url.path == "/movies" %}
+  <script src="/static/js/detail.js"></script>
+  {% endif %}
+
+
 </body>
+
 </html>

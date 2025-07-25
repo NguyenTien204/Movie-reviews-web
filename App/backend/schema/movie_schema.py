@@ -66,17 +66,10 @@ class Rating(BaseModel):
 class MovieDetail(MovieBase):
     movie_id: int
     genres: List[Genre]
-    runtime: Optional[int] = None
-    homepage: Optional[str] = None
-    tagline: Optional[str] = None
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
     production_companies: List[ProductionCompany]
     production_countries: List[ProductionCountry]
     spoken_languages: List[SpokenLanguage]
     collections: List[Collection]
-    comments: List[Comment]
-    ratings: List[Rating]
     average_rating: Optional[float] = None
     
     class Config:
@@ -88,6 +81,7 @@ class MovieShortDetail(BaseModel):
     poster_path: Optional[str] = None
     popularity: Optional[float] = None
     genres: List[Genre]
+    average_rating: Optional[float]
 
     class Config:
         from_attributes = True  # Enable ORM mode for SQLAlchemy

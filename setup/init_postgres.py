@@ -3,7 +3,7 @@ import psycopg2
 import sqlparse
 import time
 from psycopg2 import OperationalError, ProgrammingError, errors, sql
-from Data_Pipeline.config.postgres_config import POSTGRES_DB, POSTGRES_HOST, POSTGRES_PASSWORD, POSTGRES_USER, POSTGRES_PORT
+from Data_Pipeline.config.connection import POSTGRES_DB, POSTGRES_HOST, POSTGRES_PASSWORD, POSTGRES_USER, POSTGRES_PORT
 
 def ensure_database_exists():
     try:

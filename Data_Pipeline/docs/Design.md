@@ -24,7 +24,7 @@ This document details the end-to-end design of the data pipeline for the movie r
 
 **4. Processing & Modeling:**
 - **Spark Streaming** consumes Kafka topics, cleans, transforms, and enriches data in (near) real-time.
-- **Pandas** batch jobs (fallback) process data if Spark is unavailable.
+- **Pandas** batch jobs process data for movie data
 
 **5. Storage:**
 - **PostgreSQL** stores structured, relational, and analytical data (star schema: fact & dimension tables).
@@ -78,7 +78,7 @@ flowchart TD
   E --> F[PostgreSQL: Analytical DB]
   F --> G[Serving Layer: Metabase / FastAPI / Streamlit]
   E --> H[Monitoring & Logging]
-  B --> I[Pandas Batch Processor (Fallback)]
+  B --> I[Pandas Batch Processor]
 ```
 
 ---
@@ -97,8 +97,8 @@ flowchart TD
 
 ### Design Notes
 
-- Kafka topics: `movie`, `user_watch_log`, `user_click_log`, `user_comment_log`
-- Airflow DAGs manage both batch and fallback jobs.
+- Kafka topics: `click`, `rating`, `trailer`, `search`, `dwelltime` 
+- Airflow DAGs manage jobs.
 
 ---
 
@@ -126,17 +126,17 @@ flowchart TD
 ### Responsibilities
 
 - Clean, enrich, and transform data for analytics and ML.
-- Support both streaming (real-time) and batch (fallback) pipelines.
+- Support both streaming (real-time) and batch pipelines.
 
 ### Streaming (Primary)
 
 - **Spark Streaming** reads from Kafka, processes events, and writes to PostgreSQL fact/dimension tables.
 - Enables near real-time analytics, dashboards, and recommendations.
 
-### Batch (Fallback)
+### Batch 
 
-- **Pandas** batch jobs process data from MongoDB or Kafka if Spark is unavailable.
-- Used for nightly jobs, data backfills, or recovery.
+- **Pandas** batch jobs process data from MongoDB to nomalize, process missing data, duplicate, etc.
+- Used for nightly jobs.
 
 ### Consistency Design
 
@@ -168,17 +168,9 @@ flowchart TD
 
 ## 🤖 ML Model Integration
 
-- **Data Source**: ML models train on data from PostgreSQL (ratings, watch history, user events, etc.).
-- **Serving**: Model outputs (e.g., recommendations) are exposed via FastAPI endpoints or visualized in Metabase/Streamlit.
+- **Data Source**: ML models train on data from Spark after enrichment with PostgreSQL data (ratings, watch history, user events, etc.).
+- **Serving**: Model outputs (e.g., recommendations) are exposed via FastAPI endpoints or visualized in Streamlit.
 - **Consumers**: Frontend apps, dashboards, or other services can consume recommendations or analytics.
-
----
-
-## ⚠️ Fallback & Error Handling
-
-- If Spark fails, Airflow switches to Pandas batch jobs (controlled by Airflow variable).
-- Fallback data is stored separately and not auto-merged; admin can manually promote fallback data if needed.
-- All raw data is always backed up in MongoDB for recovery and reprocessing.
 
 ---
 
@@ -212,5 +204,5 @@ flowchart TD
 
 ---
 
-**Version:** 1.1  
-**Last Updated:** 2025-06-27
+**Version:** 1.2  
+**Last Updated:** 2025-07-24

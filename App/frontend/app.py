@@ -36,7 +36,7 @@ async def home(request: Request):
 async def category_page(request: Request):  # Đổi tên hàm để tránh trùng
     return templates.TemplateResponse("category.html", {"request": request})
 
-@app.get("/detail", response_class=HTMLResponse)
+@app.get("/movies", response_class=HTMLResponse)
 async def detail_page(request: Request):  # Đổi tên hàm để tránh trùng
     return templates.TemplateResponse("detail.html", {"request": request})
 

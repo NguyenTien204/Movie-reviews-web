@@ -39,4 +39,126 @@ iframe{
     background-color: #fff;
     box-shadow: 0 2px 8px rgba(0,0,0,0.12);
 }
+.detail-myscore{
+  position: relative;
+}
+.detail-underline{
+  width: 100%;
+  height: 1.5px;
+  background-color: #444445;
+  margin-bottom: 10px;
+}
+.circle-score{
+  position: absolute;
+  right: 0;
+  bottom: 100px;
+  border-radius: 100%;
+  background-color: #7dd87d;
+  color: black;
+  font-size: 24px;
+  font-weight: bold;
+  padding: 4px 16px;
+  max-width: 40px;
+  max-width: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
+}
+.myscore-bar{
+  margin-top: 10px;
+  display: flex;
+  flex-direction: row;
+  justify-content:space-around;
+}
+.piece-score-bar{
+  background-color: rgb(195, 195, 195);
+  
+  height: 8px;
+  width: 28px;
+}
+.piece-0 {
+  border-radius: 5px 0px 0px 5px ;
+}
+.piece-10{
+  border-radius: 0px 5px 5px 0px;
+}
+.post-myreview{
+  display: grid;
+  margin-top: 40px;
+  width: 100%;
+  height: 30px;
+  place-content: center;
+  border: 1px solid gray;
+  border-radius: 5px;
+  
+}
+.list-comment{
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-gap: 20px;
+  margin-top: 20px;
+  padding: 10px;
+  
+  
+}
+.comment {
+  border: 1px solid #000000;
+  display: grid;
+  grid-template-columns: 1fr 5fr 1fr;
+  grid-template-rows: 1fr 1fr 0.7fr ;
+  grid-template-areas: "score score score" "comment comment comment" "read read read" "line line line" "user user user";
+  padding: 10px;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.score-comment{
+  height: 50px;
+  color: black;
+  font-size: 24px;
+  font-weight: bold;
+  padding: 4px 12px;
+  max-width: 40px;
+  max-width: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.read-more{
+  background-color: gray;
+  border-radius: 5px;
+  border: 1px solid #1976d2;
+  padding: 4px 8px;
+  font-size: 17px;
+  font-weight: bold;
+  height: 30px;
+  width: 90px;
+  place-content: center;
+}
+.read-more p{
+  color: white;
+  margin: 0;
+}
+.user-name{
+  font-weight:bolder;
+  color: #000000;
+  font-size: 16px;
+  text-decoration: underline;
+}
+.review-all {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  
+ 
+}
+.review-all a {
+  text-decoration: none;
+  color: white;
+  background-color: gray;
+  padding: 10px 80px;
+  border-radius: 5px;
+  font-size: 20px;
+  text-align: center;
+}

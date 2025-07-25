@@ -10,14 +10,26 @@ POSTGRES_PASSWORD = '141124'
 
 MONGO_URI = "mongodb://localhost:27017"
 MONGO_DB_NAME = "tmdb_data"
+MONGO_LOG_DB = "movie_logs"
+MONGO_LOG_COLLECTIONS = {
+    "click": "click_logs",
+    "rating": "rating_logs",
+    "trailer": "trailer_logs",
+    "search": "search_logs",
+    "dwelltime": "dwell_logs"
+}
 MOVIE_COLLECTION = "raw_movies"
 USER_COMMENT_COLLECTION = "user_comments"
 
 # Configuration for Kafka in the movie data pipeline project
 KAFKA_BOOTSTRAP_SERVERS = 'localhost:9092'
-KAFKA_TOPIC_MOVIE = 'movie'
-KAFKA_TOPIC_USER_LOGS = 'user_logs'
-KAFKA_CONSUMER_GROUP = 'movie_consumer_group'
+KAFKA_TOPICS = {
+    "click": "userlog_click",
+    "rating": "userlog_rating",
+    "trailer": "userlog_trailer",
+    "search": "userlog_search",
+    "dwelltime": "userlog_dwelltime"
+}
 
 SPARK_APP_NAME = "MovieStreamingProcessor"
 SPARK_MASTER = "local[*]"  #"spark://host:port" nếu dùng cluster

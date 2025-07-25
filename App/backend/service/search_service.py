@@ -2,7 +2,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, func
 from typing import List
-from models import Movie, Genre, MovieGenre
+from models import Movie, Genre, MovieGenre, Rating
 from schema.movie_schema import (
     MovieShortDetail, Genre as GenreSchema,
 )
@@ -25,29 +25,27 @@ class Movie_Search_service:
         )
 
         movie_ids = [m.movie_id for m in movies]
-
-        # Truy vấn genre riêng biệt
         movie_genres = (
             db.query(MovieGenre.movie_id, Genre)
             .join(Genre, Genre.genre_id == MovieGenre.genre_id)
             .filter(MovieGenre.movie_id.in_(movie_ids))
             .all()
         )
-
-        # Tạo dict mapping movie_id -> list[Genre]
         from collections import defaultdict
         genre_map = defaultdict(list)
         for movie_id, genre in movie_genres:
             genre_map[movie_id].append(GenreSchema(genre_id=genre.genre_id, name=genre.name))
 
-        # Trả kết quả
         return [
             MovieShortDetail(
                 movie_id=m.movie_id,
                 title=m.title,
                 poster_path=m.poster_path,
                 popularity=m.popularity,
-                genres=genre_map[m.movie_id]
+                genres=genre_map[m.movie_id],
+                average_rating=round(
+                    db.query(func.avg(Rating.score)).filter(Rating.movie_id == m.movie_id).scalar() or 0.0, 1
+                )
             )
             for m in movies
         ]

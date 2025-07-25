@@ -50,14 +50,10 @@ class MovieDisplayService:
             title=movie.title,
             original_title=movie.original_title,
             overview=movie.overview,
-            tagline=movie.tagline,
-            runtime=movie.runtime,
             homepage=movie.homepage,
             poster_path=movie.poster_path,
             popularity=movie.popularity,
             adult=movie.adult,
-            created_at=movie.created_at,
-            updated_at=movie.updated_at,
             genres=genres,
             release_date=release_date.release_date,
             production_companies=[
@@ -76,7 +72,6 @@ class MovieDisplayService:
                 CollectionSchema.model_validate(c, from_attributes=True)
                 for c in collections
             ],
-            comments=[CommentSchema.model_validate(c, from_attributes=True) for c in comments],
             ratings=[RatingSchema.model_validate(r, from_attributes=True) for r in ratings],
             average_rating=round(average_rating, 1)
         )
@@ -86,21 +81,31 @@ class MovieDisplayService:
         movie = db.query(Movie).filter(Movie.movie_id == movie_id).first()
         if not movie:
             raise HTTPException(status_code=404, detail="Movie not found")
-        
         genres = db.query(Genre).join(MovieGenre).filter(MovieGenre.movie_id == movie_id).all()
+        average_rating = db.query(func.avg(Rating.score)).filter(Rating.movie_id == movie_id).scalar() or 0.0
         return MovieShortDetail(
             movie_id=movie.movie_id,
             title=movie.title,
             poster_path=movie.poster_path,
             popularity=movie.popularity,
-            genres=[GenreSchema(genre_id=g.genre_id, name=g.name) for g in genres]
+            genres=[GenreSchema(genre_id=g.genre_id, name=g.name) for g in genres],
+            average_rating=round(average_rating, 1)
         )
 
     @staticmethod
     async def get_movie_trailers(movie_id: int, db: Session):
-        trailers = db.query(Trailer).filter(
-            and_(Trailer.movie_id == movie_id, Trailer.type == 'Trailer')
-        ).all()
-        return [
-            MovieTrailer.model_validate(t, from_attributes=True) for t in trailers
-        ]
+        trailer = db.query(Trailer).filter(
+            and_(
+                Trailer.movie_id == movie_id,
+                Trailer.type == 'Trailer',
+                Trailer.site == 'YouTube',
+                Trailer.name.ilike('%official%')
+            )
+        ).order_by(Trailer.published_at.desc()).first()
+
+        if not trailer:
+            return []
+
+        return [MovieTrailer.model_validate(trailer, from_attributes=True)]
+
+
