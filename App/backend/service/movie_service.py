@@ -50,14 +50,10 @@ class MovieDisplayService:
             title=movie.title,
             original_title=movie.original_title,
             overview=movie.overview,
-            tagline=movie.tagline,
-            runtime=movie.runtime,
             homepage=movie.homepage,
             poster_path=movie.poster_path,
             popularity=movie.popularity,
             adult=movie.adult,
-            created_at=movie.created_at,
-            updated_at=movie.updated_at,
             genres=genres,
             release_date=release_date.release_date,
             production_companies=[
@@ -76,7 +72,6 @@ class MovieDisplayService:
                 CollectionSchema.model_validate(c, from_attributes=True)
                 for c in collections
             ],
-            comments=[CommentSchema.model_validate(c, from_attributes=True) for c in comments],
             ratings=[RatingSchema.model_validate(r, from_attributes=True) for r in ratings],
             average_rating=round(average_rating, 1)
         )
@@ -99,9 +94,18 @@ class MovieDisplayService:
 
     @staticmethod
     async def get_movie_trailers(movie_id: int, db: Session):
-        trailers = db.query(Trailer).filter(
-            and_(Trailer.movie_id == movie_id, Trailer.type == 'Trailer')
-        ).all()
-        return [
-            MovieTrailer.model_validate(t, from_attributes=True) for t in trailers
-        ]
+        trailer = db.query(Trailer).filter(
+            and_(
+                Trailer.movie_id == movie_id,
+                Trailer.type == 'Trailer',
+                Trailer.site == 'YouTube',
+                Trailer.name.ilike('%official%')
+            )
+        ).order_by(Trailer.published_at.desc()).first()
+
+        if not trailer:
+            return []
+
+        return [MovieTrailer.model_validate(trailer, from_attributes=True)]
+
+

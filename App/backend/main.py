@@ -22,16 +22,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 # Danh sách các router cần include
 routers = [
     (movie_router, "/api/v1", ["movies"]),
     (search_router, "/api/v1", ["movies"]),
-    (auth_router, "/api/v1", ["auth"]),
+    (auth_router, "/api/v1", ["Authentication"])
 ]
 
 # Gộp router
 for router, prefix, tags in routers:
     app.include_router(router, prefix=prefix, tags=tags)
+
 
 @app.get("/")
 async def root():
