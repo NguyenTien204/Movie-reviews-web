@@ -6,12 +6,13 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from psycopg2.extras import execute_values
 
 class MovieSimilarity:
-    def __init__(self, dbname, user, password, host='localhost', port='5432'):
+    def __init__(self, dbname="movie_db", user="postgres", password="Thanh1002", host='localhost', port='5432'):
         self.dbname = dbname
         self.user = user
         self.password = password
         self.host = host
         self.port = port
+
 
     def connect_to_db(self):
         return psycopg2.connect(
@@ -25,23 +26,30 @@ class MovieSimilarity:
     def load_movies(self):
         conn = self.connect_to_db()
         query = """
-            SELECT
+           SELECT 
                 m.movie_id,
                 m.title,
                 m.overview,
-                STRING_AGG(DISTINCT g.name, ', ') AS genres
+                m.tagline,
+                rc.release_date,
+                COALESCE(STRING_AGG(DISTINCT g.name, ', '), '') AS genres,
+                COALESCE(STRING_AGG(DISTINCT pc.name, ', '), '') AS production_companies
             FROM movies m
-            JOIN movie_genres mg ON m.movie_id = mg.movie_id
-            JOIN genres g ON mg.genre_id = g.genre_id
-            GROUP BY m.movie_id, m.title, m.overview
-            ORDER BY m.movie_id;
+            LEFT JOIN movie_genres mg ON m.movie_id = mg.movie_id
+            LEFT JOIN genres g ON mg.genre_id = g.genre_id
+            LEFT JOIN movie_production_companies mpc ON m.movie_id = mpc.movie_id
+            LEFT JOIN production_companies pc ON mpc.company_id = pc.company_id
+            LEFT JOIN release_calendar rc ON m.movie_id = rc.movie_id
+            WHERE m.overview IS NOT NULL
+            GROUP BY m.movie_id, m.title, m.overview, m.tagline, rc.release_date
+            ORDER BY m.movie_id
         """
         movies_df = pd.read_sql(query, conn)
         conn.close()
         return movies_df
 
     def preprocess_data(self, movies_df):
-        movies_df['text_data'] = movies_df['genres'].fillna('') + " " + movies_df['overview'].fillna('')
+        movies_df['text_data'] = movies_df['genres'].fillna('') + " " + movies_df['overview'].fillna('') + " " + movies_df['tagline'].fillna('')+ " " + movies_df['production_companies'].fillna('')
         return movies_df
 
     def compute_tfidf(self, movies_df):
@@ -51,6 +59,7 @@ class MovieSimilarity:
 
     def compute_faiss_similarity(self, tfidf_matrix, top_k=10):
         tfidf_array = tfidf_matrix.toarray().astype(np.float32)
+
 
         # Đảm bảo là float32 và C_CONTIGUOUS
         tfidf_array = np.require(tfidf_array, dtype=np.float32, requirements=['C_CONTIGUOUS'])
@@ -62,7 +71,12 @@ class MovieSimilarity:
         index.add(tfidf_array)
 
         similarity_scores, indices = index.search(tfidf_array, top_k + 1)  # +1 để bỏ chính nó
+        
+        print(f"[INFO] Kích thước ma trận tương đồng: {similarity_scores.shape}")
+
         return similarity_scores, indices
+
+
 
     def save_to_db(self, similarity_scores, indices, movies_df, top_k=10):
         conn = self.connect_to_db()
@@ -111,15 +125,27 @@ class MovieSimilarity:
 
     def process(self, top_k=10):
         movies_df = self.load_movies()
+
+        # Kiểm tra số lượng và tính đầy đủ của dữ liệu
+        total_movies = len(movies_df)
+        print(f"[INFO] Tổng số phim được load từ database: {total_movies}")
+
+        # Tiền xử lý & TF-IDF
         movies_df = self.preprocess_data(movies_df)
         tfidf_matrix, _ = self.compute_tfidf(movies_df)
+        print(f"[INFO] TF-IDF matrix shape: {tfidf_matrix.shape}")
+
+        # Tính cosine similarity
         sim_scores, indices = self.compute_faiss_similarity(tfidf_matrix, top_k=top_k)
+
+        # Lưu vào PostgreSQL
         self.save_to_db(sim_scores, indices, movies_df, top_k=top_k)
+
         return sim_scores, indices, movies_df
 
 
 def main():
-    movie_sim = MovieSimilarity(dbname="movie_db", user="postgres", password="141124")
+    movie_sim = MovieSimilarity(dbname="movie_db", user="postgres", password="Thanh1002")
     sim_scores, indices, movies_df = movie_sim.process(top_k=10)
 
     movie_id = 5  # đảm bảo đây là movie_id hợp lệ trong bảng
@@ -139,3 +165,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
