@@ -6,6 +6,7 @@ import uvicorn
 from api.movie import router as movie_router
 from api.auth import router as auth_router
 from api.search import router as search_router
+from api.rating import router as rating_router
 
 app = FastAPI(
     title="Movie API",
@@ -27,7 +28,8 @@ app.add_middleware(
 routers = [
     (movie_router, "/api/v1", ["movies"]),
     (search_router, "/api/v1", ["movies"]),
-    (auth_router, "/api/v1", ["Authentication"])
+    (auth_router, "/api/v1", ["Authentication"]),
+    (rating_router, "/api/v1", ["Rating"])
 ]
 
 # Gộp router
