@@ -1,6 +1,6 @@
 # setup/init_mongodb.py
 from pymongo import MongoClient
-from Data_Pipeline.config.mongo_config import MONGO_DB_NAME, MOVIE_COLLECTION #USER_COMMENT_COLLECTION
+from Data_Pipeline.config.connection import MONGO_DB_NAME, MOVIE_COLLECTION #USER_COMMENT_COLLECTION
 
 
 def create_collections():

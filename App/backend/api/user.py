@@ -9,4 +9,3 @@ from service.user_service import CommentService
 
 router = APIRouter()
 
-@router.get("/movies/{movie_id}/comment", response_model= )
