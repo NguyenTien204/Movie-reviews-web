@@ -13,8 +13,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             fetchFeaturedMovies(),
             fetchTrendingMovies()
         ]);
-        console.log('Featured Movies:', featuredMoviesData);
-        console.log('Trending Movies:', trendingMoviesData);
+      
         // Initialize carousels with responsive settings
         const featuredCarousel = new MovieCarousel('featured-grid', 4, 280, 20);
         const trendingCarousel = new MovieCarousel('trending-grid', 7, 159, 40);

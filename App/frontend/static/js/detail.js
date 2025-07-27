@@ -310,37 +310,5 @@ window.loadMovieDetail = loadMovieDetail;
 window.renderMovieDetailSeparate = renderMovieDetailSeparate;
 window.getMovieIdFromUrl = getMovieIdFromUrl;
 
-// Ví dụ cách sử dụng với cấu trúc detail.html:
-
-// 1. Tự động load khi có movie ID trong URL:
-// URL: /detail?id=123 hoặc /movie/123
-// Code sẽ tự động detect và load
-
-// 2. Load manual với movie ID:
-// loadMovieDetail(123);
-
-// 3. Load với dữ liệu có sẵn:
-// const movieData = { title: "Movie Name", ... };
-// renderMovieDetailSeparate(movieData);
-
-/* 
-Cấu trúc dữ liệu API mong đợi từ database:
-{
-    id: 123,
-    title: "Movie Title",
-    name: "Alternative Title", // fallback cho title
-    trailer_url: "VIDEO_ID" or "https://youtube.com/watch?v=VIDEO_ID",
-    overview: "Movie description...", // có thể gọi là summary
-    score: 7.5, // có thể gọi là vote_average hoặc metaScore
-    review_count: 25, // số lượng reviews
-    genres: [
-        {name: "Action"}, 
-        {name: "Adventure"}
-    ], // hoặc ["Action", "Adventure"]
-    poster_path: "/path/to/poster.jpg", // path tương đối
-    myScore: 8 // điểm cá nhân, optional
-}
-*/
-// pages/detail.js
 
 

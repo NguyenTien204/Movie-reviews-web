@@ -4,8 +4,10 @@ const POSTER_BASE = "https://image.tmdb.org/t/p/w500";
 
 
 const API_CONFIG = {
-    FEATURED_MOVIES_URL: `${BASE_URL}/movies/trending`,  // Sử dụng endpoint từ code cũ
-    TRENDING_MOVIES_URL: `${BASE_URL}/movies/trending`,  // Hoặc có thể khác nếu bạn có endpoint riêng
+    FEATURED_MOVIES_URL: `${BASE_URL}/movies/trending`,  
+    TRENDING_MOVIES_URL: `${BASE_URL}/movies/trending`,
+    register: `${BASE_URL}/register`,
+    login: `${BASE_URL}/login`,  
     POSTER_BASE_URL: POSTER_BASE
     
 }
@@ -23,10 +25,10 @@ async function getVideoUrl(movieId) {
         if (url) {
             return `https://www.youtube.com/embed/${url}`;
         } else {
-            return `${POSTER_BASE}/c32TsWLES7kL1uy6fF03V67AIYX.jpg`;
+            return `static/img/error_poster.png`; // Trả về poster lỗi nếu không có video
         }
     } catch (error) {
         console.error('Error fetching video URL:', error);
-        return `${POSTER_BASE}/c32TsWLES7kL1uy6fF03V67AIYX.jpg`;
+        return `static/img/error_poster.png`;
     }
 }

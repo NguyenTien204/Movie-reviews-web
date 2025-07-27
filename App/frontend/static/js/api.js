@@ -1,5 +1,5 @@
 async function registerUser(userData) {
-  const response = await fetch(`${AUTH_URL}/register`, {
+  const response = await fetch(`${BASE_URL}/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(userData)
@@ -14,7 +14,7 @@ async function registerUser(userData) {
 
 
 async function loginUser(userData) {
-  const response = await fetch(`${AUTH_URL}/login`, {
+  const response = await fetch(`${BASE_URL}/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(userData)

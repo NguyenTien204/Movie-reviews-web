@@ -45,14 +45,19 @@
               <img src="/static/img/kinhlup.png" alt="Search">
             </button>
           </div>
-          <a href="#" class="register-link demo-btn">Register</a>
-          <!-- <a class="user-icon"><img src="/static/img/user.png" alt="user"></a> -->
 
+          <!-- Chưa đăng nhập - nút Register -->
+          <a href="#" class="register-link demo-btn" id="registerButton">Register</a>
+
+          <!-- Đã đăng nhập - user icon (ẩn mặc định) -->
+          <a href="/profile" class="user-icon" id="userIcon">
+            <img src="/static/img/user.png" alt="user">
+          </a>
         </div>
       </div>
     </header>
 
-
+    {% block content %}{% endblock %}
 
     <!-- Auth Modal -->
     <div class="auth-modal" id="authModal">
@@ -68,8 +73,8 @@
 
         <!-- Tab navigation -->
         <div class="tab-navigation">
-          <button class="tab-btn" id="registerTab">Register</button>
-          <button class="demo-btn login-link tab-btn active" id="loginTab">Sign In</button>
+          <button class="tab-btn" id="registerTab" onclick="openRegisterModal()">Register</button>
+          <button class="demo-btn login-link tab-btn active" id="loginTab" onclick="openLoginModal()">Sign In</button>
         </div>
 
         <!-- Form container -->
@@ -134,7 +139,7 @@
         </div>
       </div>
     </div>
-    {% block content %}{% endblock %}
+
     <!-- Footer -->
     <footer class="footer">
       <div class="footer-bar"></div>
@@ -159,18 +164,19 @@
     </footer>
   </div>
 
-  <!-- <script src="/static/js/api.js"></script> -->
+  <!-- Scripts -->
   <script src="/static/js/config.js"></script>
   <script src="/static/js/router.js"></script>
   <script src="/static/js/apiService.js"></script>
+  <script src="/static/js/pageCacheManager.js"></script>
+  <script src="/static/js/cookie-session-manager.js"></script>
+  <script src="/static/js/login_register.js"></script>
   <script src="/static/js/main.js"></script>
   <script src="/static/js/createHome.js"></script>
-  <script src="/static/js/lognIn_register.js"></script>
-  <!-- <script src="/static/js/home.js"></script> -->
+  <script src="/static/js/check_login.js"></script>
   {% if request.url.path == "/movies" %}
   <script src="/static/js/detail.js"></script>
   {% endif %}
-
 
 </body>
 

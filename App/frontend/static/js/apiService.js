@@ -27,6 +27,41 @@ async function fetchMovieDetailData(movieId) {
         return null;
     }
 }
+// API Functions (for real backend integration)
+async function makeAPIRequest(url, data) {
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+        
+        return {
+            success: response.ok,
+            status: response.status,
+            data: result
+        };
+    } catch (error) {
+        console.error('API Request Error:', error);
+        return {
+            success: false,
+            status: 0,
+            data: { message: 'Network error. Please check your connection.' }
+        };
+    }
+}
+
+async function registerUser(userData) {
+    return await makeAPIRequest(API_CONFIG.register, userData);
+}
+async function loginUser(userData) {
+    return await makeAPIRequest(API_CONFIG.login, userData);
+}
 
 async function fetchFeaturedMovies() {
     return await fetchMovieData(API_CONFIG.FEATURED_MOVIES_URL);
