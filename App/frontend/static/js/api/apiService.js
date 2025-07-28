@@ -1,3 +1,4 @@
+import  {API_CONFIG}  from '../api/config.js';
 
 // API Service Functions
 async function fetchMovieData(url) {
@@ -40,7 +41,7 @@ async function makeAPIRequest(url, data) {
         });
 
         const result = await response.json();
-        
+
         return {
             success: response.ok,
             status: response.status,
@@ -56,17 +57,17 @@ async function makeAPIRequest(url, data) {
     }
 }
 
-async function registerUser(userData) {
+export async function registerUser(userData) {
     return await makeAPIRequest(API_CONFIG.register, userData);
 }
-async function loginUser(userData) {
+export async function loginUser(userData) {
     return await makeAPIRequest(API_CONFIG.login, userData);
 }
 
-async function fetchFeaturedMovies() {
+export async function fetchFeaturedMovies() {
     return await fetchMovieData(API_CONFIG.FEATURED_MOVIES_URL);
 }
 
-async function fetchTrendingMovies() {
+export async function fetchTrendingMovies() {
     return await fetchMovieData(API_CONFIG.TRENDING_MOVIES_URL);
 }

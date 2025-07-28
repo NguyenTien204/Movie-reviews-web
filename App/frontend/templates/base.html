@@ -165,19 +165,19 @@
   </div>
 
   <!-- Scripts -->
-  <script src="/static/js/config.js"></script>
-  <script src="/static/js/router.js"></script>
-  <script src="/static/js/apiService.js"></script>
-  <script src="/static/js/pageCacheManager.js"></script>
-  <script src="/static/js/cookie-session-manager.js"></script>
-  <script src="/static/js/login_register.js"></script>
-  <script src="/static/js/main.js"></script>
-  <script src="/static/js/createHome.js"></script>
-  <script src="/static/js/check_login.js"></script>
+  <script type="module" src="/static/js/api/config.js"></script>
+  <script src="/static/js/core/router.js"></script>
+  <script type="module" src="/static/js/api/apiService.js"></script>
+  <script src="/static/js/utils/pageCacheManager.js"></script>
+  <script src="/static/js/auth/cookie-session-manager.js"></script>
+  <script src="/static/js/auth/login_register.js"></script>
+  <script type="module" src="/static/js/page/homePage.js"></script>
+  <script src="/static/js/auth/check_login.js"></script>
   {% if request.url.path == "/movies" %}
-  <script src="/static/js/detail.js"></script>
+  <script type="module" src="/static/js/page/detailPage.js"></script>
   {% endif %}
-
+  <script type="module"src="/static/js/utils/createHome.js"></script>
+  <script type="module" src="/static/js/utils/getUrl.js"></script>
 </body>
 
 </html>

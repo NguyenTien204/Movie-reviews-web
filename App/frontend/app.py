@@ -29,7 +29,7 @@ async def root(request: Request):
 
 # Giữ nguyên các route khác
 @app.get("/home", response_class=HTMLResponse)
-async def home(request: Request):
+async def home_page(request: Request):
     return templates.TemplateResponse("home.html", {"request": request})
 
 @app.get("/category", response_class=HTMLResponse)
@@ -40,6 +40,9 @@ async def category_page(request: Request):  # Đổi tên hàm để tránh trù
 async def detail_page(request: Request):  # Đổi tên hàm để tránh trùng
     return templates.TemplateResponse("detail.html", {"request": request})
 
+@app.get("/profile", response_class=HTMLResponse)
+async def profile_page(request: Request):  # Đổi tên hàm để tránh trùng
+    return templates.TemplateResponse("profile.html", {"request": request})
 
 if __name__ == "__main__":
     uvicorn.run("app:app", host="127.0.0.1", port=8000, reload=True)
