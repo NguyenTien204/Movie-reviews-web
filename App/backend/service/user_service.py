@@ -26,12 +26,22 @@ class CommentService:
             CommentSchema(
                 id=comment.id,
                 user_id=comment.user_id,
+                movie_id = comment.movie_id,
                 body=comment.body,
                 created_at=comment.created_at,
                 is_deleted=comment.is_deleted,
                 vote_count=vote_count
             ) for comment, vote_count in comments
         ]
+
+    @staticmethod
+    async def AddOrUpdateComment(user_id: int,  movie_id: int, body: str, db: Session):
+        existing_comment = db.query(Comment).filter_by(user_id = user_id, movie_id = movie_id, is_deleted= False).first()
+
+        if existing_comment:
+            return await CommentService.edit_comment(user_id, movie_id, body, db)
+        else:
+            return await CommentService.add_comment(user_id, movie_id, body, db)
 
     @staticmethod
     async def add_comment(user_id: int, movie_id: int, body: str, db: Session) -> CommentSchema:
@@ -43,6 +53,17 @@ class CommentService:
             body=body
         )
         db.add(comment)
+        db.commit()
+        db.refresh(comment)
+        return CommentSchema.model_validate(comment, from_attributes=True)
+
+    @staticmethod
+    async def edit_comment(user_id: int, movie_id: int, body: str, db: Session):
+        comment = db.query(Comment).filter_by(user_id = user_id, movie_id = movie_id, is_deleted = False).first()
+        if not comment:
+            raise ValueError("Không tìm thấy comment để cập nhật")
+
+        comment.body = body
         db.commit()
         db.refresh(comment)
         return CommentSchema.model_validate(comment, from_attributes=True)
