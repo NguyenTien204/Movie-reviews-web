@@ -88,6 +88,7 @@ class MovieDiscoveryService:
         ).filter(
             CosineSimilarityResult.movie_id_1 == movie_id
         ).order_by(desc(CosineSimilarityResult.similarity)).limit(top_k).all()
+        average_rating = db.query(func.avg(Rating.score)).filter(Rating.movie_id == movie_id).scalar() or 0.0
 
         if not results:
             return []
@@ -112,7 +113,8 @@ class MovieDiscoveryService:
                     for g in db.query(Genre)
                                 .join(MovieGenre, Genre.genre_id == MovieGenre.genre_id)
                                 .filter(MovieGenre.movie_id == m.movie_id).all()
-                ]
+                ],
+                average_rating=round(average_rating, 1)
             )
             for m in movies
         ]

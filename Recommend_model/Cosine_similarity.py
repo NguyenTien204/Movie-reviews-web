@@ -143,6 +143,32 @@ class MovieSimilarity:
 
         return sim_scores, indices, movies_df
 
+def get_similar_movies_api(movie_id: int, top_k: int = 10):
+    """
+    Hàm này để API gọi, trả về danh sách phim tương tự theo movie_id.
+    """
+    movie_sim = MovieSimilarity(
+        dbname="movie_db",
+        user="postgres",
+        password="Thanh1002",
+        host="localhost",
+        port="5432"
+    )
+
+    sim_scores, indices, movies_df = movie_sim.process(top_k=top_k)
+
+    try:
+        top_10_movies = movie_sim.get_top_10_similar_movies(
+            movie_id=movie_id,
+            similarity_scores=sim_scores,
+            indices=indices,
+            movies_df=movies_df,
+            top_k=top_k
+        )
+        return top_10_movies
+    except ValueError:
+        return []
+
 
 def main():
     movie_sim = MovieSimilarity(dbname="movie_db", user="postgres", password="Thanh1002")
