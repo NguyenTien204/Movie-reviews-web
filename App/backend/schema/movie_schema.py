@@ -30,7 +30,7 @@ class ProductionCountry(BaseModel):
     name: str
 
 class SpokenLanguage(BaseModel):
-    iso_639_1: str 
+    iso_639_1: str
     name: str
 
 class Collection(BaseModel):
@@ -48,16 +48,9 @@ class CommentVote(BaseModel):
     class Config:
         from_attributes = True
 
-class Comment(BaseModel):
-    id: str
-    user_id: int
-    body: str
-    created_at: datetime
-    is_deleted: bool = False
-    votes: List[CommentVote] = []
-    vote_count: Optional[int] = 0
 
-class Rating(BaseModel):
+
+class All_Rating(BaseModel):
     rating_id: int
     user_id: int
     score: float
@@ -71,7 +64,7 @@ class MovieDetail(MovieBase):
     spoken_languages: List[SpokenLanguage]
     collections: List[Collection]
     average_rating: Optional[float] = None
-    
+
     class Config:
         from_attributes = True  # Enable ORM mode for SQLAlchemy
 
@@ -82,6 +75,7 @@ class MovieShortDetail(BaseModel):
     popularity: Optional[float] = None
     genres: List[Genre]
     average_rating: Optional[float]
+    similarity: Optional[float] = None
 
     class Config:
         from_attributes = True  # Enable ORM mode for SQLAlchemy
@@ -121,3 +115,4 @@ class MovieTrailer(BaseModel):
 
     class Config:
         from_attributes = True  # Enable ORM mode for SQLAlchemy
+

@@ -6,6 +6,8 @@ import uvicorn
 from api.movie import router as movie_router
 from api.auth import router as auth_router
 from api.search import router as search_router
+from api.rating import router as rating_router
+from api.user import router as user_router
 
 app = FastAPI(
     title="Movie API",
@@ -16,19 +18,23 @@ app = FastAPI(
 # Cấu hình CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://127.0.0.1:8000", "http://localhost:8000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-
 # Danh sách các router cần include
 routers = [
     (movie_router, "/api/v1", ["movies"]),
     (search_router, "/api/v1", ["movies"]),
-    (auth_router, "/api/v1", ["Authentication"])
+    (auth_router, "/api/v1", ["Authentication"]),
+    (rating_router, "/api/v1", ["Rating"]),
+    (user_router, "/api/v1", ["UserLog"])   # <-- thêm dòng này
 ]
+
+
+
 
 # Gộp router
 for router, prefix, tags in routers:

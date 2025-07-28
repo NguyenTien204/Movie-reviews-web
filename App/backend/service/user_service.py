@@ -3,9 +3,10 @@ from typing import List
 from fastapi import HTTPException
 from sqlalchemy import func, desc
 from sqlalchemy.orm import Session
+from datetime import datetime, timezone
 
-from models.user import Comment, CommentVote
-from schema.movie_schema import Comment as CommentSchema, CommentVote as CommentVoteSchema
+from models.user import Comment, CommentVote, Rating
+from schema.review import UserComment as CommentSchema, UserRating as RatingSchema
 
 class CommentService:
     @staticmethod
@@ -25,6 +26,7 @@ class CommentService:
             CommentSchema(
                 id=comment.id,
                 user_id=comment.user_id,
+                movie_id = comment.movie_id,
                 body=comment.body,
                 created_at=comment.created_at,
                 is_deleted=comment.is_deleted,
@@ -33,7 +35,16 @@ class CommentService:
         ]
 
     @staticmethod
-    async def add_comment(movie_id: int, user_id: int, body: str, db: Session) -> CommentSchema:
+    async def AddOrUpdateComment(user_id: int,  movie_id: int, body: str, db: Session):
+        existing_comment = db.query(Comment).filter_by(user_id = user_id, movie_id = movie_id, is_deleted= False).first()
+
+        if existing_comment:
+            return await CommentService.edit_comment(user_id, movie_id, body, db)
+        else:
+            return await CommentService.add_comment(user_id, movie_id, body, db)
+
+    @staticmethod
+    async def add_comment(user_id: int, movie_id: int, body: str, db: Session) -> CommentSchema:
         """Add a new comment to a movie"""
         comment = Comment(
             id=str(uuid.uuid4()),
@@ -42,6 +53,17 @@ class CommentService:
             body=body
         )
         db.add(comment)
+        db.commit()
+        db.refresh(comment)
+        return CommentSchema.model_validate(comment, from_attributes=True)
+
+    @staticmethod
+    async def edit_comment(user_id: int, movie_id: int, body: str, db: Session):
+        comment = db.query(Comment).filter_by(user_id = user_id, movie_id = movie_id, is_deleted = False).first()
+        if not comment:
+            raise ValueError("Không tìm thấy comment để cập nhật")
+
+        comment.body = body
         db.commit()
         db.refresh(comment)
         return CommentSchema.model_validate(comment, from_attributes=True)
@@ -56,56 +78,46 @@ class CommentService:
                 Comment.is_deleted.is_(False)
             )\
             .first()
-        
+
         if not comment:
             raise HTTPException(status_code=404, detail="Comment not found")
-            
+
         comment.is_deleted = True
         db.commit()
         return True
 
-    @staticmethod
-    async def vote_comment(comment_id: str, user_id: int, vote_type: int, db: Session) -> CommentVoteSchema:
-        """Add or update a vote on a comment"""
-        if vote_type not in [-1, 1]:
-            raise HTTPException(status_code=400, detail="Invalid vote type")
-            
-        # Check if comment exists and is not deleted
-        comment = db.query(Comment)\
-            .filter(
-                Comment.id == comment_id,
-                Comment.is_deleted.is_(False)
-            ).first()
-            
-        if not comment:
-            raise HTTPException(status_code=404, detail="Comment not found")
 
-        # Check existing vote
-        vote = db.query(CommentVote)\
-            .filter(
-                CommentVote.comment_id == comment_id,
-                CommentVote.user_id == user_id
-            ).first()
-            
-        if vote:
-            if vote.vote_type == vote_type:
-                # Remove vote if same type
-                db.delete(vote)
-                db.commit()
-                return None
-            # Update vote type if different
-            vote.vote_type = vote_type
+class RatingService:
+    @staticmethod
+    async def AddOrUpdateRating(user_id: int, movie_id: int, score: float, db: Session):
+        existing_rating = db.query(Rating).filter_by(user_id=user_id, movie_id=movie_id, is_deleted=False).first()
+
+        if existing_rating:
+            return await RatingService.EditRating(user_id, movie_id, score, db)
         else:
-            # Create new vote
-            vote = CommentVote(
-                comment_id=comment_id,
-                user_id=user_id,
-                vote_type=vote_type
-            )
-            db.add(vote)
-            
+            return await RatingService.AddRating(user_id, movie_id, score, db)
+
+    @staticmethod
+    async def AddRating(user_id: int, movie_id: int, score: float, db: Session):
+        ratings = Rating(
+            movie_id = movie_id,
+            user_id = user_id,
+            score = score
+        )
+        db.add(ratings)
         db.commit()
-        if vote:
-            db.refresh(vote)
-            return CommentVoteSchema.model_validate(vote, from_attributes=True)
-        return None
+        db.refresh(ratings)
+        return RatingSchema.model_validate(ratings, from_attributes=True)
+
+    @staticmethod
+    async def EditRating(user_id: int, movie_id: int, score: float, db: Session):
+        rating = db.query(Rating).filter_by(user_id=user_id, movie_id=movie_id, is_deleted=False).first()
+
+        if not rating:
+            raise ValueError("Không tìm thấy đánh giá để cập nhật")
+
+        rating.score = score
+        rating.timestamp = datetime.now(timezone.utc)
+        db.commit()
+        db.refresh(rating)
+        return RatingSchema.model_validate(rating, from_attributes=True)

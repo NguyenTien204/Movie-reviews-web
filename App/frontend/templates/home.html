@@ -19,7 +19,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="movies-grid-container">
         <div class="movies-grid" id="featured-grid">
             <!-- Featured movies will be loaded here by JavaScript -->
@@ -43,7 +43,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="movie-list-container">
         <div class="movie-list-small" id="trending-grid">
             <!-- Trending movies will be loaded here by JavaScript -->
@@ -59,13 +59,13 @@
   <div class="video-container">
     <!-- Video bên trái -->
     <div class="video-player">
-    
-    <iframe 
-      id="main-video" 
-      src="https://www.youtube.com/embed/ASR41LdpTKw" 
-      frameborder="0" 
+
+    <iframe
+      id="main-video"
+      src="https://www.youtube.com/embed/ASR41LdpTKw"
+      frameborder="0"
       allowfullscreen
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; " 
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; "
       style="width: 100%; height: 400px;">
     </iframe>
       <div class="video-info">
@@ -76,10 +76,10 @@
             <div class="score-box">70</div>
             <p id="video-desc">Based 20 on critic reviews</p>
         </div>
-        
+
       </div>
-        
-        
+
+
     </div>
 
     <!-- Danh sách video bên phải với thumbnail -->
@@ -97,7 +97,7 @@
           </div>
         </div>
       </div>
-      
+
       <div class="video-thumb " onclick="changeVideo('/watch?v=51_UUJ7Sx-I', 'Saber Trailer', 'Based 20 on critic reviews', 'static/img/Nilou.jpg', '80')">
          <div class="video-item">
           <img src="static/img/saber.png" alt="Saber" />
@@ -138,5 +138,41 @@
     </div>
   </div>
 </section>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    try {
+        document.body.addEventListener('click', function (e) {
+            const target = e.target.closest('a');
 
+            if (target && target.href && target.href.includes('movie_id=')) {
+                const url = new URL(target.href);
+                const movieId = url.searchParams.get("movie_id");
+
+                const logData = {
+                    action_type: "click",
+                    target: "movie_card",
+                    movie_id: parseInt(movieId),
+                    timestamp: new Date().toISOString(),
+                    user_agent: navigator.userAgent
+                };
+
+                fetch('http://127.0.0.1:5000/api/v1/log/user_event', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(logData)
+                })
+                .then(res => {
+                    if (!res.ok) console.warn("Log failed:", res.statusText);
+                })
+                .catch(err => console.error("Logging failed:", err));
+            }
+        });
+    } catch (err) {
+        console.error("Error in click logging setup:", err);
+    }
+});
+
+</script>
 {% endblock %}

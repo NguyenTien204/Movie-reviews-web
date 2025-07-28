@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from typing import List
 from sqlalchemy.orm import Session
 from schema.movie_schema import (
@@ -28,10 +28,13 @@ async def trending_movies(db: Session = Depends(get_db)):
     """Get trending movies"""
     return await MovieDiscoveryService.get_trending_movies(db)
 
-@router.get("/movies/{movie_id}/recommendations", response_model=List[MovieShortDetail])
-async def get_movie_recommendations(movie_id: int, db: Session = Depends(get_db)):
-    """Get movie recommendations based on a movie"""
-    return await MovieDiscoveryService.get_movie_recommendations(movie_id, db)
+@router.get("/{movie_id}/recommendations", response_model=List[MovieShortDetail])
+async def recommend_movies_by_cosine(movie_id: int, db: Session = Depends(get_db)):
+    similar_movies = await MovieDiscoveryService.get_similar_movies_cosine(movie_id, db)
+    if not similar_movies:
+        raise HTTPException(status_code=404, detail="Không tìm thấy phim gợi ý.")
+
+    return similar_movies
 
 
 # ---- Các route liên quan đến hiển thị chi tiết phim ---- #

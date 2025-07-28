@@ -1,7 +1,7 @@
 from .base import Base
 from .enums import WatchlistStatusEnum, TrailerTypeEnum, SiteEnum, EventTypeEnum
 from .user import (
-    User, WatchHistory, Rating, Comment, 
+    User, WatchHistory, Rating, Comment,
     CommentVote, Follow, Watchlist
 )
 from .movie_models import (
@@ -9,7 +9,7 @@ from .movie_models import (
     ProductionCompany, MovieProductionCompany,
     ProductionCountry, MovieProductionCountry,
     SpokenLanguage, MovieSpokenLanguage,
-    Collection, ReleaseCalendar
+    Collection, ReleaseCalendar, CosineSimilarityResult
 )
 from .event import DimSession, FactUserEvent
 
@@ -25,7 +25,7 @@ __all__ = [
     'ProductionCompany', 'MovieProductionCompany',
     'ProductionCountry', 'MovieProductionCountry',
     'SpokenLanguage', 'MovieSpokenLanguage',
-    'Collection', 'ReleaseCalendar',
+    'Collection', 'ReleaseCalendar', 'CosineSimilarityResult',
     # Event related
     'DimSession', 'FactUserEvent'
 ]

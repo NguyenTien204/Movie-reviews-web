@@ -1,6 +1,6 @@
 from datetime import datetime
 from sqlalchemy import (
-    Column, Integer, String, Text, Float, Boolean, 
+    Column, Integer, String, Text, Float, Boolean,
     DateTime, ForeignKey, Enum, Date, CHAR
 )
 from sqlalchemy.orm import relationship
@@ -9,7 +9,7 @@ from .enums import SiteEnum, TrailerTypeEnum
 
 class Movie(Base):
     __tablename__ = 'movies'
-    
+
     movie_id = Column(Integer, primary_key=True)
     title = Column(String, nullable=False)
     original_title = Column(String, nullable=False)
@@ -39,23 +39,23 @@ class Movie(Base):
 
 class Genre(Base):
     __tablename__ = 'genres'
-    
+
     genre_id = Column(Integer, primary_key=True)
     name = Column(String(50), unique=True, nullable=False)
     movies = relationship("MovieGenre", back_populates="genre")
 
 class MovieGenre(Base):
     __tablename__ = 'movie_genres'
-    
+
     movie_id = Column(Integer, ForeignKey('movies.movie_id', ondelete='CASCADE'), primary_key=True)
     genre_id = Column(Integer, ForeignKey('genres.genre_id', ondelete='CASCADE'), primary_key=True)
-    
+
     movie = relationship("Movie", back_populates="genres")
     genre = relationship("Genre", back_populates="movies")
 
 class Trailer(Base):
     __tablename__ = 'trailers'
-    
+
     id = Column(String, primary_key=True)
     movie_id = Column(Integer, ForeignKey('movies.movie_id', ondelete='CASCADE'))
     name = Column(String, nullable=False)
@@ -70,64 +70,64 @@ class Trailer(Base):
 
 class ProductionCompany(Base):
     __tablename__ = 'production_companies'
-    
+
     company_id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
     origin_country = Column(CHAR(2))
     logo_path = Column(String)
-    
+
     movies = relationship("MovieProductionCompany", back_populates="company")
 
 class MovieProductionCompany(Base):
     __tablename__ = 'movie_production_companies'
-    
+
     movie_id = Column(Integer, ForeignKey('movies.movie_id', ondelete='CASCADE'), primary_key=True)
     company_id = Column(Integer, ForeignKey('production_companies.company_id'), primary_key=True)
-    
+
     movie = relationship("Movie", back_populates="production_companies")
     company = relationship("ProductionCompany", back_populates="movies")
 
 class ProductionCountry(Base):
     __tablename__ = 'production_countries'
-    
+
     iso_3166_1 = Column(CHAR(2), primary_key=True)
     name = Column(String, nullable=False)
     movies = relationship("MovieProductionCountry", back_populates="country")
 
 class MovieProductionCountry(Base):
     __tablename__ = 'movie_production_countries'
-    
+
     movie_id = Column(Integer, ForeignKey('movies.movie_id', ondelete='CASCADE'), primary_key=True)
     iso_3166_1 = Column(CHAR(2), ForeignKey('production_countries.iso_3166_1'), primary_key=True)
-    
+
     movie = relationship("Movie", back_populates="production_countries")
     country = relationship("ProductionCountry", back_populates="movies")
 
 class SpokenLanguage(Base):
     __tablename__ = 'spoken_languages'
-    
+
     iso_639_1 = Column(CHAR(2), primary_key=True)
     name = Column(String, nullable=False)
     movies = relationship("MovieSpokenLanguage", back_populates="language")
 
 class MovieSpokenLanguage(Base):
     __tablename__ = 'movie_spoken_languages'
-    
+
     movie_id = Column(Integer, ForeignKey('movies.movie_id', ondelete='CASCADE'), primary_key=True)
     iso_639_1 = Column(CHAR(2), ForeignKey('spoken_languages.iso_639_1'), primary_key=True)
-    
+
     movie = relationship("Movie", back_populates="spoken_languages")
     language = relationship("SpokenLanguage", back_populates="movies")
 
 class Collection(Base):
     __tablename__ = 'collections'
-    
+
     collection_id = Column(String, primary_key=True)
     movie_id = Column(Integer, ForeignKey('movies.movie_id', ondelete='CASCADE'))
     name = Column(String)
     backdrop_path = Column(Text)
     poster_path = Column(Text)
-    
+
     movie = relationship("Movie", back_populates="collections")
 
 
@@ -142,3 +142,10 @@ class ReleaseCalendar(Base):
     status = Column(String)
 
     movie = relationship("Movie", back_populates="release_dates")
+
+class CosineSimilarityResult(Base):
+    __tablename__ = "cosine_similarity_results"
+
+    movie_id_1 = Column(Integer, primary_key=True)
+    movie_id_2 = Column(Integer, primary_key=True)
+    similarity = Column(Float)
