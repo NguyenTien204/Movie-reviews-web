@@ -22,7 +22,7 @@ def register(user_data: UserCreate, db: Session):
     db.commit()
     db.refresh(new_user)
 
-    token = create_access_token(data={"sub": new_user.username}, expires_delta=timedelta(minutes=30))
+    token = create_access_token(data={"sub": new_user.username, "user_id": new_user.id}, expires_delta=timedelta(minutes=30))
     return {"access_token": token, "token_type": "bearer"}
 
 
@@ -32,7 +32,7 @@ def login(user_data: UserLogin, db: Session):
     if not user or not verify_password(user_data.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    token = create_access_token(data={"sub": user.username}, expires_delta=timedelta(minutes=30))
+    token = create_access_token(data={"sub": user.username, "user_id": user.id}, expires_delta=timedelta(minutes=30))
     return {"access_token": token, "token_type": "bearer"}
 
 

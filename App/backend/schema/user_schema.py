@@ -20,11 +20,20 @@ class Token(BaseModel):
     token_type: str = "bearer"
 
 class UserLog(BaseModel):
-    action_type: str  # "click", "hover", etc.
-    target: str       # e.g., "movie_card"
-    movie_id: Optional[int]
-    timestamp: datetime
-    user_agent: Optional[str]
+    action_type: str
+    movie_id: Optional[int] = None
+    search_term: Optional[str] = None
+    rating: Optional[float] = None
+    dwell_time: Optional[int] = None
+    timestamp: Optional[datetime] = None
+    user_agent: Optional[str] = None
+
+class UserResponse(BaseModel):
+    id: int
+    username: str
+    email: EmailStr
+    created_at: datetime
+    updated_at: Optional[datetime] = None
 
 #class Comment(BaseModel):
 #    id: str

@@ -1,10 +1,12 @@
-from fastapi import APIRouter, Request, HTTPException
+from fastapi import APIRouter, Request, HTTPException, Depends
 from kafka import KafkaProducer
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 
 from schema.user_schema import UserLog
+from dependencies import get_current_user
+from models import User
 KAFKA_TOPICS = {
     "click": "userlog_click",
     "rating": "userlog_rating",
@@ -20,10 +22,12 @@ producer = KafkaProducer(
 )
 
 @router.post("/log/user_event")
-async def log_user_event(log: UserLog, request: Request):
+async def log_user_event(log: UserLog, request: Request, current_user: User = Depends(get_current_user)):
     try:
         log_dict = log.dict()
-        log_dict["timestamp"] = (log.timestamp or datetime.utcnow()).isoformat()
+        log_dict["user_id"] = current_user.id
+        log_dict["username"] = current_user.username
+        log_dict["timestamp"] = (log.timestamp or datetime.now(timezone.utc)).isoformat()
         log_dict["ip"] = request.client.host
 
         topic = KAFKA_TOPICS.get(log.action_type)

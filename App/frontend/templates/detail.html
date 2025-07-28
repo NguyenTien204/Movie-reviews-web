@@ -13,7 +13,7 @@
         <p style="font-weight: bold;margin-bottom: -10px;font-size: 20px;">Summary</p>
         <p class="summary">
         </p>
-        
+
     </div>
     <div class="detail-rating">
       <h2 class="detail-movie-title"></h2>
@@ -34,8 +34,8 @@
       <div class="detail-genre">
         <p style="color:gray;letter-spacing: 1px;">Genre</p>
         <div class="movie-genre-container">
-          
-          
+
+
         </div>
       </div>
       <div class="detail-myscore">
@@ -108,7 +108,7 @@
 
   <div class="movie-list-container">
     <div class="movie-list-small" id="related-grid">
-      
+
   </div>
 </section> -->
 
@@ -157,5 +157,75 @@
     </form>
   </div>
 </div> -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const movieId = extractMovieIdFromURL();  // URL cần có ?movie_id=xxx
+    const startTime = Date.now();
+    const iframe = document.querySelector('.main-video');
+
+    // Gửi dwelltime khi rời trang
+    window.addEventListener('beforeunload', function () {
+        const dwellTime = Date.now() - startTime;
+        if (!movieId) return;
+
+        logUserEvent({
+            action_type: "dwelltime",  // ✅ Đúng Kafka topic
+            movie_id: movieId,
+            dwell_time: dwellTime,
+            timestamp: new Date().toISOString(),
+            user_agent: navigator.userAgent
+        });
+    });
+
+    // Gửi log khi người dùng tương tác xem trailer
+    if (iframe) {
+        iframe.addEventListener('mouseenter', function () {
+            if (!movieId) return;
+
+            logUserEvent({
+                action_type: "trailer",  // ✅ Đúng Kafka topic
+                movie_id: movieId,
+                timestamp: new Date().toISOString(),
+                user_agent: navigator.userAgent
+            });
+        });
+
+        iframe.addEventListener('focus', function () {
+            if (!movieId) return;
+
+            logUserEvent({
+                action_type: "trailer",  // ✅ Có thể giữ nguyên "trailer"
+                movie_id: movieId,
+                timestamp: new Date().toISOString(),
+                user_agent: navigator.userAgent
+            });
+        });
+    }
+
+    // Gửi log đến backend
+    function logUserEvent(logData) {
+        fetch('http://127.0.0.1:5000/api/v1/log/user_event', {
+            method: 'POST',
+            credentials: 'include',  // ✅ Quan trọng để gửi cookie chứa access_token
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(logData)
+        })
+        .then(res => {
+            if (!res.ok) console.warn("Log failed:", res.statusText);
+        })
+        .catch(err => console.error("Logging error:", err));
+    }
+
+    // Trích xuất movie_id từ URL (?movie_id=123)
+    function extractMovieIdFromURL() {
+        const url = new URL(window.location.href);
+        const id = url.searchParams.get("movie_id");
+        return id ? parseInt(id) : null;
+    }
+});
+</script>
+
 
 {% endblock %}

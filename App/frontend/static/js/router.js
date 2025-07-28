@@ -16,7 +16,7 @@ const Router = {
     },
     {
       path: '/movies',
-      elementId: 'detail-movie'
+      elementId: 'home-logo'
     }
 
     // Thêm route mới vào đây
@@ -46,7 +46,7 @@ setupEventListeners() {
   // Xử lý chuyển trang
   navigate(event, path) {
     event.preventDefault();
-    
+
     // Kiểm tra nếu đang ở trang đích thì không làm gì
     if (window.location.pathname === path) {
       console.log(`Already at ${path}`);
@@ -54,7 +54,7 @@ setupEventListeners() {
     }
 
     console.log(`Navigating to: ${path}`);
-    
+
     // Phiên bản nâng cao có thể dùng History API
     if (this.supportsHistoryAPI()) {
       history.pushState({}, '', path);
@@ -70,13 +70,13 @@ setupEventListeners() {
     try {
       const response = await fetch(path);
       if (!response.ok) throw new Error('Network response was not ok');
-      
+
       const html = await response.text();
       document.getElementById("main-content").innerHTML = html;
       console.log(`Content loaded for: ${path}`);
-      
+
       // Khởi tạo lại router sau khi tải nội dung mới
-      this.init(); 
+      this.init();
     } catch (error) {
       console.error('Failed to load content:', error);
       window.location.href = path; // Fallback
