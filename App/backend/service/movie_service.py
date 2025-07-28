@@ -11,11 +11,11 @@ from schema.movie_schema import (
     MovieDetail, MovieShortDetail, MovieTrailer, Genre as GenreSchema,
     ProductionCompany as ProductionCompanySchema, ProductionCountry as ProductionCountrySchema,
     SpokenLanguage as SpokenLanguageSchema, Collection as CollectionSchema,
-    Comment as CommentSchema, Rating as RatingSchema
+    All_Rating as RatingSchema
 )
 
 class MovieDisplayService:
-    
+
     @staticmethod
     async def get_movie_detail(movie_id: int, db: Session) -> MovieDetail:
         movie = db.query(Movie).filter(Movie.movie_id == movie_id).first()
@@ -33,10 +33,6 @@ class MovieDisplayService:
             .filter(MovieSpokenLanguage.movie_id == movie_id).all()
         collections = db.query(Collection).filter(Collection.movie_id == movie_id).all()
 
-        
-        comments = await CommentService.get_movie_comments(movie_id, db)
-
-        ratings = db.query(Rating).filter(Rating.movie_id == movie_id).all()
         average_rating = db.query(func.avg(Rating.score)).filter(Rating.movie_id == movie_id).scalar() or 0.0
 
         release_date = db.query(ReleaseCalendar)\
@@ -72,7 +68,6 @@ class MovieDisplayService:
                 CollectionSchema.model_validate(c, from_attributes=True)
                 for c in collections
             ],
-            ratings=[RatingSchema.model_validate(r, from_attributes=True) for r in ratings],
             average_rating=round(average_rating, 1)
         )
 
