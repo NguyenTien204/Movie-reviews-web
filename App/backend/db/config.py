@@ -7,8 +7,8 @@ POSTGRES_PORT = 5432
 # Configuration for PostgreSQL in the movie data pipeline project
 POSTGRES_DB = 'movie_db'
 POSTGRES_USER = 'postgres'
-POSTGRES_PASSWORD = 'Thanh1002'
-POSTGRES_URL = 'postgresql+psycopg2://postgres:Thanh1002@localhost:5432/movie_db'
+POSTGRES_PASSWORD = '141124'
+POSTGRES_URL = 'postgresql+psycopg2://postgres:141124@localhost:5432/movie_db'
 
 class PostgresConnection:
     def __init__(self,

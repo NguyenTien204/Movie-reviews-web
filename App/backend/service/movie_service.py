@@ -1,7 +1,6 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, func
-from service.user_service import CommentService
 from models import (
     Movie, Genre, MovieGenre, Trailer, ProductionCompany, MovieProductionCompany,
     ProductionCountry, MovieProductionCountry, SpokenLanguage, MovieSpokenLanguage,
@@ -11,7 +10,6 @@ from schema.movie_schema import (
     MovieDetail, MovieShortDetail, MovieTrailer, Genre as GenreSchema,
     ProductionCompany as ProductionCompanySchema, ProductionCountry as ProductionCountrySchema,
     SpokenLanguage as SpokenLanguageSchema, Collection as CollectionSchema,
-    All_Rating as RatingSchema
 )
 
 class MovieDisplayService:
