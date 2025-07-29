@@ -11,9 +11,6 @@ export async function getVideoUrl(movieId) {
         if (!response.ok) throw new Error('Failed to fetch trailer');
 
         const data = await response.json();
-        console.log("🎥 Trailer API response:", data);
-
-        // ✅ Lấy phần tử đầu tiên từ mảng
         const firstTrailer = Array.isArray(data) ? data[0] : null;
         const url = firstTrailer?.key;
 
@@ -27,6 +24,7 @@ export async function getVideoUrl(movieId) {
         return `static/img/error_poster.png`;
     }
 }
+
 
 
 
