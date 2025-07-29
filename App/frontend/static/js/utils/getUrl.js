@@ -18,7 +18,7 @@ export async function getVideoUrl(movieId) {
         const url = firstTrailer?.key;
 
         if (url) {
-            return `https://www.youtube.com/embed/${url}`;
+            return `https://www.youtube.com/embed/${url}?enablejsapi=1`;
         } else {
             return `static/img/error_poster.png`;
         }
