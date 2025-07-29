@@ -6,7 +6,7 @@
 <section class="section-detail-movie">
     <div class="box-detail"></div>
     <div class="detail-video">
-        <iframe class="main-video" src="" frameborder="0" allowfullscreen
+        <iframe class="main-video" id="trailer-player" src="" frameborder="0" allowfullscreen
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; "
             style="width: 100%; height: 400px;">
         </iframe>
@@ -157,11 +157,15 @@
     </form>
   </div>
 </div> -->
+<script src="https://www.youtube.com/iframe_api"></script>
 <script>
+let player;
+let hasLoggedStart = false;
+let watchStartTime = null;
+
 document.addEventListener('DOMContentLoaded', function () {
     const movieId = extractMovieIdFromURL();  // URL cần có ?movie_id=xxx
     const startTime = Date.now();
-    const iframe = document.querySelector('.main-video');
 
     // Gửi dwelltime khi rời trang
     window.addEventListener('beforeunload', function () {
@@ -169,61 +173,107 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!movieId) return;
 
         logUserEvent({
-            action_type: "dwelltime",  // ✅ Đúng Kafka topic
+            action_type: "dwelltime",
             movie_id: movieId,
             dwell_time: dwellTime,
             timestamp: new Date().toISOString(),
             user_agent: navigator.userAgent
         });
     });
-
-    // Gửi log khi người dùng tương tác xem trailer
-    if (iframe) {
-        iframe.addEventListener('mouseenter', function () {
-            if (!movieId) return;
-
-            logUserEvent({
-                action_type: "trailer",  // ✅ Đúng Kafka topic
-                movie_id: movieId,
-                timestamp: new Date().toISOString(),
-                user_agent: navigator.userAgent
-            });
-        });
-
-        iframe.addEventListener('focus', function () {
-            if (!movieId) return;
-
-            logUserEvent({
-                action_type: "trailer",  // ✅ Có thể giữ nguyên "trailer"
-                movie_id: movieId,
-                timestamp: new Date().toISOString(),
-                user_agent: navigator.userAgent
-            });
-        });
-    }
-
-    // Gửi log đến backend
-    function logUserEvent(logData) {
-        fetch('http://127.0.0.1:5000/api/v1/log/user_event', {
-            method: 'POST',
-            credentials: 'include',  // ✅ Quan trọng để gửi cookie chứa access_token
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(logData)
-        })
-        .then(res => {
-            if (!res.ok) console.warn("Log failed:", res.statusText);
-        })
-        .catch(err => console.error("Logging error:", err));
-    }
-
-    // Trích xuất movie_id từ URL (?movie_id=123)
-    function extractMovieIdFromURL() {
-        const url = new URL(window.location.href);
-        const id = url.searchParams.get("movie_id");
-        return id ? parseInt(id) : null;
-    }
 });
+
+// ✅ Hàm khởi tạo player khi API đã sẵn sàng
+function onYouTubeIframeAPIReady() {
+    const iframe = document.querySelector('.main-video');
+    if (!iframe) {
+        console.warn("⚠️ Không tìm thấy iframe .main-video");
+        return;
+    }
+
+    // Thêm enablejsapi nếu chưa có
+    const src = iframe.getAttribute('src');
+    if (!src.includes('enablejsapi=1')) {
+        iframe.setAttribute('src', src + (src.includes('?') ? '&' : '?') + 'enablejsapi=1');
+    }
+
+    // ✅ Tạo player từ iframe với id trailer-player
+    player = new YT.Player('trailer-player', {
+        events: {
+            'onStateChange': onPlayerStateChange
+        }
+    });
+}
+
+// ✅ Hàm theo dõi trạng thái video
+function onPlayerStateChange(event) {
+    console.log("🎬 YT state:", event.data); // 👉 Debug trong console
+
+    const movieId = extractMovieIdFromURL();
+    if (!movieId) return;
+
+    const state = event.data;
+
+    if (state === YT.PlayerState.PLAYING && !hasLoggedStart) {
+        hasLoggedStart = true;
+        watchStartTime = Date.now();
+        console.log("▶ Trailer started");
+
+        logUserEvent({
+            action_type: "trailer",
+            event: "started",
+            movie_id: movieId,
+            timestamp: new Date().toISOString(),
+            user_agent: navigator.userAgent
+        });
+    }
+
+    if (state === YT.PlayerState.PAUSED && watchStartTime) {
+        const elapsed = Math.floor((Date.now() - watchStartTime) / 1000);
+        console.log("⏸ Trailer paused, watched:", elapsed, "seconds");
+
+        logUserEvent({
+            action_type: "trailer",
+            event: "paused",
+            movie_id: movieId,
+            watch_seconds: elapsed,
+            timestamp: new Date().toISOString(),
+            user_agent: navigator.userAgent
+        });
+    }
+
+    if (state === YT.PlayerState.ENDED && watchStartTime) {
+        const total = Math.floor((Date.now() - watchStartTime) / 1000);
+        console.log("✅ Trailer finished, total watched:", total, "seconds");
+
+        logUserEvent({
+            action_type: "trailer",
+            event: "finished",
+            movie_id: movieId,
+            watch_seconds: total,
+            timestamp: new Date().toISOString(),
+            user_agent: navigator.userAgent
+        });
+    }
+}
+
+// ✅ Hàm gửi log về backend
+function logUserEvent(logData) {
+    fetch('http://127.0.0.1:5000/api/v1/log/user_event', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(logData)
+    }).catch(console.warn);
+}
+
+// ✅ Lấy movie_id từ URL (?movie_id=xxx)
+function extractMovieIdFromURL() {
+    const url = new URL(window.location.href);
+    const id = url.searchParams.get("movie_id");
+    return id ? parseInt(id) : null;
+}
 </script>
+
 {% endblock %}
