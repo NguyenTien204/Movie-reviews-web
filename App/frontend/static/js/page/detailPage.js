@@ -33,13 +33,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
         // 4. Hiển thị video (YouTube trailer)
-        const videoSection = document.querySelector(".video-section");
+        const iframe = document.getElementById("trailer-player");
         if (movie.video_url) {
-            const iframe = document.createElement("iframe");
-            iframe.src = movie.video_url;
-            iframe.allowFullscreen = true;
-            iframe.loading = "lazy";
-            videoSection.appendChild(iframe);
+            iframe.src = movie.video_url
+            
         } else {
             videoSection.innerHTML = "<p>Không tìm thấy video trailer.</p>";
         }
