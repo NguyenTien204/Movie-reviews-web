@@ -9,17 +9,24 @@ export async function getVideoUrl(movieId) {
     try {
         const response = await fetch(`${API_CONFIG.BASE_URL}/movies/${movieId}/trailer`);
         if (!response.ok) throw new Error('Failed to fetch trailer');
+
         const data = await response.json();
-        const url = data[0].key
+        console.log("🎥 Trailer API response:", data);
+
+        // ✅ Lấy phần tử đầu tiên từ mảng
+        const firstTrailer = Array.isArray(data) ? data[0] : null;
+        const url = firstTrailer?.key;
+
         if (url) {
             return `https://www.youtube.com/embed/${url}`;
         } else {
-            return `static/img/error_poster.png`; // Trả về poster lỗi nếu không có video
+            return `static/img/error_poster.png`;
         }
     } catch (error) {
         console.error('Error fetching video URL:', error);
         return `static/img/error_poster.png`;
     }
 }
+
 
 

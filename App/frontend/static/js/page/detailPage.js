@@ -1,6 +1,6 @@
 
 import { getVideoUrl } from '../utils/getUrl.js';
-import { MovieCarousel, getScoreDescription} from '../utils/createHome.js';
+import { getScoreDescription,processGenres} from '../utils/createHome.js';
 import { API_CONFIG } from '../api/config.js';
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -23,13 +23,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         const movie = await response.json();
         const videoUrl = await getVideoUrl(movie.movie_id);
-        const genreUrl = MovieCarousel.processGenres(movie.genres).map(genre =>`<span class="movie-genre">${genre}</span>`).join('');
-        console.log(genreUrl);
+        const genreUrl = processGenres(movie.genres).map(genre =>`<span class="movie-genre">${genre}</span>`).join('');
+        console.log(videoUrl);
         document.querySelector(".detail-movie-title").textContent = movie.title || "Không có tiêu đề";
         document.querySelector(".summary").textContent = movie.overview || "Không có mô tả";
         document.querySelector(".main-video").src = videoUrl || "Không rõ";
         document.querySelector(".movie-genre-container").innerHTML = genreUrl || "Không rõ";
-        document.querySelector(".score-description").textContent = getScoreDescription(myScore)|| "Không có mô tả";
+        document.querySelector(".score-description").textContent = getScoreDescription(7)|| "Không có mô tả";
 
 
         // 4. Hiển thị video (YouTube trailer)

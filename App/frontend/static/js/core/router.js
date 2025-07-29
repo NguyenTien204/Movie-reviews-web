@@ -16,11 +16,15 @@ const Router = {
     },
     {
       path: '/movies',
+<<<<<<< HEAD:App/frontend/static/js/core/router.js
       elementId: 'detail-movie'
     },
     {
       path: '/profile',
       elementId: 'userIcon'
+=======
+      elementId: 'home-logo'
+>>>>>>> d36abf0a6a65d5a4bd483fa94b847111445ae465:App/frontend/static/js/router.js
     }
 
     // Thêm route mới vào đây

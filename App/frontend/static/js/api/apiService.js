@@ -1,7 +1,7 @@
 import  {API_CONFIG}  from '../api/config.js';
 
 // API Service Functions
-async function fetchMovieData(url) {
+export async function fetchMovieData(url) {
     try {
         const response = await fetch(url);
         if (!response.ok) {
@@ -15,7 +15,7 @@ async function fetchMovieData(url) {
     }
 }
 
-async function fetchMovieDetailData(movieId) {
+export async function fetchMovieDetailData(movieId) {
     try {
         const response = await fetch(`${API_CONFIG.MOVIE_DETAIL_URL}${movieId}`);
         if (!response.ok) {
@@ -29,7 +29,7 @@ async function fetchMovieDetailData(movieId) {
     }
 }
 // API Functions (for real backend integration)
-async function makeAPIRequest(url, data) {
+export async function makeAPIRequest(url, data) {
     try {
         const response = await fetch(url, {
             method: 'POST',

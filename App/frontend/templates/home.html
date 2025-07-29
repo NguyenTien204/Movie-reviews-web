@@ -142,10 +142,12 @@
 document.addEventListener('DOMContentLoaded', function () {
     try {
         document.body.addEventListener('click', function (e) {
-            const target = e.target.closest('a');
+            const anchor = e.target.closest('a');
 
-            if (target && target.href && target.href.includes('movie_id=')) {
-                const url = new URL(target.href);
+            if (anchor && anchor.href && anchor.href.includes('movie_id=')) {
+                e.preventDefault();  // ✅ Chặn chuyển trang mặc định
+
+                const url = new URL(anchor.href, window.location.origin);
                 const movieId = url.searchParams.get("movie_id");
 
                 const logData = {
@@ -161,18 +163,22 @@ document.addEventListener('DOMContentLoaded', function () {
                     headers: {
                         'Content-Type': 'application/json'
                     },
+                    credentials: 'include',  // ✅ nếu dùng cookie
                     body: JSON.stringify(logData)
                 })
-                .then(res => {
-                    if (!res.ok) console.warn("Log failed:", res.statusText);
-                })
-                .catch(err => console.error("Logging failed:", err));
+                .catch(err => console.error("Logging failed:", err))
+                .finally(() => {
+                    // ✅ Chuyển trang sau khi gửi log
+                    setTimeout(() => {
+                        window.location.href = anchor.href;
+                    }, 200);
+                });
             }
         });
     } catch (err) {
         console.error("Error in click logging setup:", err);
     }
 });
-
 </script>
+
 {% endblock %}
