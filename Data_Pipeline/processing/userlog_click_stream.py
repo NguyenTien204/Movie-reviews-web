@@ -1,7 +1,7 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import from_json, col
-from kafka_consumer.kafka_schemas import userlog_schema
-from kafka_consumer.mongo_writer import write_to_mongo
+from kafka.kafka_schemas import userlog_schema
+from kafka.mongo_writer import write_to_mongo
 from config.connection import KAFKA_BOOTSTRAP_SERVERS, KAFKA_TOPICS
 import os
 

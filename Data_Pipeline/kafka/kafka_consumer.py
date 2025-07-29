@@ -11,7 +11,7 @@ KAFKA_TOPICS = [
 ]
 
 def process_message(topic, message):
-    print(f"[{topic}] {message}")  # TODO: thay bằng lưu DB, Spark, gửi qua API, etc.
+    print(f"[{topic}] {message}")
 
 def start_consumer():
     consumer = KafkaConsumer(
