@@ -7,7 +7,7 @@ from api.movie import router as movie_router
 from api.auth import router as auth_router
 from api.search import router as search_router
 from api.rating import router as rating_router
-from api.user import router as user_router
+from api.user_log import router as user_router
 
 app = FastAPI(
     title="Movie API",
