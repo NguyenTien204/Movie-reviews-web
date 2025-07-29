@@ -43,7 +43,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         } else {
             videoSection.innerHTML = "<p>Không tìm thấy video trailer.</p>";
         }
-
         // 5. Hiển thị điểm số
         const scoreElement = document.querySelector(".score");
         if (scoreElement) {

@@ -24,6 +24,7 @@ class UserLog(BaseModel):
     movie_id: Optional[int] = None
     search_term: Optional[str] = None
     rating: Optional[float] = None
+    trailer_time: Optional[int] = None
     dwell_time: Optional[int] = None
     timestamp: Optional[datetime] = None
     user_agent: Optional[str] = None

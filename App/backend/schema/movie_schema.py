@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime
 from enum import Enum
-
+from models.enums import TrailerTypeEnum
 class Genre(BaseModel):
     genre_id: int
     name: str
@@ -87,16 +87,6 @@ class MovieFilter(BaseModel):
     page: int = 1
     limit: int = 20
 
-class TrailerType(str, Enum):
-    TRAILER = "Trailer"
-    TEASER = "Teaser"
-    CLIP = "Clip"
-    FEATURETTE = "Featurette"
-    BEHIND_THE_SCENES = "Behind the Scenes"
-    BLOOPERS = "Bloopers"
-    OPENING_SCENE = "Opening Scene"
-    ENDING_SCENE = "Ending Scene"
-    DELETED_SCENE = "Deleted Scene"
 
 class SiteType(str, Enum):
     YOUTUBE = "YouTube"
@@ -108,11 +98,11 @@ class MovieTrailer(BaseModel):
     name: str
     site: SiteType
     key: str
-    type: TrailerType
+    type: TrailerTypeEnum
     official: Optional[bool] = None
     published_at: Optional[datetime] = None
     size: Optional[int] = None
 
     class Config:
-        from_attributes = True  # Enable ORM mode for SQLAlchemy
+        from_attributes = True
 

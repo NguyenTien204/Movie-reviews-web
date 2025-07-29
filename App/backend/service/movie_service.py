@@ -4,7 +4,7 @@ from sqlalchemy import and_, func
 from models import (
     Movie, Genre, MovieGenre, Trailer, ProductionCompany, MovieProductionCompany,
     ProductionCountry, MovieProductionCountry, SpokenLanguage, MovieSpokenLanguage,
-    Collection, Rating, ReleaseCalendar
+    Collection, Rating, ReleaseCalendar, TrailerTypeEnum
 )
 from schema.movie_schema import (
     MovieDetail, MovieShortDetail, MovieTrailer, Genre as GenreSchema,
@@ -90,15 +90,25 @@ class MovieDisplayService:
         trailer = db.query(Trailer).filter(
             and_(
                 Trailer.movie_id == movie_id,
-                Trailer.type == 'Trailer',
-                Trailer.site == 'YouTube',
-                Trailer.name.ilike('%official%')
+                Trailer.site == 'YouTube'
             )
         ).order_by(Trailer.published_at.desc()).first()
 
         if not trailer:
             return []
 
-        return [MovieTrailer.model_validate(trailer, from_attributes=True)]
+        # ✳️ Chuyển thành dict, ép kiểu nếu cần
+        trailer_dict = trailer.__dict__.copy()
+
+        try:
+            trailer_dict["type"] = TrailerTypeEnum(trailer_dict["type"])
+        except ValueError:
+            # Log cảnh báo nếu giá trị không hợp lệ
+            print(f"[WARN] Trailer type '{trailer_dict['type']}' is invalid.")
+            trailer_dict["type"] = None  # hoặc dùng default Enum
+
+        return [MovieTrailer(**trailer_dict)]
+
+
 
 

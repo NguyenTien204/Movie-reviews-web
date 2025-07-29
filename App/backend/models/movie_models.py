@@ -61,7 +61,7 @@ class Trailer(Base):
     name = Column(String, nullable=False)
     site = Column(Enum(SiteEnum), nullable=False)
     key = Column(String, nullable=False)
-    type = Column(Enum(TrailerTypeEnum), nullable=False)
+    type = Column(String, nullable=True)
     official = Column(Boolean)
     published_at = Column(DateTime)
     size = Column(Integer)
