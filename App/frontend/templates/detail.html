@@ -6,7 +6,7 @@
 <section class="section-detail-movie">
     <div class="box-detail"></div>
     <div class="detail-video">
-        <iframe class="main-video" src="" frameborder="0" allowfullscreen
+        <iframe class="main-video" id="trailer-player" src="" frameborder="0" allowfullscreen
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; "
             style="width: 100%; height: 400px;">
         </iframe>
@@ -157,11 +157,16 @@
     </form>
   </div>
 </div> -->
+<script src="https://www.youtube.com/iframe_api"></script>
 <script>
+let player;
+let watchStartTime = null;      // Thời điểm bắt đầu xem (mỗi lần Play)
+let totalWatchTime = 0;         // Tổng thời gian đã xem (cộng dồn)
+let isPlaying = false;
+
 document.addEventListener('DOMContentLoaded', function () {
-    const movieId = extractMovieIdFromURL();  // URL cần có ?movie_id=xxx
+    const movieId = extractMovieIdFromURL();
     const startTime = Date.now();
-    const iframe = document.querySelector('.main-video');
 
     // Gửi dwelltime khi rời trang
     window.addEventListener('beforeunload', function () {
@@ -169,61 +174,111 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!movieId) return;
 
         logUserEvent({
-            action_type: "dwelltime",  // ✅ Đúng Kafka topic
+            action_type: "dwelltime",
             movie_id: movieId,
             dwell_time: dwellTime,
             timestamp: new Date().toISOString(),
             user_agent: navigator.userAgent
         });
+
+        // Nếu đang xem mà tắt trang → ghi nốt thời gian đã xem
+        if (isPlaying && watchStartTime) {
+            totalWatchTime += Math.floor((Date.now() - watchStartTime) / 1000);
+            logUserEvent({
+                action_type: "trailer",
+                event: "left_page",
+                movie_id: movieId,
+                watch_seconds: totalWatchTime,
+                timestamp: new Date().toISOString(),
+                user_agent: navigator.userAgent
+            });
+        }
     });
-
-    // Gửi log khi người dùng tương tác xem trailer
-    if (iframe) {
-        iframe.addEventListener('mouseenter', function () {
-            if (!movieId) return;
-
-            logUserEvent({
-                action_type: "trailer",  // ✅ Đúng Kafka topic
-                movie_id: movieId,
-                timestamp: new Date().toISOString(),
-                user_agent: navigator.userAgent
-            });
-        });
-
-        iframe.addEventListener('focus', function () {
-            if (!movieId) return;
-
-            logUserEvent({
-                action_type: "trailer",  // ✅ Có thể giữ nguyên "trailer"
-                movie_id: movieId,
-                timestamp: new Date().toISOString(),
-                user_agent: navigator.userAgent
-            });
-        });
-    }
-
-    // Gửi log đến backend
-    function logUserEvent(logData) {
-        fetch('http://127.0.0.1:5000/api/v1/log/user_event', {
-            method: 'POST',
-            credentials: 'include',  // ✅ Quan trọng để gửi cookie chứa access_token
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(logData)
-        })
-        .then(res => {
-            if (!res.ok) console.warn("Log failed:", res.statusText);
-        })
-        .catch(err => console.error("Logging error:", err));
-    }
-
-    // Trích xuất movie_id từ URL (?movie_id=123)
-    function extractMovieIdFromURL() {
-        const url = new URL(window.location.href);
-        const id = url.searchParams.get("movie_id");
-        return id ? parseInt(id) : null;
-    }
 });
+
+// ✅ Hàm YouTube API gọi khi sẵn sàng
+function onYouTubeIframeAPIReady() {
+    console.log("✅ YouTube API ready, waiting for iframe to load…");
+
+}
+
+// ✅ Lắng nghe trạng thái video
+function onPlayerStateChange(event) {
+    const movieId = extractMovieIdFromURL();
+    if (!movieId) return;
+
+    const state = event.data;
+
+    if (state === YT.PlayerState.PLAYING) {
+        if (!isPlaying) {
+            watchStartTime = Date.now();
+            isPlaying = true;
+
+            logUserEvent({
+                action_type: "trailer",
+                event: "started",
+                movie_id: movieId,
+                timestamp: new Date().toISOString(),
+                user_agent: navigator.userAgent
+            });
+        }
+    }
+
+    if (state === YT.PlayerState.PAUSED && isPlaying) {
+        // Cộng dồn thời gian xem
+        totalWatchTime += Math.floor((Date.now() - watchStartTime) / 1000);
+        isPlaying = false;
+
+        logUserEvent({
+            action_type: "trailer",
+            event: "paused",
+            movie_id: movieId,
+            watch_seconds: totalWatchTime,
+            timestamp: new Date().toISOString(),
+            user_agent: navigator.userAgent
+        });
+    }
+
+    if (state === YT.PlayerState.ENDED) {
+        // Khi video kết thúc, cộng nốt thời gian và gửi log
+        if (isPlaying) {
+            totalWatchTime += Math.floor((Date.now() - watchStartTime) / 1000);
+            isPlaying = false;
+        }
+
+        logUserEvent({
+            action_type: "trailer",
+            event: "finished",
+            movie_id: movieId,
+            watch_seconds: totalWatchTime,
+            timestamp: new Date().toISOString(),
+            user_agent: navigator.userAgent
+        });
+
+        // Reset để lần xem sau bắt đầu lại từ 0
+        totalWatchTime = 0;
+    }
+}
+
+// ✅ Gửi log về backend (backend push Kafka)
+function logUserEvent(logData) {
+    fetch('http://127.0.0.1:5000/api/v1/log/user_event', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(logData)
+    }).catch(console.warn);
+}
+
+// ✅ Lấy movie_id từ URL (?movie_id=xxx)
+function extractMovieIdFromURL() {
+    const url = new URL(window.location.href);
+    const id = url.searchParams.get("movie_id");
+    return id ? parseInt(id) : null;
+}
 </script>
+
+
 {% endblock %}

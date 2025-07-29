@@ -32,25 +32,28 @@ document.addEventListener("DOMContentLoaded", async () => {
         document.querySelector(".score-description").textContent = getScoreDescription(7)|| "Không có mô tả";
 
 
-        // 4. Hiển thị video (YouTube trailer)
-        const iframe = document.getElementById("trailer-player");
-        if (movie.video_url) {
-            iframe.src = movie.video_url
-            
-        } else {
-            videoSection.innerHTML = "<p>Không tìm thấy video trailer.</p>";
-        }
-        // 5. Hiển thị điểm số
-        const scoreElement = document.querySelector(".score");
-        if (scoreElement) {
-            scoreElement.textContent = `Score: ${movie.score || "N/A"}`;
-        }
+        // 🎯 Gán src cho iframe như trước
+        const iframe = document.querySelector(".main-video");
+        iframe.src = videoUrl;
 
-    } catch (error) {
-        console.error("Lỗi khi lấy chi tiết phim:", error);
-        document.querySelector(".movie-title").textContent = "Đã xảy ra lỗi khi tải dữ liệu.";
+        // 🎯 Đợi iframe load xong mới attach YT.Player
+        iframe.onload = () => {
+            console.log("✅ Iframe loaded, attaching YT.Player");
+            player = new YT.Player('trailer-player', {
+                events: { 'onStateChange': onPlayerStateChange }
+            });
+        };
+
+        // (các đoạn gán title, summary, genre giữ nguyên)
+        document.querySelector(".detail-movie-title").textContent = movie.title || "Không có tiêu đề";
+        document.querySelector(".summary").textContent = movie.overview || "Không có mô tả";
+        document.querySelector(".movie-genre-container").innerHTML = processGenres(movie.genres)
+            .map(genre => `<span class="movie-genre">${genre}</span>`).join('');
+        document.querySelector(".score-description").textContent = getScoreDescription(7) || "Không có mô tả";
+
+    } catch (err) {
+        console.error("Lỗi khi lấy chi tiết phim:", err);
     }
 });
-
 
 
