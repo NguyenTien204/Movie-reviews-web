@@ -1,3 +1,7 @@
+import {getScoreDescription} from '../utils/createHome.js';
+
+
+
 const scoreBar = document.getElementById('scoreBar');
 const circleScore = document.getElementById('circleScore');
 const scoreDescription = document.getElementById('scoreDescription');
@@ -13,16 +17,6 @@ function getColorClass(score) {
     return 'red';
 }
 
-function getScoreDescription(score) {
-    const numScore = parseFloat(score);
-    if (isNaN(numScore)) return "No rating";
-
-    if (numScore >= 9.0) return "Universal acclaim";
-    if (numScore >= 8.0) return "Generally favorable";
-    if (numScore >= 7.0) return "Generally positive";
-    if (numScore >= 6.0) return "Mixed reviews";
-    return "Generally negative";
-}
 
 // Hàm cập nhật màu circle-score
 function updateCircleColor(score) {

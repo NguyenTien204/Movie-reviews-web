@@ -26,7 +26,7 @@
 }
 .featured-underline-1 {
     width: 100%;
-  
+
 }
 
 /* ==================== NAVIGATION ARROWS ==================== */
@@ -167,8 +167,8 @@
     margin-bottom: 100px;
     position: absolute;
     bottom: 0;
- 
-    
+
+
 
 }
 
@@ -177,9 +177,9 @@
     bottom: 0;
     width: 90%;
     margin-bottom: 10px;
-    
-    
-    
+
+
+
 }
 
 .meta-label {
@@ -196,6 +196,7 @@
 }
 
 .score-box {
+    width: 32px;
     background-color: #7dd87d;
     color: black;
     border-radius: 4px;
@@ -329,25 +330,25 @@
     .movies-grid {
         gap: 15px;
     }
-    
+
     .movie-card {
         flex: 0 0 200px;
     }
-    
+
     .small-movie-card {
         flex: 0 0 150px;
         height: 240px;
     }
-    
+
     .section-header {
         flex-direction: column;
         gap: 15px;
     }
-    
+
     .featured-underline {
         width: 150px;
     }
-    
+
     .navigation-arrows {
         justify-content: center;
     }
@@ -357,16 +358,16 @@
     .movie-card {
         flex: 0 0 180px;
     }
-    
+
     .small-movie-card {
         flex: 0 0 120px;
         height: 200px;
     }
-    
+
     .small-movie-card img {
         height: 160px;
     }
-    
+
     .section-title {
         font-size: 20px;
     }
@@ -399,7 +400,7 @@
   display: grid;
   grid-template-columns: 1fr auto; /* Cột 1 co dãn, cột 2 tự động */
   align-items: center;
-  
+
 }
 .video-title-main {
   grid-column: 1;
@@ -429,7 +430,7 @@
 }
 
 .video-thumb {
-  
+
   position: relative;
   cursor: pointer;
   overflow: hidden;
