@@ -1,131 +1,175 @@
-# Refactored Transformation Module
-
-from typing import Dict, List, Tuple
+from typing import Dict, List, Any, Optional
 import pandas as pd
 import logging
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
 
-from Data_Pipeline.pipelines.extract import (
-    JSONPathExtractor,
-    SimpleFieldStrategy, NestedObjectStrategy,
-    ArrayStrategy, MappingType,
-    FieldMapping, TableMapping
-)
-
-# Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Utility functions
+@dataclass
+class FieldMapping:
+    source: str
+    target: str
+    data_type: Optional[str] = None
+    default_value: Any = None
+    required: bool = False
+    nullable: Optional[bool] = None
 
-def parse_field_mappings(fields_cfg: List[Dict]) -> List[FieldMapping]:
-    return [
-        FieldMapping(
-            source=f['source'],
-            target=f['target'],
-            data_type=f.get('type'),
-            default_value=f.get('default_value')
-        ) for f in fields_cfg
-    ]
+@dataclass
+class TableMapping:
+    table_name: str
+    fields: List[FieldMapping]
+    foreign_key: Optional[str] = None
+    primary_key: Optional[str] = None
+    source_path: Optional[str] = None
+    junction_table: Optional[str] = None
+    junction_config: Optional[Dict] = None
 
-def detect_primary_key(df: pd.DataFrame) -> str:
-    id_cols = [col for col in df.columns if col.endswith('_id')]
-    return id_cols[0] if id_cols else df.columns[0]
+class DataExtractor:
+    def safe_extract(self, doc: Dict, path: str) -> Any:
+        try:
+            if not path:
+                return doc
 
-# Config Parser Class
-class ConfigParser:
-    def parse_main_table(self, config: Dict) -> TableMapping:
-        fields = parse_field_mappings(config['mappings']['simple_fields'])
-        return TableMapping(table_name=config['main_table'], fields=fields)
+            parts = path.replace("[]", ".[]").split(".")
+            current = doc
 
-    def parse_related_configs(self, config: Dict) -> Dict[MappingType, List[TableMapping]]:
-        mappings = config.get("mappings", {})
-        result = {}
+            for part in parts:
+                if not current:
+                    return None
 
-        for key, mapping_type in [
-            ("one_to_one", MappingType.ONE_TO_ONE),
-            ("nested_objects", MappingType.NESTED_OBJECTS),
-            ("arrays", MappingType.ARRAYS)
-        ]:
-            if key not in mappings:
-                continue
+                if part == "[]":
+                    if not isinstance(current, list):
+                        return []
+                    continue
 
-            tables = []
-            for tbl_key, tbl_cfg in mappings[key].items():
-                fields = parse_field_mappings(tbl_cfg['fields'])
-                table = TableMapping(
-                    table_name=tbl_cfg.get('table_name', tbl_key),
-                    fields=fields,
-                    primary_key=tbl_cfg.get('primary_key'),
-                    foreign_key=tbl_cfg.get('relation', {}).get('foreign_key')
-                )
-                if 'source_path' in tbl_cfg:
-                    setattr(table, 'source_path', tbl_cfg['source_path'])
-                if 'junction_table' in tbl_cfg:
-                    setattr(table, 'junction_table', tbl_cfg['junction_table'])
-                if 'relation_keys' in tbl_cfg:
-                    setattr(table, 'junction_config', tbl_cfg['relation_keys'])
-                tables.append(table)
-            result[mapping_type] = tables
+                if isinstance(current, list):
+                    if part.isdigit():
+                        idx = int(part)
+                        current = current[idx] if 0 <= idx < len(current) else None
+                    else:
+                        current = [item.get(part) for item in current if isinstance(item, dict)]
+                elif isinstance(current, dict):
+                    current = current.get(part)
+                else:
+                    return None
 
-        return result
+            return current
+        except Exception as e:
+            logger.warning(f"Failed to extract path '{path}': {e}")
+            return None
 
-# Transformer Classes
-class MainTableTransformer:
-    def __init__(self, extractor: JSONPathExtractor):
+class DataTransformer:
+    def __init__(self, extractor: DataExtractor):
         self.extractor = extractor
 
-    def transform(self, df: pd.DataFrame, config: TableMapping) -> pd.DataFrame:
+    def transform_array(self, data: Dict, config: TableMapping, main_id: Any) -> Dict[str, List[Dict]]:
+        array_path = config.source_path or config.fields[0].source.split("[]")[0]
+        items = self.extractor.safe_extract(data, array_path)
+
+        if not isinstance(items, list):
+            return {}
+
+        main_results = []
+        junction_results = []
+
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+
+            row = {}
+            valid_row = True
+
+            for field in config.fields:
+                field_path = field.source.split("[]")[-1].lstrip(".")
+                value = item.get(field_path)
+
+                if value is not None:
+                    row[field.target] = value
+                elif field.default_value is not None:
+                    row[field.target] = field.default_value
+                elif field.required:
+                    valid_row = False
+                    break
+
+            if not valid_row or not row:
+                continue
+
+            main_results.append(row)
+
+            if config.junction_config:
+                junction_results.append({
+                    config.junction_config['left_key']: main_id,
+                    config.junction_config['right_key']: row.get(config.junction_config['right_key'])
+                })
+
         result = {}
-        for field in config.fields:
-            if field.source == "_id":
-                result[field.target] = df['_id'].astype(str)
-            elif '.' in field.source:
-                result[field.target] = df.apply(lambda row: self.extractor.safe_extract(row.to_dict(), field.source), axis=1)
-            else:
-                result[field.target] = df.get(field.source, field.default_value)
-        return pd.DataFrame(result)
-
-class RelatedTableTransformer:
-    def __init__(self, extractor: JSONPathExtractor):
-        self.strategies = {
-            MappingType.SIMPLE: SimpleFieldStrategy(extractor),
-            MappingType.ONE_TO_ONE: SimpleFieldStrategy(extractor),
-            MappingType.NESTED_OBJECTS: NestedObjectStrategy(extractor),
-            MappingType.ARRAYS: ArrayStrategy(extractor)
-        }
-
-    def transform(self, df: pd.DataFrame, main_df: pd.DataFrame, related_configs: Dict[MappingType, List[TableMapping]]) -> Dict[str, pd.DataFrame]:
-        main_pk = detect_primary_key(main_df)
-        result = {}
-
-        for mapping_type, tables in related_configs.items():
-            strategy = self.strategies[mapping_type]
-            for table_cfg in tables:
-                collected = []
-                for idx, row in df.iterrows():
-                    main_id = main_df.iloc[idx][main_pk]
-                    records = strategy.process(row.to_dict(), table_cfg, main_id)
-                    for tbl_name, recs in records.items():
-                        valid = [r for r in recs if any(r.values()) and (tbl_name != 'collections' or r.get('collection_id'))]
-                        collected.extend(valid)
-                if collected:
-                    result[table_cfg.table_name] = pd.DataFrame(collected)
+        if main_results:
+            result[config.table_name] = pd.DataFrame(main_results)
+        if junction_results:
+            result[config.junction_table] = pd.DataFrame(junction_results)
 
         return result
 
-# Pipeline Controller
+    def transform_simple(self, data: Dict, config: TableMapping) -> pd.DataFrame:
+        result = {}
+        for field in config.fields:
+            value = self.extractor.safe_extract(data, field.source)
+            if value is not None:
+                result[field.target] = value
+            elif field.default_value is not None:
+                result[field.target] = field.default_value
+        return pd.DataFrame([result]) if result else pd.DataFrame()
+
 class TransformationEngine:
     def __init__(self):
-        self.extractor = JSONPathExtractor()
-        self.parser = ConfigParser()
-        self.main_transformer = MainTableTransformer(self.extractor)
-        self.related_transformer = RelatedTableTransformer(self.extractor)
+        self.extractor = DataExtractor()
+        self.transformer = DataTransformer(self.extractor)
 
-    def transform_batch(self, df: pd.DataFrame, config: Dict) -> Tuple[pd.DataFrame, Dict[str, pd.DataFrame]]:
-        main_cfg = self.parser.parse_main_table(config)
-        related_cfgs = self.parser.parse_related_configs(config)
+    def transform_batch(self, df: pd.DataFrame, config: Dict) -> tuple[pd.DataFrame, Dict[str, pd.DataFrame]]:
+        results = {'main': [], 'related': {}}
 
-        main_df = self.main_transformer.transform(df, main_cfg)
-        related_dfs = self.related_transformer.transform(df, main_df, related_cfgs)
+        for _, row in df.iterrows():
+            data = row.to_dict()
+
+            # Transform main table
+            main_fields = [FieldMapping(**f) for f in config['mappings']['simple_fields']]
+            main_config = TableMapping(table_name=config['main_table'], fields=main_fields)
+            main_df = self.transformer.transform_simple(data, main_config)
+
+            if main_df.empty:
+                continue
+
+            results['main'].append(main_df)
+            main_id = main_df.iloc[0][config.get('primary_key', 'movie_id')]
+
+            # Transform related tables
+            for table_type in ['arrays']:
+                if table_type not in config['mappings']:
+                    continue
+
+                for table_name, table_config in config['mappings'][table_type].items():
+                    fields = [FieldMapping(**f) for f in table_config['fields']]
+                    mapping = TableMapping(
+                        table_name=table_config.get('table_name', table_name),
+                        fields=fields,
+                        source_path=table_config.get('source_path'),
+                        junction_table=table_config.get('junction_table'),
+                        junction_config=table_config.get('relation_keys')
+                    )
+
+                    transformed = self.transformer.transform_array(data, mapping, main_id)
+                    for k, v in transformed.items():
+                        if k not in results['related']:
+                            results['related'][k] = []
+                        results['related'][k].append(v)
+
+        # Combine results
+        main_df = pd.concat(results['main'], ignore_index=True) if results['main'] else pd.DataFrame()
+        related_dfs = {
+            k: pd.concat(v, ignore_index=True) for k, v in results['related'].items()
+            if v and not all(df.empty for df in v)
+        }
 
         return main_df, related_dfs

@@ -9,7 +9,7 @@ PYTHON_PATH = r"C:\Users\Admin\AppData\Local\Programs\Python\Python310\python.ex
 os.environ["PYSPARK_PYTHON"] = PYTHON_PATH
 os.environ["PYSPARK_DRIVER_PYTHON"] = PYTHON_PATH
 
-# 1. Tạo Spark session
+# Tạo Spark session
 spark = SparkSession.builder \
     .appName("KafkaStructuredBatch") \
     .appName("ClickStreamConsumer") \
@@ -30,7 +30,7 @@ userlog_schema = StructType() \
     .add("user_id", IntegerType()) \
     .add("user_agent", StringType())
 
-# 3. Đọc từ Kafka nhiều topic
+# Đọc từ Kafka nhiều topic
 df_raw = spark.readStream \
     .format("kafka") \
     .option("kafka.bootstrap.servers", "localhost:9092") \
@@ -44,13 +44,13 @@ df_raw = spark.readStream \
     .option("startingOffsets", "latest") \
     .load()
 
-# 4. Parse JSON từ Kafka message
+# Parse JSON từ Kafka message
 df_parsed = df_raw.select(
     from_json(col("value").cast("string"), userlog_schema).alias("data"),
     col("topic")
 ).select("data.*", "topic")
 
-# 5. Gom nhóm theo user_id và thời gian 5 phút
+# Gom nhóm theo user_id và thời gian 5 phút
 df_grouped = df_parsed \
     .withWatermark("timestamp", "10 minutes") \
     .groupBy(
@@ -59,7 +59,7 @@ df_grouped = df_parsed \
     ) \
     .count()  # hoặc thực hiện enrichment, agg,...
 
-# 6. Xuất kết quả ra console để test (sau này sẽ ghi vào PostgreSQL)
+# Xuất kết quả ra console để test (sau này sẽ ghi vào PostgreSQL)
 query = df_grouped.writeStream \
     .outputMode("update") \
     .trigger(processingTime="5 minutes") \

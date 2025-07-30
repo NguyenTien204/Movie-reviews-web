@@ -1,6 +1,6 @@
 import requests
 import time
-TMDB_API_KEY = 'your api key'
+TMDB_API_KEY = '358fe0abcb8f482817d2372f11dcfb7a'
 TMDB_BASE_URL = 'https://api.themoviedb.org/3'
 
 class TMDBClient:
