@@ -1,6 +1,6 @@
 
 import { getVideoUrl } from '../utils/getUrl.js';
-import { getScoreDescription,processGenres} from '../utils/createHome.js';
+import { processGenres} from '../utils/createHome.js';
 import { API_CONFIG } from '../api/config.js';
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -55,5 +55,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         console.error("Lỗi khi lấy chi tiết phim:", err);
     }
 });
+
 
 

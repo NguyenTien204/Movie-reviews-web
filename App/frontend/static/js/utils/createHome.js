@@ -2,10 +2,6 @@ import { getPosterUrl } from '../utils/getUrl.js';
 
 
 
-
-
-
-
 export function processGenres(genres) {
     if (!genres) return [];
 
@@ -25,17 +21,6 @@ export function processGenres(genres) {
     }
 
     return [];
-}
-
-export function getScoreDescription(score) {
-    const numScore = parseFloat(score);
-    if (isNaN(numScore)) return "No rating";
-
-    if (numScore >= 9.0) return "Universal acclaim";
-    if (numScore >= 8.0) return "Generally favorable";
-    if (numScore >= 7.0) return "Generally positive";
-    if (numScore >= 6.0) return "Mixed reviews";
-    return "Generally negative";
 }
 
 // MovieCarousel Class
