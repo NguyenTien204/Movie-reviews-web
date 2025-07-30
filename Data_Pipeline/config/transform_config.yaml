@@ -5,46 +5,46 @@ mappings:
   simple_fields:
     - source: id
       target: movie_id
-      type: integer
+      data_type: integer
 
     - source : title
       target: title
-      type: VARCHAR
+      data_type: VARCHAR
       nullable: false
 
     - source: original_title
       target: original_title
-      type: VARCHAR
+      data_type: VARCHAR
       nullable: false
 
     - source: overview
       target: overview
-      type: TEXT
+      data_type: TEXT
 
     - source: popularity
       target: popularity
-      type: DOUBLE PRECISION
+      data_type: DOUBLE PRECISION
 
     - source: homepage
       target: homepage
-      type: VARCHAR
+      data_type: VARCHAR
 
     - source: tagline
       target: tagline
-      type: TEXT
+      data_type: TEXT
 
     - source: adult
       target: adult
-      type: BOOLEAN
+      data_type: BOOLEAN
 
     - source: poster_path
       target: poster_path
-      type: VARCHAR
+      data_type: VARCHAR
 
     - source: runtime
       target: runtime
-      type: INTEGER
-      
+      data_type: INTEGER
+
   # Trường object đơn giản, ánh xạ sang bảng phụ (1-1)
   one_to_one:
     release_calendar:
@@ -53,13 +53,13 @@ mappings:
 
         - source: release_date
           target: release_date
-          type: DATE
+          data_type: DATE
           nullable: false
 
         - source: status
           target: status
-          type: BOOLEAN
-          
+          data_type: BOOLEAN
+
       relation:
         local_key: movie_id
         foreign_key: movie_id
@@ -70,19 +70,19 @@ mappings:
       fields:
         - source: belongs_to_collection.id
           target: collection_id
-          type: VARCHAR
+          data_type: VARCHAR
 
         - source: belongs_to_collection.name
           target: name
-          type: VARCHAR
+          data_type: VARCHAR
 
         - source: belongs_to_collection.poster_path
           target: poster_path
-          type: VARCHAR
+          data_type: VARCHAR
 
         - source: belongs_to_collection.backdrop_path
           target: backdrop_path
-          type: VARCHAR
+          data_type: VARCHAR
 
       relation:
         from_main_table: true       # main table (movies) có khóa ngoại collection_id
@@ -98,46 +98,46 @@ mappings:
       fields:
         - source: id
           target: id
-          type: VARCHAR
+          data_type: VARCHAR
 
         - source: name
           target: name
-          type: VARCHAR
+          data_type: VARCHAR
           nullable: false
 
         - source: site
           target: site
-          type: enum
+          data_type: enum
           enum: site_enum[YouTube, Vimeo]
           nullable: false
 
         - source: key
           target: key
-          type: VARCHAR
+          data_type: VARCHAR
           nullable: false
 
-        - source: type
-          target: type
-          type: enum
+        - source: data_type
+          target: data_type
+          data_type: enum
           enum: trailers_type_enum[Trailer, Teaser, Clip, Featurette]
           nullable: false
 
         - source: official
           target: official
-          type: BOOLEAN
+          data_type: BOOLEAN
 
         - source: published_at
           target: published_at
-          type: TIMESTAMP
+          data_type: TIMESTAMP
 
         - source: size
           target: size
-          type: INTEGER
+          data_type: INTEGER
 
       relation:
         from_related_table: true
-        local_key: movie_id       
-        foreign_key: movie_id 
+        local_key: movie_id
+        foreign_key: movie_id
 
   # Mảng object, ánh xạ sang bảng quan hệ nhiều-nhiều
   arrays:
@@ -146,11 +146,11 @@ mappings:
       fields:
         - source: genres[].id
           target: genre_id
-          type: integer
+          data_type: integer
 
         - source: genres[].name
           target: name
-          type: VARCHAR
+          data_type: VARCHAR
           nullable: false
 
       junction_table: movie_genres
@@ -163,20 +163,20 @@ mappings:
       fields:
         - source: production_companies[].id
           target: company_id
-          type: INTEGER
+          data_type: INTEGER
 
         - source: production_companies[].name
           target: name
-          type: VARCHAR
+          data_type: VARCHAR
           nullable: false
 
         - source: production_companies[].logo_path
           target: logo_path
-          type: VARCHAR
+          data_type: VARCHAR
 
         - source: production_companies[].origin_country
           target: origin_country
-          type: CHAR(2)
+          data_type: CHAR(2)
 
       junction_table: movie_production_companies
       relation_keys:
@@ -188,11 +188,11 @@ mappings:
       fields:
         - source: production_countries[].iso_3166_1
           target: iso_3166_1
-          type: CHAR(2)
+          data_type: CHAR(2)
 
         - source: production_countries[].name
           target: name
-          type: VARCHAR
+          data_type: VARCHAR
           nullable: false
 
       junction_table: movie_production_countries
@@ -205,11 +205,11 @@ mappings:
       fields:
         - source: spoken_languages[].iso_639_1
           target: iso_639_1
-          type: CHAR(2)
+          data_type: CHAR(2)
 
         - source: spoken_languages[].english_name
           target: name
-          type: VARCHAR
+          data_type: VARCHAR
           nullable: false
 
       junction_table: movie_spoken_languages
@@ -218,7 +218,7 @@ mappings:
         right_key: iso_639_1
 
 
-        
+
 # | Mục             | Ý nghĩa                                                | Gợi ý chỉnh sửa                                                              |
 # | --------------- | ------------------------------------------------------ | ---------------------------------------------------------------------------- |
 # | collection`     | Tên collection MongoDB gốc                             | Thay bằng tên bạn đang ETL                                                   |
