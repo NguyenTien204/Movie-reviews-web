@@ -4,7 +4,7 @@ from pymongo import MongoClient
 
 POSTGRES_HOST = 'localhost'
 POSTGRES_PORT = 5432
-POSTGRES_DB = 'movie_db_test'
+POSTGRES_DB = 'movie_db'
 POSTGRES_USER = 'postgres'
 POSTGRES_PASSWORD = '141124'
 
@@ -18,7 +18,7 @@ MONGO_LOG_COLLECTIONS = {
     "search": "search_logs",
     "dwelltime": "dwell_logs"
 }
-MOVIE_COLLECTION = "raw_movies_test"
+MOVIE_COLLECTION = "raw_movies"
 USER_COMMENT_COLLECTION = "user_comments"
 
 # Configuration for Kafka in the movie data pipeline project

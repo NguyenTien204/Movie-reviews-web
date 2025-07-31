@@ -1,21 +1,23 @@
+# simplified_transform_config.yaml
 collection: raw_movies
 main_table: movies
+
 mappings:
-  # Trường đơn giản, ánh xạ trực tiếp sang bảng chính
+  # ===== MAIN TABLE FIELDS =====
   simple_fields:
     - source: id
       target: movie_id
       data_type: integer
 
-    - source : title
+    - source: title
       target: title
       data_type: VARCHAR
-      nullable: false
+      required: true
 
     - source: original_title
       target: original_title
       data_type: VARCHAR
-      nullable: false
+      required: true
 
     - source: overview
       target: overview
@@ -45,27 +47,20 @@ mappings:
       target: runtime
       data_type: INTEGER
 
-  # Trường object đơn giản, ánh xạ sang bảng phụ (1-1)
+  # ===== ONE-TO-ONE RELATIONSHIPS =====
   one_to_one:
     release_calendar:
       table: release_calendar
       fields:
-
         - source: release_date
           target: release_date
           data_type: DATE
-          nullable: false
 
         - source: status
           target: status
-          data_type: BOOLEAN
+          data_type: VARCHAR
 
-      relation:
-        local_key: movie_id
-        foreign_key: movie_id
-        fk_column_on_main_table: movie_id
-
-    belongs_to_collection:
+    collections:
       table: collections
       fields:
         - source: belongs_to_collection.id
@@ -84,17 +79,11 @@ mappings:
           target: backdrop_path
           data_type: VARCHAR
 
-      relation:
-        from_main_table: true       # main table (movies) có khóa ngoại collection_id
-        local_key: movie_id
-        foreign_key: movie_id
-
-
-  # Object lồng, ánh xạ sang bảng phụ (1-nhiều)
+  # ===== NESTED OBJECTS (ONE-TO-MANY) =====
   nested_objects:
     trailers:
-      source_path: videos.results
       table: trailers
+      source_path: videos.results
       fields:
         - source: id
           target: id
@@ -103,24 +92,18 @@ mappings:
         - source: name
           target: name
           data_type: VARCHAR
-          nullable: false
 
         - source: site
           target: site
-          data_type: enum
-          enum: site_enum[YouTube, Vimeo]
-          nullable: false
+          data_type: VARCHAR
 
         - source: key
           target: key
           data_type: VARCHAR
-          nullable: false
 
-        - source: data_type
-          target: data_type
-          data_type: enum
-          enum: trailers_type_enum[Trailer, Teaser, Clip, Featurette]
-          nullable: false
+        - source: type
+          target: type
+          data_type: VARCHAR
 
         - source: official
           target: official
@@ -134,24 +117,19 @@ mappings:
           target: size
           data_type: INTEGER
 
-      relation:
-        from_related_table: true
-        local_key: movie_id
-        foreign_key: movie_id
-
-  # Mảng object, ánh xạ sang bảng quan hệ nhiều-nhiều
+  # ===== ARRAYS (MANY-TO-MANY) =====
   arrays:
     genres:
       table: genres
       fields:
         - source: genres[].id
           target: genre_id
-          data_type: integer
+          data_type: INTEGER
 
         - source: genres[].name
           target: name
           data_type: VARCHAR
-          nullable: false
+          required: true
 
       junction_table: movie_genres
       relation_keys:
@@ -168,7 +146,7 @@ mappings:
         - source: production_companies[].name
           target: name
           data_type: VARCHAR
-          nullable: false
+          required: true
 
         - source: production_companies[].logo_path
           target: logo_path
@@ -176,7 +154,7 @@ mappings:
 
         - source: production_companies[].origin_country
           target: origin_country
-          data_type: CHAR(2)
+          data_type: VARCHAR
 
       junction_table: movie_production_companies
       relation_keys:
@@ -188,12 +166,12 @@ mappings:
       fields:
         - source: production_countries[].iso_3166_1
           target: iso_3166_1
-          data_type: CHAR(2)
+          data_type: VARCHAR
 
         - source: production_countries[].name
           target: name
           data_type: VARCHAR
-          nullable: false
+          required: true
 
       junction_table: movie_production_countries
       relation_keys:
@@ -205,25 +183,14 @@ mappings:
       fields:
         - source: spoken_languages[].iso_639_1
           target: iso_639_1
-          data_type: CHAR(2)
+          data_type: VARCHAR
 
         - source: spoken_languages[].english_name
           target: name
           data_type: VARCHAR
-          nullable: false
+          required: true
 
       junction_table: movie_spoken_languages
       relation_keys:
         left_key: movie_id
         right_key: iso_639_1
-
-
-
-# | Mục             | Ý nghĩa                                                | Gợi ý chỉnh sửa                                                              |
-# | --------------- | ------------------------------------------------------ | ---------------------------------------------------------------------------- |
-# | collection`     | Tên collection MongoDB gốc                             | Thay bằng tên bạn đang ETL                                                   |
-# | main_table`     | Tên bảng chính ở PostgreSQL                            | Thường là `movies`, `users`,...                                              |
-# | simple_fields`  | Các trường ánh xạ trực tiếp từ document vào bảng chính | Bổ sung nếu bạn thêm trường trong Mongo                                      |
-# | nested_objects` | Trường là object (ví dụ `belongs_to_collection`)       | Mỗi object -> 1 bảng riêng, có `foreign key` trỏ từ bảng chính               |
-# | arrays`         | Các trường là array (mảng object hoặc string)          | Ánh xạ sang bảng phụ hoặc bảng trung gian (junction) cho quan hệ nhiều-nhiều |
-# | junction_table` | Tên bảng trung gian nối nhiều-nhiều                    | Đặt tên dạng `movie_xxx` để dễ dùng sau                                      |

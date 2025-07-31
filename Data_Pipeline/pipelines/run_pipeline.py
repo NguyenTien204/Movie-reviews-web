@@ -4,7 +4,7 @@ import logging
 from Data_Pipeline.pipelines.extract import MongoExtractor
 from Data_Pipeline.pipelines.load import PostgresLoader
 from Data_Pipeline.pipelines.validator import load_and_validate
-from pipelines.transform import TransformationEngine
+from Data_Pipeline.pipelines.transform import TransformationEngine
 from Data_Pipeline.config.connection import (
     POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD,
     POSTGRES_HOST, POSTGRES_PORT, MONGO_URI, MONGO_DB_NAME, MOVIE_COLLECTION,
