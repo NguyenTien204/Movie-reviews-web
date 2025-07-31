@@ -1,48 +1,54 @@
-
-.box-detail{
-    position: absolute;
-    left: 0;
-    width: 100%;
-    background-color: #fbc02d;
-    height: 100px;
-    z-index: 0;
+.box-detail {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  background-color: #fbc02d;
+  height: 100px;
+  z-index: 0;
 }
+
 .section-detail-movie {
   display: flex;
   flex-direction: row;
 
 }
+
 .detail-video,
 .detail-rating {
   margin-top: 50px;
 
 }
-.detail-video{
-    z-index: 2;
-    width:70%;
-    border-radius: 5px;
+
+.detail-video {
+  z-index: 2;
+  width: 70%;
+  border-radius: 5px;
 
 
 }
-iframe{
-    border-radius:10px;
+
+iframe {
+  border-radius: 10px;
 
 }
-.detail-rating{
-    z-index: 1;
-    right:195px;
-    border: 2px solid white;
-    border-radius: 10px 10px 10px 10px;
-    padding: 15px 20px;
-    width: 30%;
-    height: 450px;
-    background-color: #fff;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+
+.detail-rating {
+  z-index: 1;
+  right: 195px;
+  border: 2px solid white;
+  border-radius: 10px 10px 10px 10px;
+  padding: 15px 20px;
+  width: 30%;
+  height: 450px;
+  background-color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
-.detail-myscore{
+
+.detail-myscore {
   position: relative;
 }
-.detail-underline{
+
+.detail-underline {
   width: 100%;
   height: 1.5px;
   background-color: #444445;
@@ -159,7 +165,7 @@ iframe{
 }
 
 
-.post-myreview{
+.post-myreview {
   display: grid;
   margin-top: 40px;
   width: 100%;
@@ -169,7 +175,8 @@ iframe{
   border-radius: 5px;
 
 }
-.list-comment{
+
+.list-comment {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   grid-gap: 20px;
@@ -178,17 +185,19 @@ iframe{
 
 
 }
+
 .comment {
   border: 1px solid #000000;
   display: grid;
   grid-template-columns: 1fr 5fr 1fr;
-  grid-template-rows: 1fr 1fr 0.7fr ;
+  grid-template-rows: 1fr 1fr 0.7fr;
   grid-template-areas: "score score score" "comment comment comment" "read read read" "line line line" "user user user";
   padding: 10px;
   border-radius: 5px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
-.score-comment{
+
+.score-comment {
   height: 50px;
   color: black;
   font-size: 24px;
@@ -200,7 +209,8 @@ iframe{
   justify-content: center;
   align-items: center;
 }
-.read-more{
+
+.read-more {
   background-color: gray;
   border-radius: 5px;
   border: 1px solid #1976d2;
@@ -211,16 +221,19 @@ iframe{
   width: 90px;
   place-content: center;
 }
-.read-more p{
+
+.read-more p {
   color: white;
   margin: 0;
 }
-.user-name{
-  font-weight:bolder;
+
+.user-name {
+  font-weight: bolder;
   color: #000000;
   font-size: 16px;
   text-decoration: underline;
 }
+
 .review-all {
   display: flex;
   justify-content: center;
@@ -229,6 +242,7 @@ iframe{
 
 
 }
+
 .review-all a {
   text-decoration: none;
   color: white;

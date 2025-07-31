@@ -21,7 +21,6 @@ const Router = {
     {
       path: '/profile',
       elementId: 'userIcon'
-      
     }
 
     // Thêm route mới vào đây

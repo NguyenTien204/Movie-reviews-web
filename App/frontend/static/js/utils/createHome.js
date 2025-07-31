@@ -81,7 +81,7 @@ export class MovieCarousel {
         ).join('');
 
         // Xử lý score - sử dụng từ API nếu có, không thì để placeholder
-        let score =  movie.average_rating  || 'N/A';
+        const score =  movie.average_rating  || 'N/A';
         const scoreDescription = score !== 'N/A' ? getScoreDescription(score) : 'No rating yet';
 
         return `
@@ -122,8 +122,8 @@ export class MovieCarousel {
         const imageUrl = getPosterUrl(movie.poster_path);
 
         // Xử lý score
-        const score = movie.score || movie.vote_average || 'N/A';
-        const scoreDescription = score !== 'N/A' ? this.getScoreDescription(score) : 'No rating';
+        const score = movie.average_rating || 'N/A';
+        const scoreDescription = score !== 'N/A' ? getScoreDescription(score) : 'No rating';
 
         return `
             <div class="movie-card-small">
