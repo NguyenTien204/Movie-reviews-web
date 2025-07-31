@@ -27,6 +27,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const genreUrl = processGenres(movie.genres).map(genre =>`<span class="movie-genre">${genre}</span>`).join('');
         console.log(videoUrl);
         document.querySelector(".detail-movie-title").textContent = movie.title || "Không có tiêu đề";
+        document.querySelector(".score-box").textContent = movie.average_rating || "N/A"
         document.querySelector(".summary").textContent = movie.overview || "Không có mô tả";
         document.querySelector(".main-video").src = videoUrl || "Không rõ";
         document.querySelector(".movie-genre-container").innerHTML = genreUrl || "Không rõ";

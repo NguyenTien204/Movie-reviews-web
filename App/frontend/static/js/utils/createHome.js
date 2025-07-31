@@ -81,7 +81,7 @@ export class MovieCarousel {
         ).join('');
 
         // Xử lý score - sử dụng từ API nếu có, không thì để placeholder
-        let score = '7' ; //movie.score || movie.vote_average || 'N/A';
+        let score =  movie.average_rating  || 'N/A';
         const scoreDescription = score !== 'N/A' ? getScoreDescription(score) : 'No rating yet';
 
         return `
