@@ -3,9 +3,6 @@ import { getPosterUrl } from '../utils/getUrl.js';
 
 
 
-
-
-
 export function processGenres(genres) {
     if (!genres) return [];
 
@@ -26,7 +23,6 @@ export function processGenres(genres) {
 
     return [];
 }
-
 export function getScoreDescription(score) {
     const numScore = parseFloat(score);
     if (isNaN(numScore)) return "No rating";
@@ -85,8 +81,8 @@ export class MovieCarousel {
         ).join('');
 
         // Xử lý score - sử dụng từ API nếu có, không thì để placeholder
-        const score = movie.score || movie.vote_average || 'N/A'; //score và vote average review_count chưa có trong data base
-        const scoreDescription = score !== 'N/A' ? this.getScoreDescription(score) : 'No rating yet';
+        let score = '7' ; //movie.score || movie.vote_average || 'N/A';
+        const scoreDescription = score !== 'N/A' ? getScoreDescription(score) : 'No rating yet';
 
         return `
             <div class="movie-card">

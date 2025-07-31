@@ -4,91 +4,98 @@
 
 {% block content %}
 <section class="section-detail-movie">
-    <div class="box-detail"></div>
-    <div class="detail-video">
-        <iframe class="main-video" id="trailer-player" src="" frameborder="0" allowfullscreen
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; "
-            style="width: 100%; height: 400px;">
-        </iframe>
-        <p style="font-weight: bold;margin-bottom: -10px;font-size: 20px;">Summary</p>
-        <p class="summary">
-        </p>
+  <div class="box-detail"></div>
+  <div class="detail-video">
+    <iframe class="main-video" id="trailer-player" src="" frameborder="0" allowfullscreen
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; "
+      style="width: 100%; height: 400px;">
+    </iframe>
+    <p style="font-weight: bold;margin-bottom: -10px;font-size: 20px;">Summary</p>
+    <p class="summary">
+    </p>
 
+  </div>
+  <div class="detail-rating">
+    <h2 class="detail-movie-title"></h2>
+    <div class="detail-underline"></div>
+    <div class="meta-label">METASCORE</div>
+    <div class="score-container">
+      <div class="score-info">
+        <div class="score-description"></div>
+        <div class="score-details">Based on 20 Critic Reviews</div>
+      </div>
+      <div class="score-box">5</div>
     </div>
-    <div class="detail-rating">
-      <h2 class="detail-movie-title"></h2>
-      <div class="detail-underline"></div>
-      <div class="meta-label">METASCORE</div>
-      <div class="score-container">
-        <div class="score-info">
-          <div class="score-description"></div>
-          <div class="score-details">Based on 20 Critic Reviews</div>
-        </div>
-        <div class="score-box">10</div>
-      </div>
-      <div class="rating-bar">
-        <div class="positive-bar"></div>
-        <div class="mixed-bar"></div>
-        <div class="negative-bar"></div>
-      </div>
-      <div class="detail-genre">
-        <p style="color:gray;letter-spacing: 1px;">Genre</p>
-        <div class="movie-genre-container">
-
-
-        </div>
-      </div>
-      <div class="detail-myscore">
-        <p style="color:gray; letter-spacing: 1px; margin-bottom: 5px;">MY SCORE</p>
-        <div class="circle-score">3</div>
-        <div class="score-description">Generally Favorable</div>
-        <div class="myscore-bar">
-          <div class="piece-score-bar piece-0"></div>
-          <div class="piece-score-bar piece-1"></div>
-          <div class="piece-score-bar piece-2"></div>
-          <div class="piece-score-bar piece-3"></div>
-          <div class="piece-score-bar piece-4"></div>
-          <div class="piece-score-bar piece-5"></div>
-          <div class="piece-score-bar piece-6"></div>
-          <div class="piece-score-bar piece-7"></div>
-          <div class="piece-score-bar piece-8"></div>
-          <div class="piece-score-bar piece-9"></div>
-          <div class="piece-score-bar piece-10"></div>
-        </div>
-        <div class="post-myreview">
-          <a href="#">Edit My Review</a>
-        </div>
+    <div class="rating-bar">
+      <div class="positive-bar"></div>
+      <div class="mixed-bar"></div>
+      <div class="negative-bar"></div>
+    </div>
+    <div class="detail-genre">
+      <p style="color:gray;letter-spacing: 1px;">Genre</p>
+      <div class="movie-genre-container">
+        <!-- auto genre -->
       </div>
     </div>
+    <div class="detail-myscore">
+      <p style="color:gray; letter-spacing: 1px; margin-bottom: 5px;">MY SCORE</p>
+      <div class="circle-score" id="circleScore">0</div>
+      <div class="rating-container">
+        <div class="score-description" id="scoreDescription">Chưa đánh giá</div>
+        <div class="myscore-bar" id="scoreBar">
+          <div class="piece-score-bar piece-0" data-score="0"></div>
+          <div class="piece-score-bar piece-1" data-score="1"></div>
+          <div class="piece-score-bar piece-2" data-score="2"></div>
+          <div class="piece-score-bar piece-3" data-score="3"></div>
+          <div class="piece-score-bar piece-4" data-score="4"></div>
+          <div class="piece-score-bar piece-5" data-score="5"></div>
+          <div class="piece-score-bar piece-6" data-score="6"></div>
+          <div class="piece-score-bar piece-7" data-score="7"></div>
+          <div class="piece-score-bar piece-8" data-score="8"></div>
+          <div class="piece-score-bar piece-9" data-score="9"></div>
+          <div class="piece-score-bar piece-10" data-score="10"></div>
+        </div>
+      </div>
+      <div class="post-myreview">
+        <a href="#">Edit My Review</a>
+      </div>
+    </div>
+  </div>
 </section>
 <section class="section-user-reviews">
-    <div class="featured-title-group">
-        <h2 class="section-title">User Reviews</h2>
-        <div class="featured-underline featured-underline-1"></div>
+  <div class="featured-title-group">
+    <h2 class="section-title">User Reviews</h2>
+    <div class="featured-underline featured-underline-1"></div>
+  </div>
+  <div class="list-comment">
+    <div class="comment">
+      <div class="score-box score-comment">71</div>
+      <h3>Trailer Nilou</h3>
+      <div class="date-comment">Jul,3,2025</div>
+      <p class="comment-text" style="grid-area: comment;">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed
+        do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+      <a href="#" class="read-more" style="grid-area: read;">
+        <p>Read more</p>
+      </a>
+      <div class="detail-underline" style="grid-area: line"></div>
+      <p class="user-name" style="grid-area:user">By Văn Đạo</p>
     </div>
-    <div class="list-comment">
-        <div class="comment">
-            <div class="score-box score-comment">71</div>
-            <h3>Trailer Nilou</h3>
-            <div class="date-comment">Jul,3,2025</div>
-            <p class="comment-text" style="grid-area: comment;">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-            <a href="#" class="read-more" style="grid-area: read;"><p>Read more</p></a>
-            <div class="detail-underline" style="grid-area: line"></div>
-            <p class="user-name" style="grid-area:user">By Văn Đạo</p>
-        </div>
-        <div class="comment">
-            <div class="score-box score-comment">71</div>
-            <h3>Trailer Nilou</h3>
-            <div class="date-comment">Jul,3,2025</div>
-            <p class="comment-text" style="grid-area: comment;">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-            <a href="#" class="read-more" style="grid-area: read;"><p>Read more</p></a>
-            <div class="detail-underline" style="grid-area: line"></div>
-            <p class="user-name" style="grid-area:user">By Văn Đạo</p>
-        </div>
+    <div class="comment">
+      <div class="score-box score-comment">71</div>
+      <h3>Trailer Nilou</h3>
+      <div class="date-comment">Jul,3,2025</div>
+      <p class="comment-text" style="grid-area: comment;">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed
+        do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+      <a href="#" class="read-more" style="grid-area: read;">
+        <p>Read more</p>
+      </a>
+      <div class="detail-underline" style="grid-area: line"></div>
+      <p class="user-name" style="grid-area:user">By Văn Đạo</p>
     </div>
-    <div class="review-all">
-        <a href="#" class="btn btn-review">See All 51 User Reviews</a>
-    </div>
+  </div>
+  <div class="review-all">
+    <a href="#" class="btn btn-review">See All 51 User Reviews</a>
+  </div>
 </section>
 <!-- <section class="section">
   <div class="section-header">
@@ -158,108 +165,8 @@
   </div>
 </div> -->
 <script src="https://www.youtube.com/iframe_api"></script>
-<script>
-let player;
-let watchStartTime = null;      // thời điểm bắt đầu PLAY
-let totalWatchTime = 0;         // tổng thời gian đã xem
-let isPlaying = false;
-let videoEnded = false;         // đánh dấu video đã END chưa
-
-document.addEventListener('DOMContentLoaded', function () {
-    const movieId = extractMovieIdFromURL();
-
-    // ✅ Nếu người dùng đổi trang giữa chừng
-    window.addEventListener('beforeunload', function () {
-        if (!movieId) return;
-
-        // Nếu đang play → cộng nốt thời gian
-        if (isPlaying && watchStartTime) {
-            totalWatchTime += Math.floor((Date.now() - watchStartTime) / 1000);
-            isPlaying = false;
-        }
-
-        // Nếu video chưa kết thúc → gửi log "left_page"
-        if (!videoEnded && totalWatchTime > 0) {
-            logUserEvent({
-                action_type: "trailer",
-                event: "left_page",
-                movie_id: movieId,
-                trailer_time: totalWatchTime,
-                timestamp: new Date().toISOString(),
-                user_agent: navigator.userAgent
-            });
-        }
-    });
-});
-
-// ✅ YouTube API ready
-function onYouTubeIframeAPIReady() {
-    console.log("✅ YouTube API ready.");
-}
-
-// ✅ Lắng nghe trạng thái player
-function onPlayerStateChange(event) {
-    const movieId = extractMovieIdFromURL();
-    if (!movieId) return;
-
-    const state = event.data;
-
-    if (state === YT.PlayerState.PLAYING) {
-        // Bắt đầu ghi nhận thời gian xem
-        if (!isPlaying) {
-            watchStartTime = Date.now();
-            isPlaying = true;
-        }
-    }
-
-    if (state === YT.PlayerState.PAUSED && isPlaying) {
-        // Cộng dồn thời gian khi pause
-        totalWatchTime += Math.floor((Date.now() - watchStartTime) / 1000);
-        isPlaying = false;
-    }
-
-    if (state === YT.PlayerState.ENDED) {
-        // Khi video xem xong
-        if (isPlaying) {
-            totalWatchTime += Math.floor((Date.now() - watchStartTime) / 1000);
-            isPlaying = false;
-        }
-
-        videoEnded = true; // đánh dấu video đã END
-
-        // ✅ Gửi log duy nhất khi video kết thúc
-        logUserEvent({
-            action_type: "trailer",
-            event: "finished",
-            movie_id: movieId,
-            trailer_time: totalWatchTime,
-            timestamp: new Date().toISOString(),
-            user_agent: navigator.userAgent
-        });
-
-        // Reset cho lượt xem lại sau
-        totalWatchTime = 0;
-    }
-}
-
-// ✅ Hàm gửi log về backend
-function logUserEvent(logData) {
-    fetch('http://127.0.0.1:5000/api/v1/log/user_event', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(logData)
-    }).catch(console.warn);
-}
-
-// ✅ Lấy movie_id từ URL
-function extractMovieIdFromURL() {
-    const url = new URL(window.location.href);
-    const id = url.searchParams.get("movie_id");
-    return id ? parseInt(id) : null;
-}
-</script>
-
+<script src="/static/js/auth/user_log.js"></script>
+<script type="module" src="/static/js/utils/scoreBar.js"></script>
 
 
 

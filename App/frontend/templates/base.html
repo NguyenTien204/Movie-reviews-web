@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="/static/css/base.css">
   <link rel="stylesheet" href="/static/css/home.css">
   <link rel="stylesheet" href="/static/css/detail.css">
-  <link rel="stylesheet" href="/static/css/lognIn_register.css">
+  <link rel="stylesheet" href="/static/css/login_register.css">
 </head>
 
 <body>
@@ -171,7 +171,9 @@
   <script type="module" src="/static/js/api/apiService.js"></script>
   <script src="/static/js/utils/pageCacheManager.js"></script>
   <script src="/static/js/auth/cookie-session-manager.js"></script>
-  <script src="/static/js/auth/login_register.js"></script>
+  <script type="module" src="/static/js/auth/session_auth.js"></script>
+  <script type="module" src="/static/js/auth/modal_auth.js"></script>
+  <script type="module"src="/static/js/auth/login_register.js"></script>
   <script type="module" src="/static/js/page/homePage.js"></script>
   <script src="/static/js/auth/check_login.js"></script>
   {% if request.url.path == "/movies" %}
@@ -179,7 +181,7 @@
   {% endif %}
   <script type="module"src="/static/js/utils/createHome.js"></script>
   <script type="module" src="/static/js/utils/getUrl.js"></script>
-  
+
 </body>
 
 </html>
