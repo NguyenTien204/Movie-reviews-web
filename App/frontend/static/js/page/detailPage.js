@@ -1,6 +1,7 @@
 
 import { getVideoUrl } from '../utils/getUrl.js';
-import { getScoreDescription,processGenres} from '../utils/createHome.js';
+import { getScoreDescription,processGenres, MovieCarousel} from '../utils/createHome.js';
+import  {fetchTrendingMovies}  from '../api/apiService.js';
 import { API_CONFIG } from '../api/config.js';
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -55,6 +56,76 @@ document.addEventListener("DOMContentLoaded", async () => {
         console.error("Lỗi khi lấy chi tiết phim:", err);
     }
 });
+
+
+// Initialize trending carousel when DOM is loaded
+document.addEventListener('DOMContentLoaded', async function() {
+    // Show loading state for trending
+    const trendingContainer = document.getElementById('related-grid');
+
+    if (trendingContainer) {
+        trendingContainer.innerHTML = '<div class="loading">Loading trending movies...</div>';
+    }
+
+    try {
+        // Fetch trending movies only
+        const trendingMoviesData = await fetchTrendingMovies();
+
+        // Initialize trending carousel with default settings
+        const trendingCarousel = new MovieCarousel('related-grid', 7, 159, 40);
+
+        // Setup carousel with API data
+        if (trendingMoviesData && trendingMoviesData.length > 0) {
+            trendingCarousel.init(trendingMoviesData, 'small-movie-card');
+        } else {
+            if (trendingContainer) {
+                trendingContainer.innerHTML = '<div class="error">No trending movies available</div>';
+            }
+        }
+
+        // Add event listeners for arrow clicks (only for trending)
+        document.addEventListener('click', (e) => {
+            const arrow = e.target.closest('.arrow');
+            if (!arrow) return;
+
+            const target = arrow.dataset.target;
+            const direction = arrow.classList.contains('arrow-left') ? 'left' : 'right';
+
+            if (target === 'trending') {
+                trendingCarousel.scroll(direction);
+            }
+        });
+
+        // Handle responsive behavior
+        function handleResize() {
+            const screenWidth = window.innerWidth;
+
+            if (screenWidth <= 480) {
+                trendingCarousel.updateSettings(3, 120);
+            } else if (screenWidth <= 768) {
+                trendingCarousel.updateSettings(5, 140);
+            } else {
+                trendingCarousel.updateSettings(6, 159);
+            }
+        }
+
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(handleResize, 250);
+        });
+
+        handleResize();
+
+    } catch (error) {
+        console.error('Error initializing trending carousel:', error);
+        if (trendingContainer) {
+            trendingContainer.innerHTML = '<div class="error">Error loading movies</div>';
+        }
+    }
+});
+
+
 
 
 

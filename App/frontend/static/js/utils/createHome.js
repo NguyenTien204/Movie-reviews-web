@@ -163,6 +163,16 @@ export class MovieCarousel {
     }
 
     updateArrows() {
+        if (!this.container) {
+            console.error("Container is null. Check selector or DOM readiness.");
+            return;
+        }
+
+        const section = this.container.closest('.section');
+        if (!section) {
+            console.error("Could not find parent section element.");
+            return;
+        }
         const target = this.container.closest('.section').querySelector('[data-target]').dataset.target;
         const leftArrow = document.querySelector(`[data-target="${target}"].arrow-left`);
         const rightArrow = document.querySelector(`[data-target="${target}"].arrow-right`);

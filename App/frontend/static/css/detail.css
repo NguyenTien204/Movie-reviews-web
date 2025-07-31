@@ -65,7 +65,7 @@ iframe{
   color: black;
   font-size: 24px;
   font-weight: bold;
-  padding: 6px 8px;
+  padding: 6px 7px;
   width: 40px;
   height: 40px;
   display: flex;
@@ -112,28 +112,28 @@ iframe{
 
 /* Hover colors */
 .piece-score-bar.hover-red {
-  background-color: #ff4444;
+  background-color: #e53935;
 }
 
 .piece-score-bar.hover-yellow {
-  background-color: #ffaa00;
+  background-color: #fbc02d;
 }
 
 .piece-score-bar.hover-green {
-  background-color: #44aa44;
+  background-color: #4caf50;
 }
 
 /* Active/selected colors */
 .piece-score-bar.selected-red {
-  background-color: #ff4444;
+  background-color: #e53935;
 }
 
 .piece-score-bar.selected-yellow {
-  background-color: #ffaa00;
+  background-color: #fbc02d;
 }
 
 .piece-score-bar.selected-green {
-  background-color: #44aa44;
+  background-color: #4caf50;
 }
 
 /* Tooltip */
