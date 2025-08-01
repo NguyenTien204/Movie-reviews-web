@@ -4,6 +4,18 @@ import  {API_CONFIG}  from '../api/config.js';
 export function getPosterUrl(path) {
     return path ? `${API_CONFIG.POSTER_BASE}${path}` : `${API_CONFIG.POSTER_BASE}/c32TsWLES7kL1uy6fF03V67AIYX.jpg`;
 }
+export function getDate(apiDate) {
+    if (!apiDate) return ""; // Nếu API không trả về gì thì trả về rỗng
+
+    const date = new Date(apiDate); // Tạo Date object từ string ISO
+
+    // Format theo dạng "Jul 2, 2025"
+    return date.toLocaleDateString("en-US", {
+        month: "short",   // Jul, Aug, Sep...
+        day: "numeric",   // 1, 2, 3...
+        year: "numeric"   // 2025
+    });
+}
 
 export async function getVideoUrl(movieId) {
     try {

@@ -67,7 +67,7 @@ iframe {
   right: 0px;
   top: 5px;
   border-radius: 100%;
-  background-color: #7dd87d;
+  background-color: #e9ecef;
   color: black;
   font-size: 24px;
   font-weight: bold;
@@ -77,7 +77,7 @@ iframe {
   display: flex;
   justify-content: center;
   align-items: center;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .score-description {
@@ -116,31 +116,35 @@ iframe {
   border-radius: 0px 5px 5px 0px;
 }
 
-/* Hover colors */
-.piece-score-bar.hover-red {
+
+.piece-score-bar.red {
   background-color: #e53935;
 }
 
-.piece-score-bar.hover-yellow {
+.piece-score-bar.yellow {
   background-color: #fbc02d;
 }
 
-.piece-score-bar.hover-green {
+.piece-score-bar.green {
   background-color: #4caf50;
 }
+.piece-score-bar.inactive {
+  background-color: #e9ecef;
+}
 
-/* Active/selected colors */
-.piece-score-bar.selected-red {
+.circle-score.red {
   background-color: #e53935;
 }
 
-.piece-score-bar.selected-yellow {
+.circle-score.yellow {
   background-color: #fbc02d;
 }
 
-.piece-score-bar.selected-green {
+.circle-score.green{
   background-color: #4caf50;
 }
+
+
 
 /* Tooltip */
 .piece-score-bar::after {

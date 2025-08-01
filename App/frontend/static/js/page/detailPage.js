@@ -1,5 +1,5 @@
 
-import { getVideoUrl } from '../utils/getUrl.js';
+import { getVideoUrl,getPosterUrl,getDate } from '../utils/getUrl.js';
 import { getScoreDescription,processGenres, MovieCarousel} from '../utils/createHome.js';
 import  {fetchTrendingMovies}  from '../api/apiService.js';
 import { API_CONFIG } from '../api/config.js';
@@ -24,15 +24,20 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         const movie = await response.json();
         const videoUrl = await getVideoUrl(movie.movie_id);
+        const posterUrl = await getPosterUrl(movie.poster_path)
         const genreUrl = processGenres(movie.genres).map(genre =>`<span class="movie-genre">${genre}</span>`).join('');
-        console.log(videoUrl);
+        const releaseDate = getDate(movie.release_date)
+
         document.querySelector(".detail-movie-title").textContent = movie.title || "Không có tiêu đề";
         document.querySelector(".score-box").textContent = movie.average_rating || "N/A"
         document.querySelector(".summary").textContent = movie.overview || "Không có mô tả";
         document.querySelector(".main-video").src = videoUrl || "Không rõ";
         document.querySelector(".movie-genre-container").innerHTML = genreUrl || "Không rõ";
         document.querySelector(".score-description").textContent = getScoreDescription(7)|| "Không có mô tả";
-
+        document.querySelector(".movie-poster-small").src = posterUrl;
+        document.querySelector(".movie-title-modal").textContent = movie.title || "Không có tiêu đề";
+        document.querySelector(".small-movie-title-modal").textContent = movie.title || "Không có tiêu đề";
+        document.querySelector(".date").textContent = releaseDate
 
         // 🎯 Gán src cho iframe như trước
         const iframe = document.querySelector(".main-video");

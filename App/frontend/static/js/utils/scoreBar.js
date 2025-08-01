@@ -1,92 +1,192 @@
 import { getScoreDescription } from '../utils/createHome.js';
 
-const scoreBar = document.getElementById('scoreBar');
-const circleScore = document.getElementById('circleScore');
-const scoreDescription = document.getElementById('scoreDescription');
-const pieces = document.querySelectorAll('.piece-score-bar');
+// Global state để chia sẻ giữa các component
+let globalCurrentScore = 0;
+let callbacks = []; // Danh sách các callback khi score thay đổi
 
-let currentScore = 0; // Mặc định ban đầu là 0 (chưa chọn điểm)
+// Hàm đăng ký callback khi score thay đổi
+function onScoreChange(callback) {
+    callbacks.push(callback);
+}
 
-// Hàm lấy màu theo điểm số
-function getColorClass(score) {
+// Hàm thông báo score đã thay đổi
+function notifyScoreChange(score) {
+    globalCurrentScore = score;
+    callbacks.forEach(callback => callback(score));
+}
+
+// Hàm lấy score hiện tại
+function getCurrentScore() {
+    return globalCurrentScore;
+}
+
+// Hàm set score từ bên ngoài
+function setGlobalScore(score) {
+    if (score >= 0 && score <= 10) {
+        notifyScoreChange(score);
+    }
+}
+
+// Hàm trả về màu dựa trên điểm
+function getScoreColor(score) {
     if (score >= 1 && score <= 3) return 'red';
     if (score >= 4 && score <= 6) return 'yellow';
     if (score >= 7 && score <= 10) return 'green';
     return 'inactive';
 }
 
-// Hàm cập nhật màu circle-score
-function updateCircleColor(score) {
-    const colorClass = getColorClass(score);
-    circleScore.style.backgroundColor =
-        colorClass === 'red' ? '#ff4444' :
-        colorClass === 'yellow' ? '#ffaa00' :
-        colorClass === 'green' ? '#7dd87d' : '#7dd87d';
+// Hàm trả về class dùng cho text hoặc score circle
+function getScoreClass(score) {
+    if (score >= 1 && score <= 3) return 'red';
+    if (score >= 4 && score <= 6) return 'yellow';
+    if (score >= 7 && score <= 10) return 'green';
+    return '';
 }
 
-// Hàm reset tất cả hover classes
-function resetHoverClasses() {
-    pieces.forEach(piece => {
-        piece.classList.remove('hover-red', 'hover-yellow', 'hover-green');
-    });
-}
+// Class ScoreBar có thể tái sử dụng
+function ScoreBar(config) {
+    const {
+        containerSelector,
+        circleSelector,
+        descriptionSelector,
+        maxScore = 10,
+        segmentClass = 'piece-score-bar',
+        hoverEffect = true,
+        onClick = null
+    } = config;
 
-// Hàm reset tất cả selected classes
-function resetSelectedClasses() {
-    pieces.forEach(piece => {
-        piece.classList.remove('selected-red', 'selected-yellow', 'selected-green');
-    });
-}
+    let container = document.querySelector(containerSelector);
+    let circleEl = document.querySelector(circleSelector);
+    let descriptionEl = document.querySelector(descriptionSelector);
+    let pieces = [];
+    let currentScore = 0;
+    let hoveredScore = 0;
 
-// Hàm hiển thị hover effect
-function showHoverEffect(hoveredScore) {
-    resetHoverClasses();
-    const colorClass = getColorClass(hoveredScore);
+    // Tạo các piece/segment
+    function createPieces() {
+        if (!container) return;
 
-    // Tô màu từ piece đầu tiên tới piece đang hover
-    for (let i = 0; i < hoveredScore; i++) {
-        pieces[i].classList.add(`hover-${colorClass}`);
+        container.innerHTML = '';
+        pieces = [];
+
+        for (let i = 1; i <= maxScore; i++) {
+            const piece = document.createElement('div');
+            piece.className = `${segmentClass} piece-${i} inactive`;
+            piece.setAttribute('data-score', i);
+
+            // Event listeners
+            if (hoverEffect) {
+                piece.addEventListener('mouseenter', () => handleHover(i));
+                piece.addEventListener('mouseleave', () => handleMouseLeave());
+            }
+            piece.addEventListener('click', () => handleClick(i));
+
+            container.appendChild(piece);
+            pieces.push(piece);
+        }
     }
-}
 
-// Hàm hiển thị selected effect
-function showSelectedEffect(selectedScore) {
-    resetSelectedClasses();
-    const colorClass = getColorClass(selectedScore);
+    // Update display
+    function updateDisplay(score, isTemp = false) {
+        updatePieces(score);
+        updateCircleAndDescription(score);
 
-    // Tô màu từ piece đầu tiên tới piece được chọn
-    for (let i = 0; i < selectedScore; i++) {
-        pieces[i].classList.add(`selected-${colorClass}`);
+        if (!isTemp) {
+            currentScore = score;
+            // Notify global change
+            notifyScoreChange(score);
+        }
     }
-}
 
-// Event listeners cho từng piece
-pieces.forEach((piece, index) => {
-    const scoreValue = index + 1; // ✅ Fix: chuyển index (0–9) thành score (1–10)
+    // Update pieces color
+    function updatePieces(score) {
+        const color = getScoreColor(score);
+        pieces.forEach((piece, index) => {
+            const pieceScore = index + 1;
+            if (pieceScore <= score) {
+                piece.className = `${segmentClass} piece-${pieceScore} ${color}`;
+            } else {
+                piece.className = `${segmentClass} piece-${pieceScore} inactive`;
+            }
+        });
+    }
 
-    // Hover effect
-    piece.addEventListener('mouseenter', () => {
-        showHoverEffect(scoreValue);
+    // Update circle and description
+    function updateCircleAndDescription(score) {
+        if (circleEl) {
+            circleEl.textContent = score;
+            circleEl.classList.remove('red', 'yellow', 'green');
+            const colorClass = getScoreClass(score);
+            if (colorClass) {
+                circleEl.classList.add(colorClass);
+            }
+        }
+
+        if (descriptionEl) {
+            descriptionEl.textContent = getScoreDescription(score);
+        }
+    }
+
+    // Hover handlers
+    function handleHover(score) {
+        if (!hoverEffect) return;
+        hoveredScore = score;
+        updateDisplay(score, true);
+    }
+
+    function handleMouseLeave() {
+        if (!hoverEffect) return;
+        hoveredScore = 0;
+        updateDisplay(currentScore, true);
+    }
+
+    // Click handler
+    function handleClick(score) {
+        currentScore = score;
+        updateDisplay(score);
+
+        if (onClick) {
+            onClick(score);
+        }
+    }
+
+    // Listen to global score changes
+    onScoreChange((score) => {
+        if (score !== currentScore) {
+            currentScore = score;
+            updateDisplay(score, true);
+        }
     });
 
-    // Click effect
-    piece.addEventListener('click', () => {
-        currentScore = scoreValue; // ✅ Lưu điểm đã chọn
-        circleScore.textContent = currentScore;
-        scoreDescription.textContent = getScoreDescription(currentScore);
-        updateCircleColor(currentScore);
-        showSelectedEffect(scoreValue);
-    });
-});
+    // Public methods
+    return {
+        init: function() {
+            createPieces();
+            updateDisplay(globalCurrentScore);
+        },
+        setScore: function(score) {
+            currentScore = score;
+            updateDisplay(score);
+        },
+        getScore: function() {
+            return currentScore;
+        },
+        destroy: function() {
+            if (container) {
+                container.innerHTML = '';
+            }
+            pieces = [];
+        }
+    };
+}
 
-// Reset hover khi mouse leave khỏi score bar
-scoreBar.addEventListener('mouseleave', () => {
-    resetHoverClasses();
-    if (currentScore > 0) {
-        showSelectedEffect(currentScore);
-    }
-});
-
-// Khởi tạo trạng thái ban đầu
-circleScore.textContent = '0';
-scoreDescription.textContent = getScoreDescription(0);
+// Export functions
+export {
+    ScoreBar,
+    getCurrentScore,
+    setGlobalScore,
+    onScoreChange,
+    getScoreColor,
+    getScoreClass,
+    getScoreDescription
+};
