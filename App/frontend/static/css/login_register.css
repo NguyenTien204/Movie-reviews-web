@@ -31,20 +31,27 @@
 
 /* Close button */
 .close-btn {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    background: none;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-    color: #999;
-    transition: color 0.2s ease;
-    z-index: 10;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #666;
+  padding: 8px;
+  margin: 10px;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  position: absolute;
+  right: 0;
 }
 
 .close-btn:hover {
-    color: #333;
+  background: #f0f0f0;
+  transform: rotate(90deg);
 }
 
 /* Logo section */
