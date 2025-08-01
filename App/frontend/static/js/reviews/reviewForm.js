@@ -1,4 +1,5 @@
-import { ScoreBar, getCurrentScore, setGlobalScore } from '../utils/scoreBar.js';
+import { ScoreBar, getCurrentScore, setGlobalScore, initializeScore, getScoreDescription } from '../utils/scoreBar.js';
+import { ReviewStorage, MovieStorage } from '../storage/localstorage-manager.js';
 
 let modalScoreBar = null;
 
@@ -56,12 +57,34 @@ function initModalScoreBar() {
     if (currentScore > 0) {
         modalScoreBar.setScore(currentScore);
     }
+    // Load review text đã lưu (nếu có)
+    loadSavedReview();
+}
+
+// Load review đã lưu
+function loadSavedReview() {
+    const savedReview = ReviewStorage.get();
+    const reviewText = document.getElementById('reviewText');
+
+    if (reviewText && savedReview.text) {
+        reviewText.value = savedReview.text;
+        updateCharacterCount(reviewText);
+    }
+}
+
+// Lưu review text khi người dùng gõ
+function saveReviewText(text) {
+    const currentScore = getCurrentScore();
+    ReviewStorage.save({
+        score: currentScore,
+        text: text,
+        date: new Date().toISOString()
+    });
 }
 
 // Reset form trong modal
 function resetModalForm() {
     // Reset score
-    setGlobalScore(0);
 
     // Reset textarea
     const reviewText = document.getElementById('reviewText');
@@ -70,17 +93,30 @@ function resetModalForm() {
         updateCharacterCount(reviewText);
     }
 
+    // Xóa review text đã lưu
+    ReviewStorage.clear();
+
     // Reset score display
+    const currentScore = getCurrentScore();
     const scoreCircle = document.getElementById('scoreCircle');
     const scoreText = document.getElementById('scoreText');
 
     if (scoreCircle) {
-        scoreCircle.textContent = '0';
+        scoreCircle.textContent = currentScore || '0';
         scoreCircle.classList.remove('red', 'yellow', 'green');
+
+        if (currentScore > 0) {
+            let colorClass = '';
+            if (currentScore >= 1 && currentScore <= 3) colorClass = 'red';
+            else if (currentScore >= 4 && currentScore <= 6) colorClass = 'yellow';
+            else if (currentScore >= 7 && currentScore <= 10) colorClass = 'green';
+
+            if (colorClass) scoreCircle.classList.add(colorClass);
+        }
     }
 
     if (scoreText) {
-        scoreText.textContent = 'Select a rating';
+        scoreText.textContent = currentScore > 0 ? getScoreDescription(currentScore) : 'Select a rating';
     }
 }
 
@@ -105,7 +141,8 @@ function updateCharacterCount(textarea) {
             minCharInfo.className = 'char-requirement met';
         }
     }
-
+    // Lưu review text khi người dùng gõ
+    saveReviewText(textarea.value);
     checkFormValidity();
 }
 
@@ -130,6 +167,14 @@ function submitReview() {
     if (!reviewText) return;
 
     if (currentScore > 0 && reviewText.value.length >= 75) {
+
+        ReviewStorage.save({
+            score: currentScore,
+            text: reviewText.value,
+            date: new Date().toISOString(),
+            submitted: true
+        });
+
         alert(`Review submitted!\nScore: ${currentScore}/10\nReview: ${reviewText.value.substring(0, 100)}...`);
         closeModal();
     }
@@ -148,4 +193,4 @@ window.closeModal = closeModal;
 window.updateCharacterCount = updateCharacterCount;
 window.submitReview = submitReview;
 
-export { openModal, closeModal, updateCharacterCount, submitReview };
+export { openModal, closeModal, updateCharacterCount, submitReview, loadSavedReview, saveReviewText };

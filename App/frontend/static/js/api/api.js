@@ -1,83 +1,201 @@
-async function registerUser(userData) {
-  const response = await fetch(`${BASE_URL}/register`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(userData)
-  });
+// Thêm import storage
+import { ScoreBar, getCurrentScore, setGlobalScore, initializeScore, getScoreDescription } from './scoreBar.js';
+import { ReviewStorage, MovieStorage } from './storage.js';
 
-  const result = await response.json();
-  if (!response.ok) throw new Error(result.detail || "Registration failed");
-  return result; // result = { access_token, token_type }
+let modalScoreBar = null;
+
+// Hàm mở modal
+function openModal() {
+    const modalOverlay = document.getElementById('modalOverlay');
+    if (!modalOverlay) return;
+
+    modalOverlay.classList.add('show');
+    document.body.style.overflow = 'hidden';
+
+    // Khởi tạo score bar trong modal
+    initModalScoreBar();
 }
 
-// Example:
+// Hàm đóng modal
+function closeModal(event) {
+    // Kiểm tra xem có phải click vào overlay hoặc nút close không
+    if (event && event.target !== event.currentTarget && !event.target.classList.contains('close-btn')) {
+        return;
+    }
 
+    const modalOverlay = document.getElementById('modalOverlay');
+    if (!modalOverlay) return;
 
-async function loginUser(userData) {
-  const response = await fetch(`${BASE_URL}/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(userData)
-  });
+    modalOverlay.classList.remove('show');
+    document.body.style.overflow = 'auto';
 
-  const result = await response.json();
-  if (!response.ok) throw new Error(result.detail || "Login failed");
-  return result;
+    // Reset form
+    resetModalForm();
 }
 
-// Example:
+// Khởi tạo score bar trong modal
+function initModalScoreBar() {
+    if (modalScoreBar) {
+        modalScoreBar.destroy();
+    }
 
-async function getTrendingMovies() {
-  const response = await fetch(`${BASE_URL}/movies/trending`);
-  return await response.json();
-}
-
-async function getMovieTrailers(movieId) {
-  const response = await fetch(`${BASE_URL}/movies/${movieId}/trailer`);
-  return await response.json();
-}
-
-async function getMovieRecommendations(movieId) {
-  const response = await fetch(`${BASE_URL}/movies/${movieId}/recommendations`);
-  return await response.json();
-}
-
-
-async function getMovieDetail(movieId) {
-  const response = await fetch(`${BASE_URL}/movies/${movieId}`);
-  const data = await response.json();
-  return data;
-}
-
-
-async function getMovieShortDetail(movieId) {
-  const response = await fetch(`${BASE_URL}/shortdetail/${movieId}`);
-  return await response.json();
-}
-
-async function filterMovies(params) {
-  const query = new URLSearchParams(params).toString();
-  const response = await fetch(`${BASE_URL}/movies/filter?${query}`);
-  return await response.json();
-}
-
-
-document.addEventListener("DOMContentLoaded", () => {
-  const movieId = window.location.pathname.split("/").pop();
-
-  fetch(`${BASE_URL}/movies/12`)
-    .then(response => {
-      if (!response.ok) {
-        throw new Error("Failed to fetch movie details");
-      }
-      return response.json();
-    })
-    .then(data => {
-      const jsonContainer = document.getElementById("json-output");
-      jsonContainer.textContent = JSON.stringify(data, null, 2); 
-    })
-    .catch(error => {
-      console.error("Error:", error);
-      document.getElementById("json-output").textContent = "Lỗi khi lấy dữ liệu.";
+    modalScoreBar = ScoreBar({
+        containerSelector: '#ratingSegments',
+        circleSelector: '#scoreCircle',
+        descriptionSelector: '#scoreText',
+        maxScore: 10,
+        segmentClass: 'rating-segment',
+        hoverEffect: true,
+        onClick: (score) => {
+            checkFormValidity();
+        }
     });
+
+    modalScoreBar.init();
+
+    // Sync với score hiện tại từ main component
+    const currentScore = getCurrentScore();
+    if (currentScore > 0) {
+        modalScoreBar.setScore(currentScore);
+    }
+
+    // Load review text đã lưu (nếu có)
+    loadSavedReview();
+}
+
+// Load review đã lưu
+function loadSavedReview() {
+    const savedReview = ReviewStorage.get();
+    const reviewText = document.getElementById('reviewText');
+
+    if (reviewText && savedReview.text) {
+        reviewText.value = savedReview.text;
+        updateCharacterCount(reviewText);
+    }
+}
+
+// Lưu review text khi người dùng gõ
+function saveReviewText(text) {
+    const currentScore = getCurrentScore();
+    ReviewStorage.save({
+        score: currentScore,
+        text: text,
+        date: new Date().toISOString()
+    });
+}
+
+// Reset form trong modal (KHÔNG reset score đã lưu)
+function resetModalForm() {
+    // KHÔNG reset score - giữ nguyên điểm đã chọn
+    // setGlobalScore(0); // ← Bỏ dòng này
+
+    // Chỉ reset textarea
+    const reviewText = document.getElementById('reviewText');
+    if (reviewText) {
+        reviewText.value = '';
+        updateCharacterCount(reviewText);
+    }
+
+    // Xóa review text đã lưu
+    ReviewStorage.clear();
+
+    // Cập nhật display với score hiện tại (đã lưu)
+    const currentScore = getCurrentScore();
+    const scoreCircle = document.getElementById('scoreCircle');
+    const scoreText = document.getElementById('scoreText');
+
+    if (scoreCircle) {
+        scoreCircle.textContent = currentScore || '0';
+        scoreCircle.classList.remove('red', 'yellow', 'green');
+
+        if (currentScore > 0) {
+            let colorClass = '';
+            if (currentScore >= 1 && currentScore <= 3) colorClass = 'red';
+            else if (currentScore >= 4 && currentScore <= 6) colorClass = 'yellow';
+            else if (currentScore >= 7 && currentScore <= 10) colorClass = 'green';
+
+            if (colorClass) scoreCircle.classList.add(colorClass);
+        }
+    }
+
+    if (scoreText) {
+        scoreText.textContent = currentScore > 0 ? getScoreDescription(currentScore) : 'Select a rating';
+    }
+}
+
+// Hàm đếm ký tự review
+function updateCharacterCount(textarea) {
+    const currentLength = textarea.value.length;
+    const remaining = 5000 - currentLength;
+    const minCharInfo = document.getElementById('minCharInfo');
+    const charCount = document.getElementById('charCount');
+
+    if (charCount) {
+        charCount.textContent = remaining + ' characters remaining';
+    }
+
+    if (minCharInfo) {
+        if (currentLength < 75) {
+            const needed = 75 - currentLength;
+            minCharInfo.textContent = `Minimum ${needed} characters needed`;
+            minCharInfo.className = 'char-requirement needed';
+        } else {
+            minCharInfo.textContent = 'Minimum requirement met ✓';
+            minCharInfo.className = 'char-requirement met';
+        }
+    }
+
+    // Lưu review text khi người dùng gõ
+    saveReviewText(textarea.value);
+
+    checkFormValidity();
+}
+
+// Kiểm tra form hợp lệ
+function checkFormValidity() {
+    const reviewText = document.getElementById('reviewText');
+    const postBtn = document.getElementById('postBtn');
+
+    if (!reviewText || !postBtn) return;
+
+    const currentScore = getCurrentScore();
+    const isValid = currentScore > 0 && reviewText.value.length >= 75;
+
+    postBtn.disabled = !isValid;
+}
+
+// Submit review
+function submitReview() {
+    const reviewText = document.getElementById('reviewText');
+    const currentScore = getCurrentScore();
+
+    if (!reviewText) return;
+
+    if (currentScore > 0 && reviewText.value.length >= 75) {
+        // Lưu review hoàn chỉnh
+        ReviewStorage.save({
+            score: currentScore,
+            text: reviewText.value,
+            date: new Date().toISOString(),
+            submitted: true
+        });
+
+        alert(`Review submitted!\nScore: ${currentScore}/10\nReview: ${reviewText.value.substring(0, 100)}...`);
+        closeModal();
+    }
+}
+
+// Event listeners
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeModal();
+    }
 });
+
+// Export functions để có thể gọi từ HTML
+window.openModal = openModal;
+window.closeModal = closeModal;
+window.updateCharacterCount = updateCharacterCount;
+window.submitReview = submitReview;
+
+export { openModal, closeModal, updateCharacterCount, submitReview, loadSavedReview, saveReviewText };

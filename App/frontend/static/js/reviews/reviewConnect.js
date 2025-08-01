@@ -1,4 +1,5 @@
-import { ScoreBar, getCurrentScore, setGlobalScore, onScoreChange } from '../utils/scoreBar.js';
+import { ScoreBar, getCurrentScore, setGlobalScore, onScoreChange, initializeScore, clearSavedScore } from '../utils/scoreBar.js';
+import { StorageDebug } from '../storage/localstorage-manager.js';
 import './reviewForm.js'; // Import modal functionality
 
 let mainScoreBar = null;
@@ -62,11 +63,31 @@ function getScore() {
 
 // Khởi tạo khi DOM ready
 document.addEventListener('DOMContentLoaded', function() {
+    // Khởi tạo score từ localStorage trước
+    initializeScore();
+    // Sau đó khởi tạo score bar
     initMainScoreBar();
 });
+
+// Hàm public để xóa score đã lưu
+function resetScore() {
+    clearSavedScore();
+}
+
+// Debug functions
+function debugStorage() {
+    StorageDebug.logAll();
+}
+
+function clearAllData() {
+    return StorageDebug.clearAll();
+}
 
 // Export public functions
 window.setScore = setScore;
 window.getScore = getScore;
+window.resetScore = resetScore;
+window.debugStorage = debugStorage;
+window.clearAllData = clearAllData;
 
-export { setScore, getScore, initMainScoreBar };
+export { setScore, getScore, initMainScoreBar, resetScore, debugStorage, clearAllData };

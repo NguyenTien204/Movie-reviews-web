@@ -1,17 +1,33 @@
 import { getScoreDescription } from '../utils/createHome.js';
+import { ScoreStorage } from '../storage/localstorage-manager.js';
 
 // Global state để chia sẻ giữa các component
 let globalCurrentScore = 0;
 let callbacks = []; // Danh sách các callback khi score thay đổi
 
+// Khởi tạo score từ localStorage
+function initializeScore() {
+    const savedScore = ScoreStorage.get();
+    if (savedScore > 0) {
+        globalCurrentScore = savedScore;
+        // Thông báo cho tất cả components về score đã lưu
+        callbacks.forEach(callback => callback(globalCurrentScore));
+    }
+}
+
 // Hàm đăng ký callback khi score thay đổi
 function onScoreChange(callback) {
     callbacks.push(callback);
+    // Gọi callback ngay lập tức với score hiện tại (nếu có)
+    if (globalCurrentScore > 0) {
+        callback(globalCurrentScore);
+    }
 }
 
 // Hàm thông báo score đã thay đổi
 function notifyScoreChange(score) {
     globalCurrentScore = score;
+    ScoreStorage.save(score); // Lưu vào localStorage thông qua ScoreStorage
     callbacks.forEach(callback => callback(score));
 }
 
@@ -25,6 +41,13 @@ function setGlobalScore(score) {
     if (score >= 0 && score <= 10) {
         notifyScoreChange(score);
     }
+}
+
+// Hàm xóa score đã lưu (để reset)
+function clearSavedScore() {
+    ScoreStorage.clear();
+    globalCurrentScore = 0;
+    callbacks.forEach(callback => callback(0));
 }
 
 // Hàm trả về màu dựa trên điểm
@@ -158,6 +181,12 @@ function ScoreBar(config) {
         }
     });
 
+    // Khởi tạo với score đã lưu
+        const savedScore = getCurrentScore();
+        if (savedScore > 0) {
+            currentScore = savedScore;
+        }
+
     // Public methods
     return {
         init: function() {
@@ -188,5 +217,7 @@ export {
     onScoreChange,
     getScoreColor,
     getScoreClass,
-    getScoreDescription
+    getScoreDescription,
+    initializeScore,
+    clearSavedScore
 };
